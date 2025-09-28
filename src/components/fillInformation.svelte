@@ -117,6 +117,7 @@
       });
       if (res.ok) {
         dispatch("close");
+        dispatch("updated", { userId });
         setTimeout(() => {
           showNotification({ message: "Update successful" }, "success");
         }, 200);
