@@ -1,0 +1,55 @@
+<script lang="ts">
+    import { onMount } from "svelte";
+
+    // Redirect to user-specific route
+    onMount(() => {
+        // Kiểm tra accessToken từ cookie
+        const cookies = document.cookie.split(";");
+        const tokenCookie = cookies.find((cookie) =>
+            cookie.trim().startsWith("accessToken="),
+        );
+
+        if (!tokenCookie) {
+            // Không có token, redirect về trang đăng nhập
+            window.location.href = "/";
+            return;
+        }
+
+        const token = tokenCookie.split("=")[1];
+
+        // Decode token để lấy user_id và role
+        try {
+            const payload = token.split(".")[1];
+            const decoded = atob(payload);
+            const tokenData = JSON.parse(decoded);
+            const tokenUserId =
+                tokenData?.user_id || tokenData?.id || tokenData?.sub;
+            const userRole = tokenData?.role || tokenData?.user_role || "user";
+
+            // Kiểm tra role và redirect tương ứng
+            if (userRole === "admin" || userRole === "administrator") {
+                // Admin users go to admin dashboard
+                window.location.href = "/admin/dashboard";
+            } else if (tokenUserId) {
+                // Regular users go to their specific main screen
+                window.location.href = `/${tokenUserId}/mainScreen`;
+            } else {
+                // Không lấy được user ID từ token
+                console.error("Cannot extract user ID from token");
+                window.location.href = "/";
+            }
+        } catch (error) {
+            console.error("Error decoding token:", error);
+            window.location.href = "/";
+        }
+    });
+</script>
+
+<div class="min-h-screen flex items-center justify-center">
+    <div class="text-center">
+        <div
+            class="animate-spin rounded-full h-32 w-32 border-b-2 border-teal-500 mx-auto mb-4"
+        ></div>
+        <p class="text-gray-600">Redirecting to your dashboard...</p>
+    </div>
+</div>
