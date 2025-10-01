@@ -19,9 +19,46 @@
   // Show fill information dialog
   let showFillDialog = $state(false);
 
+  // User data state
+  let userData = $state(null);
+
   // Handle navigation from sidebar
   function handleNavigation(event: CustomEvent<{ page: string }>) {
     currentPage = event.detail.page;
+  }
+
+  // Function to refresh user data
+  async function refreshUserData() {
+    if (!userId) return;
+
+    try {
+      const cookies = document.cookie.split(";");
+      const tokenCookie = cookies.find((cookie) =>
+        cookie.trim().startsWith("accessToken=")
+      );
+
+      if (!tokenCookie) return;
+
+      const token = tokenCookie.split("=")[1];
+
+      const res = await fetch(`http://nghiapd.ddns.net:8081/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const response = await res.json();
+        userData = response.data;
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  }
+
+  // Handle profile update event
+  function handleProfileUpdate() {
+    refreshUserData();
   }
 
   // Verify user authentication and token
@@ -87,6 +124,9 @@
         );
         if (res.status === 404) {
           showFillDialog = true;
+        } else if (res.ok) {
+          const response = await res.json();
+          userData = response.data; // Lấy data từ response
         }
       } catch (err) {
         console.error("Error fetching user info:", err);
@@ -105,7 +145,7 @@
   </div>
   <div class="flex-1 h-full flex flex-col">
     <div class="w-full h-[80px] flex-shrink-0">
-      <HeaderMainScreen />
+      <HeaderMainScreen {userData} />
     </div>
     <div class="flex-1 w-full overflow-y-auto">
       {#if currentPage === "dashboard"}
@@ -119,7 +159,7 @@
       {:else if currentPage === "chat"}
         <ChatBotPage />
       {:else if currentPage === "settings"}
-        <SettingPage />
+        <SettingPage on:profileUpdated={handleProfileUpdate} />
       {:else}
         <!-- Default to dashboard -->
         <DashBoard />
