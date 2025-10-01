@@ -78,11 +78,6 @@
   $effect(() => {
     if (selectedCountryId) {
       loadCities(selectedCountryId);
-      // Set country name based on selected country ID
-      const selectedCountry = countries.find(c => c.id === selectedCountryId);
-      if (selectedCountry) {
-        country = selectedCountry.name;
-      }
     }
   });
 
