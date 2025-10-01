@@ -78,6 +78,11 @@
   $effect(() => {
     if (selectedCountryId) {
       loadCities(selectedCountryId);
+      // Set country name based on selected country ID
+      const selectedCountry = countries.find(c => c.id === selectedCountryId);
+      if (selectedCountry) {
+        country = selectedCountry.name;
+      }
     }
   });
 
@@ -108,7 +113,7 @@
         body: JSON.stringify({
           firstName,
           lastName,
-          country,
+          region: country,
           city,
           language: "en",
           isPremium: false,
@@ -247,7 +252,7 @@
       <!-- City Field -->
       <div>
         <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-          City
+          City/State
         </label>
         <div class="relative">
           <div

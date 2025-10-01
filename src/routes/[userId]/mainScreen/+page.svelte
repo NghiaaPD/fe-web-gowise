@@ -169,5 +169,8 @@
 </div>
 
 {#if showFillDialog}
-  <FillInformation on:close={() => (showFillDialog = false)} />
+  <FillInformation 
+    on:close={() => (showFillDialog = false)} 
+    on:updated={handleProfileUpdate}
+  />
 {/if}

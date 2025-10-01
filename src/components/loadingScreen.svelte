@@ -258,8 +258,6 @@
     }
   }
 
-
-
   .particles {
     position: absolute;
     top: 0;
@@ -314,7 +312,6 @@
       width: 90px;
       height: 90px;
     }
-
   }
 
   @media (max-width: 480px) {

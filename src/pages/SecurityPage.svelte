@@ -103,7 +103,11 @@
 </script>
 
 {#if loading}
-  <LoadingScreen bind:this={loadingScreenRef} manualControl={true} onComplete={() => {}} />
+  <LoadingScreen
+    bind:this={loadingScreenRef}
+    manualControl={true}
+    onComplete={() => {}}
+  />
 {:else}
   <div class="max-w-5xl mx-auto">
     <div class="mb-6">
@@ -169,10 +173,8 @@
             </div>
           </div>
           <button
-            class="{twoFactorEnabled
-              ? 'bg-teal-600 text-white hover:bg-teal-700'
-              : 'bg-transparent border border-teal-600 text-teal-600 hover:bg-teal-600 hover:text-white'} px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-all duration-200"
-            onclick={toggleTwoFactor}
+            class="bg-gray-300 text-gray-500 px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed"
+            disabled
           >
             {twoFactorEnabled ? "Disable" : "Enable"}
           </button>
@@ -196,39 +198,11 @@
             </div>
           </div>
           <button
-            class="bg-transparent border border-teal-600 text-teal-600 px-4 py-2 rounded-md cursor-pointer text-sm font-medium transition-all duration-200 hover:bg-teal-600 hover:text-white"
-            onclick={manageApiKeys}
+            class="bg-gray-300 text-gray-500 px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed"
+            disabled
           >
             Manage
           </button>
-        </div>
-      </div>
-
-      <!-- Additional Security Info -->
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-        <div class="flex items-start">
-          <svg
-            class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-          <div>
-            <h4 class="text-sm font-medium text-blue-900 m-0 mb-1">
-              Security Recommendations
-            </h4>
-            <p class="text-sm text-blue-700 m-0">
-              We recommend enabling two-factor authentication and regularly
-              updating your password to keep your account secure.
-            </p>
-          </div>
         </div>
       </div>
 
