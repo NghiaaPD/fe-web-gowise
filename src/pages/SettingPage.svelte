@@ -4,7 +4,6 @@
   import ProfilePage from "./ProfilePage.svelte";
   import SecurityPage from "./SecurityPage.svelte";
   import PreferancesPage from "./PreferancesPage.svelte";
-  import PaymentConfigPage from "./PaymentConfigPage.svelte";
   import HelpPage from "./HelpPage.svelte";
 
   const dispatch = createEventDispatcher();
@@ -24,7 +23,6 @@
       profile: "Profile",
       security: "Account & Security",
       preferences: "Preferences",
-      payment: "Payment Methods",
       help: "Help & Support",
     };
     return titles[itemId] || "Settings";
@@ -51,8 +49,6 @@
         <SecurityPage />
       {:else if selectedItem === "preferences"}
         <PreferancesPage />
-      {:else if selectedItem === "payment"}
-        <PaymentConfigPage />
       {:else if selectedItem === "help"}
         <HelpPage />
       {/if}
