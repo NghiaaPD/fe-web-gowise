@@ -491,11 +491,11 @@
     {/if}
 
     <!-- Info Section -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="bg-teal-50 border border-teal-200 rounded-lg p-4">
       <div class="flex items-start">
         <div class="flex-shrink-0">
           <svg
-            class="h-5 w-5 text-blue-400"
+            class="h-5 w-5 text-teal-400"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -507,7 +507,7 @@
           </svg>
         </div>
         <div class="ml-3">
-          <p class="text-sm text-blue-700">
+          <p class="text-sm text-teal-700">
             These preferences will affect your experience across the
             application.
           </p>
