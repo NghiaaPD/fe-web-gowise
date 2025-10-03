@@ -21,7 +21,6 @@
   let showContent = $state(false);
   let currentStep = $state(1); // 1: first question, 2: domestic/international, 3: travel details form
   let showSuccessOverlay = $state(false); // Control success overlay separately
-  let stepKey = $state(1); // Key to force component re-render for smoother transitions
   let travelType = $state<"domestic" | "international" | null>(null);
   let travelDetails = $state({
     destination: "",
@@ -44,18 +43,16 @@
     if (answer) {
       setTimeout(() => {
         currentStep = 3;
-        stepKey = 3; // Update key to force re-render
         isAnimating = false;
         // Keep selectedAnswer = true to show destination field
-      }, 800);
+      }, 300);
     } else {
       // If user says "Not yet", go to domestic/international question (step 2)
       setTimeout(() => {
         currentStep = 2;
-        stepKey = 2; // Update key to force re-render
         isAnimating = false;
         // Keep selectedAnswer = false for proper flow tracking
-      }, 800);
+      }, 300);
     }
   }
 
@@ -68,9 +65,8 @@
     // Go to travel details form (step 3)
     setTimeout(() => {
       currentStep = 3;
-      stepKey = 3; // Update key to force re-render
       isAnimating = false;
-    }, 800);
+    }, 300);
   }
 
   function goBack() {
@@ -83,24 +79,21 @@
       if (selectedAnswer === true) {
         // "Yes I do" users go back to step 1
         currentStep = 1;
-        stepKey = 1;
         selectedAnswer = null;
       } else {
         // "Not yet" users go back to step 2
         currentStep = 2;
-        stepKey = 2;
       }
     } else if (currentStep === 2) {
       // From step 2, go back to step 1
       currentStep = 1;
-      stepKey = 1;
       selectedAnswer = null;
       travelType = null;
     }
 
     setTimeout(() => {
       isAnimating = false;
-    }, 500);
+    }, 300);
   }
 
   function handleTravelDetailsSubmit() {
@@ -219,12 +212,23 @@
         </div>
       </div>
 
-      <!-- Question Section - Step 1 -->
-      {#if currentStep === 1}
+      <!-- Back Button (conditional) -->
+      {#if currentStep > 1}
+        <div class="back-btn-container">
+          <button class="back-btn" onclick={goBack}>
+            <span class="back-icon"><FaArrowLeft /></span>
+            Back
+          </button>
+        </div>
+      {/if}
+
+      <!-- Steps Container with fixed height -->
+      <div class="steps-container">
+        <!-- Step 1: Travel Plan Question -->
         <div
-          class="question-section"
-          in:fly={{ y: 50, duration: 800, delay: 400, easing: cubicOut }}
-          out:fly={{ y: -50, duration: 600, easing: quintOut }}
+          class="step-wrapper"
+          class:active={currentStep === 1}
+          class:hidden={currentStep !== 1}
         >
           <div class="question-container">
             <h1 class="question-title">
@@ -237,12 +241,7 @@
             </p>
           </div>
 
-          <!-- Answer Buttons -->
-          <div
-            class="answer-buttons"
-            in:fly={{ y: 30, duration: 700, delay: 800, easing: cubicOut }}
-            out:fade={{ duration: 400 }}
-          >
+          <div class="answer-buttons">
             <button
               class="answer-btn yes-btn"
               class:selected={selectedAnswer === true}
@@ -272,21 +271,13 @@
             </button>
           </div>
         </div>
-      {/if}
 
-      <!-- Travel Type Question - Step 2 -->
-      {#if currentStep === 2}
+        <!-- Step 2: Travel Type Question -->
         <div
-          class="question-section"
-          in:fly={{ y: 50, duration: 800, delay: 400, easing: cubicOut }}
-          out:fly={{ y: -50, duration: 600, easing: quintOut }}
+          class="step-wrapper"
+          class:active={currentStep === 2}
+          class:hidden={currentStep !== 2}
         >
-          <!-- Back Button -->
-          <button class="back-btn" onclick={goBack}>
-            <span class="back-icon"><FaArrowLeft /></span>
-            Back
-          </button>
-
           <div class="question-container">
             <h1 class="question-title">
               <span class="question-icon"><FaMap /></span>
@@ -297,12 +288,7 @@
             </p>
           </div>
 
-          <!-- Travel Type Buttons -->
-          <div
-            class="answer-buttons"
-            in:fly={{ y: 30, duration: 700, delay: 800, easing: cubicOut }}
-            out:fade={{ duration: 400 }}
-          >
+          <div class="answer-buttons">
             <button
               class="answer-btn domestic-btn"
               class:selected={travelType === "domestic"}
@@ -332,131 +318,95 @@
             </button>
           </div>
         </div>
-      {/if}
 
-      <!-- Travel Details Form - Step 3 -->
-      {#if currentStep === 3}
-        {#key stepKey}
-          <div
-            class="travel-details-section"
-            in:fly={{ y: 50, duration: 800, delay: 200, easing: cubicOut }}
-            out:fly={{ y: -30, duration: 500, easing: quintOut }}
-          >
-            <!-- Back Button -->
-            <button class="back-btn" onclick={goBack}>
-              <span class="back-icon"><FaArrowLeft /></span>
-              Back
-            </button>
+        <!-- Step 3: Travel Details Form -->
+        <div
+          class="step-wrapper form-step"
+          class:active={currentStep === 3}
+          class:hidden={currentStep !== 3}
+        >
+          <div class="question-container">
+            <h1 class="question-title">
+              <span class="question-icon"><FaRocket /></span>
+              Tell us about your {selectedAnswer === true
+                ? "travel plan"
+                : travelType === "domestic"
+                  ? "domestic trip"
+                  : "international adventure"}
+            </h1>
+            <p class="question-subtitle">
+              {selectedAnswer === true
+                ? "Fill in the details so we can create the perfect plan for you"
+                : "Just a few more details to get you started"}
+            </p>
+          </div>
 
-            <div class="question-container">
-              <h1 class="question-title">
-                <span class="question-icon"><FaRocket /></span>
-                Tell us about your {selectedAnswer === true
-                  ? "travel plan"
-                  : travelType === "domestic"
-                    ? "domestic trip"
-                    : "international adventure"}
-              </h1>
-              <p class="question-subtitle">
-                {selectedAnswer === true
-                  ? "Fill in the details so we can create the perfect plan for you"
-                  : "Just a few more details to get you started"}
-              </p>
-            </div>
+          <div class="travel-form">
+            {#if selectedAnswer === true}
+              <div class="form-group">
+                <label for="destination" class="form-label">
+                  <span class="label-icon"><FaMapMarkerAlt /></span>
+                  Destination
+                </label>
+                <input
+                  id="destination"
+                  type="text"
+                  bind:value={travelDetails.destination}
+                  placeholder="e.g., Tokyo, Japan"
+                  class="form-input"
+                />
+              </div>
+            {/if}
 
-            <!-- Travel Form -->
-            <div class="travel-form" in:fade={{ duration: 600, delay: 400 }}>
-              {#if selectedAnswer === true}
-                <!-- Full form for users who already have a plan (only for "Yes I do") -->
-                <div
-                  class="form-group"
-                  in:fly={{
-                    y: 20,
-                    duration: 500,
-                    delay: 600,
-                    easing: cubicOut,
-                  }}
-                >
-                  <label for="destination" class="form-label">
-                    <span class="label-icon"><FaMapMarkerAlt /></span>
-                    Destination
-                  </label>
-                  <input
-                    id="destination"
-                    type="text"
-                    bind:value={travelDetails.destination}
-                    placeholder="e.g., Tokyo, Japan"
-                    class="form-input"
-                  />
-                </div>
-              {/if}
-
-              <div
-                class="form-row"
-                in:fly={{
-                  y: 20,
-                  duration: 500,
-                  delay: selectedAnswer === true ? 800 : 600,
-                  easing: cubicOut,
-                }}
-              >
-                <div class="form-group">
-                  <label for="days" class="form-label">
-                    <span class="label-icon"><FaCalendarAlt /></span>
-                    Duration (days)
-                  </label>
-                  <input
-                    id="days"
-                    type="number"
-                    bind:value={travelDetails.days}
-                    placeholder="7"
-                    min="1"
-                    max="365"
-                    class="form-input"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label for="budget" class="form-label">
-                    <span class="label-icon"><FaMoneyBillWave /></span>
-                    Budget (USD)
-                  </label>
-                  <input
-                    id="budget"
-                    type="text"
-                    bind:value={travelDetails.budget}
-                    placeholder={travelType === "domestic" ? "500" : "2,000"}
-                    class="form-input"
-                  />
-                </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="days" class="form-label">
+                  <span class="label-icon"><FaCalendarAlt /></span>
+                  Duration (days)
+                </label>
+                <input
+                  id="days"
+                  type="text"
+                  bind:value={travelDetails.days}
+                  placeholder="7"
+                  class="form-input"
+                />
               </div>
 
-              <button
-                class="submit-btn"
-                in:scale={{
-                  duration: 500,
-                  delay: selectedAnswer === true ? 1000 : 800,
-                  easing: cubicOut,
-                  start: 0.8,
-                }}
-                class:disabled={(selectedAnswer === true &&
-                  !travelDetails.destination) ||
-                  !travelDetails.days ||
-                  !travelDetails.budget ||
-                  isAnimating}
-                onclick={handleTravelDetailsSubmit}
-              >
-                <span class="btn-icon"><FaRocket /></span>
-                <span class="btn-text">
-                  {selectedAnswer === true
-                    ? "Create Travel Plan"
-                    : "Get Recommendations"}
-                </span>
-              </button>
+              <div class="form-group">
+                <label for="budget" class="form-label">
+                  <span class="label-icon"><FaMoneyBillWave /></span>
+                  Budget (USD)
+                </label>
+                <input
+                  id="budget"
+                  type="text"
+                  bind:value={travelDetails.budget}
+                  placeholder={travelType === "domestic" ? "500" : "2,000"}
+                  class="form-input"
+                />
+              </div>
             </div>
+
+            <button
+              class="submit-btn"
+              class:disabled={(selectedAnswer === true &&
+                !travelDetails.destination) ||
+                !travelDetails.days ||
+                !travelDetails.budget ||
+                isAnimating}
+              onclick={handleTravelDetailsSubmit}
+            >
+              <span class="btn-icon"><FaRocket /></span>
+              <span class="btn-text">
+                {selectedAnswer === true
+                  ? "Create Travel Plan"
+                  : "Get Recommendations"}
+              </span>
+            </button>
           </div>
-        {/key}
-      {/if}
+        </div>
+      </div>
 
       <!-- Progress Indicator -->
       <div
@@ -649,9 +599,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
-    max-width: 550px;
+    gap: 1.5rem;
+    max-width: 800px;
+    width: 100%;
     padding: 1.5rem;
+    padding-bottom: 2rem;
     position: relative;
     z-index: 10;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -662,7 +614,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     text-align: center;
   }
 
@@ -758,25 +710,98 @@
     }
   }
 
-  /* Question Section */
-  .question-section {
+  /* Steps Container */
+  .steps-container {
+    position: relative;
+    width: 100%;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .step-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateX(100px) scale(0.95);
+    width: 100%;
+    max-width: 700px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2rem;
+    gap: 0.75rem;
     text-align: center;
-    will-change: transform, opacity;
-    width: 100%;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    padding: 0.5rem;
+  }
+
+  .step-wrapper.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateX(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .step-wrapper.form-step.active {
+    transform: translate(-50%, -60%) translateX(0) scale(1);
+  }
+
+  .step-wrapper.active .question-container {
+    animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  }
+
+  .step-wrapper.active .answer-buttons {
+    animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+
+  .step-wrapper.active .travel-form {
+    animation: slideInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+
+  .step-wrapper.hidden {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateX(-100px) scale(0.95);
+  }
+
+  @keyframes slideInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .step-wrapper.form-step {
+    padding: 0.5rem;
+    transform: translate(-50%, -60%);
   }
 
   .question-container {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .question-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: white;
     margin: 0;
@@ -816,9 +841,9 @@
   }
 
   .question-subtitle {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.8);
-    margin: 0;
+    margin: 0 0 10px 0;
     line-height: 1.5;
   }
 
@@ -826,8 +851,9 @@
   .answer-buttons {
     display: flex;
     gap: 2rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    width: 100%;
   }
 
   .answer-btn {
@@ -839,11 +865,13 @@
     backdrop-filter: blur(10px);
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: 160px;
+    min-width: 180px;
+    flex: 1;
+    max-width: 250px;
     overflow: hidden;
   }
 
-  .answer-btn:hover {
+  .answer-btn:hover:not(.disabled) {
     transform: translateY(-5px) scale(1.05);
     border-color: rgba(20, 184, 166, 0.5);
     box-shadow:
@@ -942,24 +970,12 @@
     }
   }
 
-  /* Travel Details Form */
-  .travel-details-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-    text-align: center;
-    width: 100%;
-    max-width: 450px;
-    will-change: transform, opacity;
-  }
-
   .travel-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
     width: 100%;
-    will-change: transform, opacity;
+    max-width: 450px;
   }
 
   .form-row {
@@ -971,7 +987,7 @@
   .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.375rem;
     text-align: left;
   }
 
@@ -1018,7 +1034,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.5rem;
     border: 2px solid #14b8a6;
     border-radius: 14px;
     background: linear-gradient(135deg, #14b8a6, #06b6d4);
@@ -1027,7 +1043,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
     position: relative;
     overflow: hidden;
   }
@@ -1064,8 +1080,12 @@
   }
 
   /* Back Button */
-  .back-btn {
+  .back-btn-container {
     align-self: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .back-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -1079,7 +1099,6 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 1rem;
   }
 
   .back-btn:hover {
@@ -1099,7 +1118,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .progress-dots {
@@ -1188,9 +1207,13 @@
   /* Responsive Design */
   @media (max-width: 768px) {
     .content-container {
-      gap: 1.5rem;
+      gap: 1rem;
       padding: 1rem;
       max-width: 100%;
+    }
+
+    .header-section {
+      gap: 0.5rem;
     }
 
     .brand-text {
@@ -1198,19 +1221,22 @@
     }
 
     .question-title {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
       flex-direction: column;
       gap: 0.5rem;
     }
 
     .answer-buttons {
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .answer-btn {
-      min-width: 140px;
+      min-width: 100%;
+      max-width: 100%;
       padding: 1rem 1.25rem;
+      flex: none;
     }
 
     .form-row {
@@ -1218,28 +1244,92 @@
       gap: 1rem;
     }
 
-    .travel-details-section {
+    .steps-container {
+      min-height: 350px;
+    }
+
+    .step-wrapper {
       max-width: 100%;
-      gap: 1.5rem;
+      padding: 0.5rem;
+      gap: 0.75rem;
+    }
+
+    .step-wrapper.form-step {
+      padding: 0.5rem;
+      gap: 0.75rem;
+      transform: translate(-50%, -55%);
+    }
+
+    .step-wrapper.form-step.active {
+      transform: translate(-50%, -55%) translateX(0) scale(1);
+    }
+
+    .travel-form {
+      gap: 0.75rem;
+    }
+
+    .question-container {
+      gap: 0.375rem;
+      margin-bottom: 0.125rem;
     }
 
     .logo {
       width: 50px;
       height: 50px;
     }
+
+    .progress-section {
+      gap: 0.5rem;
+    }
+  }
+
+  @media (max-width: 1024px) and (min-width: 769px) {
+    .answer-buttons {
+      gap: 1.5rem;
+    }
+
+    .answer-btn {
+      min-width: 160px;
+      max-width: 200px;
+    }
   }
 
   @media (max-width: 480px) {
+    .content-container {
+      gap: 0.75rem;
+      padding: 0.75rem;
+    }
+
     .brand-text {
       font-size: 1.8rem;
     }
 
     .question-title {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
     }
 
     .question-subtitle {
       font-size: 1rem;
+    }
+
+    .steps-container {
+      min-height: 300px;
+    }
+
+    .step-wrapper {
+      gap: 0.5rem;
+    }
+
+    .step-wrapper.form-step {
+      transform: translate(-50%, -50%);
+    }
+
+    .step-wrapper.form-step.active {
+      transform: translate(-50%, -50%) translateX(0) scale(1);
+    }
+
+    .answer-buttons {
+      gap: 0.5rem;
     }
   }
 </style>
