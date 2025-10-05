@@ -24,7 +24,9 @@
   let travelType = $state<"domestic" | "international" | null>(null);
   let travelDetails = $state({
     destination: "",
-    days: "",
+    startDate: "",
+    endDate: "",
+    participants: "",
     budget: "",
   });
 
@@ -96,46 +98,373 @@
     }, 300);
   }
 
-  function handleTravelDetailsSubmit() {
+  async function getUserLocation(): Promise<{
+    lat: number;
+    lon: number;
+  } | null> {
+    return new Promise((resolve) => {
+      console.log("🌍 Getting user location...");
+
+      if (!navigator.geolocation) {
+        console.warn("❌ Geolocation not supported");
+        // Default to Ho Chi Minh City coordinates
+        const defaultLocation = { lat: 10.7769, lon: 106.7009 };
+        console.log("📍 Using default location:", defaultLocation);
+        resolve(defaultLocation);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLocation = {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          };
+          console.log("✅ User location obtained:", userLocation);
+          resolve(userLocation);
+        },
+        (error) => {
+          console.warn("⚠️ Error getting location:", error);
+          // Default to Ho Chi Minh City coordinates
+          const defaultLocation = { lat: 10.7769, lon: 106.7009 };
+          console.log(
+            "📍 Using default location after error:",
+            defaultLocation
+          );
+          resolve(defaultLocation);
+        },
+        {
+          timeout: 10000,
+          enableHighAccuracy: false,
+        }
+      );
+    });
+  }
+
+  async function fetchFlightData(
+    location: { lat: number; lon: number },
+    destination: string,
+    startDate: string,
+    endDate: string
+  ) {
+    const requestData = {
+      departure_lat: location.lat,
+      departure_lon: location.lon,
+      arrival_city: destination,
+      outbound_date: startDate,
+      return_date: endDate,
+      sort_criteria: "score",
+      limit: 3,
+    };
+
+    console.log("✈️ Fetching flight data...");
+    console.log("📋 Flight request data:", requestData);
+
+    try {
+      const response = await fetch(
+        "http://nghiapd.ddns.net:8081/flights/search",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      console.log("📡 Flight API response status:", response.status);
+
+      // Handle both success and 400 (no flights found) responses
+      if (response.ok || response.status === 400) {
+        const data = await response.json();
+        console.log("✅ Flight data received:", data);
+
+        // Check if no flights found (HTTP 400 or message contains "no flights")
+        if (
+          response.status === 400 ||
+          (data.message &&
+            (data.message.includes("No flights found") ||
+              data.message.includes("Found 0 flights")))
+        ) {
+          console.log("⚠️ No flights found for this route");
+          return {
+            success: false,
+            message:
+              data.message ||
+              "No flights found for the specified route and date",
+            no_flights_found: true,
+            destination: requestData.arrival_city,
+          };
+        }
+
+        return data;
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Flight API error response:", errorText);
+        throw new Error(
+          `HTTP error! status: ${response.status}, body: ${errorText}`
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error fetching flight data:", error);
+      return null;
+    }
+  }
+
+  async function fetchHotelData(
+    destination: string,
+    startDate: string,
+    endDate: string,
+    participants: string
+  ) {
+    const requestData = {
+      location: destination,
+      check_in_date: startDate,
+      check_out_date: endDate,
+      adults: parseInt(participants) || 2,
+      limit: 5,
+    };
+
+    try {
+      const response = await fetch(
+        "http://nghiapd.ddns.net:8081/hotels/search",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      console.log("📡 Hotel API response status:", response.status);
+
+      // Handle both success and 400 (no hotels found) responses
+      if (response.ok || response.status === 400) {
+        const data = await response.json();
+        console.log("✅ Hotel data received:", data);
+
+        // Check if no hotels found (HTTP 400 or message contains "no hotels")
+        if (
+          response.status === 400 ||
+          (data.message &&
+            (data.message.includes("No hotels found") ||
+              data.message.includes("Found 0 hotels")))
+        ) {
+          console.log("⚠️ No hotels found for this location");
+          return {
+            success: false,
+            message:
+              data.message ||
+              "No hotels found for the specified location and dates",
+            no_hotels_found: true,
+            destination: requestData.location,
+          };
+        }
+
+        return data;
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Hotel API error response:", errorText);
+        throw new Error(
+          `HTTP error! status: ${response.status}, body: ${errorText}`
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error fetching hotel data:", error);
+      return null;
+    }
+  }
+
+  function getRandomDestination(userLocation: {
+    lat: number;
+    lon: number;
+  }): string {
+    console.log("🎲 Getting random destination for travel type:", travelType);
+
+    // Vietnam coordinates check
+    const isInVietnam =
+      userLocation.lat >= 8.2 &&
+      userLocation.lat <= 23.4 &&
+      userLocation.lon >= 102.1 &&
+      userLocation.lon <= 109.5;
+
+    const domesticDestinations = [
+      "Ho Chi Minh City",
+      "Da Nang",
+      "Nha Trang",
+      "Hoi An",
+      "Ha Long",
+      "Phu Quoc",
+      "Da Lat",
+      "Can Tho",
+      "Hue",
+      "Sapa",
+    ];
+
+    const internationalDestinations = [
+      "Bangkok",
+      "Singapore",
+      "Kuala Lumpur",
+      "Jakarta",
+      "Manila",
+      "Seoul",
+      "Tokyo",
+      "Taipei",
+      "Hong Kong",
+      "Phnom Penh",
+    ];
+
+    let destinations: string[];
+
+    // Respect user's travel type choice
+    if (travelType === "domestic") {
+      destinations = isInVietnam
+        ? domesticDestinations
+        : ["Ho Chi Minh City", "Hanoi"]; // Default domestic for non-Vietnam users
+      console.log("🏠 Using domestic destinations:", destinations);
+    } else if (travelType === "international") {
+      destinations = internationalDestinations;
+      console.log("🌍 Using international destinations:", destinations);
+    } else {
+      // Fallback to mixed (shouldn't happen normally)
+      destinations = isInVietnam
+        ? [...domesticDestinations, ...internationalDestinations]
+        : internationalDestinations;
+      console.log("🎯 Using mixed destinations:", destinations);
+    }
+
+    const selectedDestination =
+      destinations[Math.floor(Math.random() * destinations.length)];
+    console.log("✅ Selected destination:", selectedDestination);
+    return selectedDestination;
+  }
+
+  async function handleTravelDetailsSubmit() {
     // Validation based on flow
     const isValidForExistingPlan =
       selectedAnswer === true &&
       travelDetails.destination &&
-      travelDetails.days &&
+      travelDetails.startDate &&
+      travelDetails.endDate &&
+      travelDetails.participants &&
       travelDetails.budget;
     const isValidForNewPlan =
-      selectedAnswer !== true && travelDetails.days && travelDetails.budget;
+      selectedAnswer !== true &&
+      travelDetails.startDate &&
+      travelDetails.endDate &&
+      travelDetails.participants &&
+      travelDetails.budget;
+
+    console.log("🔍 Validation - Existing plan valid:", isValidForExistingPlan);
+    console.log("🔍 Validation - New plan valid:", isValidForNewPlan);
 
     if (!isValidForExistingPlan && !isValidForNewPlan) {
+      console.log("❌ Validation failed - missing required fields");
       return; // Don't submit if required fields are empty
     }
 
     isAnimating = true;
     showSuccessOverlay = true; // Show success overlay when form is submitted
 
-    // Dispatch travel details
-    setTimeout(() => {
-      const dataToSend = {
-        hasExistingPlan: selectedAnswer === true,
-        travelType: travelType,
-        destination: selectedAnswer === true ? travelDetails.destination : null,
-        days: parseInt(travelDetails.days),
-        budget: travelDetails.budget,
-      };
+    try {
+      console.log("⏳ Starting API calls...");
 
-      dispatch("travelDetails", dataToSend);
+      // Get user location
+      const userLocation = await getUserLocation();
 
-      // Navigate to main screen
+      if (!userLocation) {
+        throw new Error("Could not get user location");
+      }
+
+      // Determine destination
+      const destination =
+        selectedAnswer === true
+          ? travelDetails.destination
+          : getRandomDestination(userLocation);
+
+      console.log("🎯 Final destination:", destination);
+      console.log("🔄 Travel type:", travelType);
+      console.log("👤 Has existing plan:", selectedAnswer);
+
+      // Fetch flight and hotel data concurrently
+      console.log("📡 Making concurrent API calls...");
+      const [flightData, hotelData] = await Promise.all([
+        fetchFlightData(
+          userLocation,
+          destination,
+          travelDetails.startDate,
+          travelDetails.endDate
+        ),
+        fetchHotelData(
+          destination,
+          travelDetails.startDate,
+          travelDetails.endDate,
+          travelDetails.participants
+        ),
+      ]);
+
+      console.log("📊 API Results:");
+      console.log("✈️ Flight data:", flightData);
+      console.log("🏨 Hotel data:", hotelData);
+
+      // Check if we have at least some data to proceed
+      const hasValidData = flightData || hotelData;
+      const hasFlightSuccess = flightData && flightData.success;
+      const hasHotelSuccess = hotelData && hotelData.success;
+
+      console.log("🔍 Data validation:");
+      console.log("- Has any data:", hasValidData);
+      console.log("- Flight successful:", hasFlightSuccess);
+      console.log("- Hotel successful:", hasHotelSuccess);
+
+      if (!hasValidData) {
+        console.log("⚠️ No data received from APIs, staying on current page");
+        alert(
+          "Unable to fetch travel data. Please check your connection and try again."
+        );
+        showSuccessOverlay = false;
+        isAnimating = false;
+        return;
+      }
+
+      // Proceed with data even if only one API succeeded
       setTimeout(() => {
-        const userId = getUserIdFromToken();
+        const dataToSend = {
+          hasExistingPlan: selectedAnswer === true,
+          travelType: travelType,
+          destination: destination,
+          startDate: travelDetails.startDate,
+          endDate: travelDetails.endDate,
+          participants: travelDetails.participants,
+          budget: travelDetails.budget,
+          flightData: flightData,
+          hotelData: hotelData,
+          userLocation: userLocation,
+        };
 
-        if (userId) {
-          window.location.href = `/${userId}/mainScreen`;
-        } else {
-          window.location.href = "/";
-        }
-      }, 2000);
-    }, 1000);
+        console.log("💾 Storing data to localStorage:", dataToSend);
+        dispatch("travelDetails", dataToSend);
+
+        // Navigate to plan results
+        setTimeout(() => {
+          // Store travel details in localStorage for planResults page
+          localStorage.setItem("travelPlanData", JSON.stringify(dataToSend));
+          console.log("🔄 Navigating to plan results...");
+
+          // Navigate to plan results page
+          window.location.href = "/planResults";
+        }, 2000);
+      }, 1000);
+    } catch (error) {
+      console.error("❌ Error creating travel plan:", error);
+      // Show error message to user
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      alert(`Error creating travel plan: ${errorMessage}. Please try again.`);
+      showSuccessOverlay = false;
+      isAnimating = false;
+    }
   }
 
   function getUserIdFromToken() {
@@ -196,6 +525,16 @@
   <!-- Main Content -->
   {#if showContent}
     <div class="content-container" transition:fade={{ duration: 800 }}>
+      <!-- Back Button (conditional) - Positioned at top -->
+      {#if currentStep > 1}
+        <div class="back-btn-container top">
+          <button class="back-btn" onclick={goBack}>
+            <span class="back-icon"><FaArrowLeft /></span>
+            Back
+          </button>
+        </div>
+      {/if}
+
       <!-- Header Section -->
       <div class="header-section">
         <div class="logo-container">
@@ -211,16 +550,6 @@
           <span class="tagline-text">Your Travel Planning Assistant</span>
         </div>
       </div>
-
-      <!-- Back Button (conditional) -->
-      {#if currentStep > 1}
-        <div class="back-btn-container">
-          <button class="back-btn" onclick={goBack}>
-            <span class="back-icon"><FaArrowLeft /></span>
-            Back
-          </button>
-        </div>
-      {/if}
 
       <!-- Steps Container with fixed height -->
       <div class="steps-container">
@@ -360,15 +689,43 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="days" class="form-label">
+                <label for="startDate" class="form-label">
                   <span class="label-icon"><FaCalendarAlt /></span>
-                  Duration (days)
+                  Start Date
                 </label>
                 <input
-                  id="days"
+                  id="startDate"
+                  type="date"
+                  bind:value={travelDetails.startDate}
+                  class="form-input"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="endDate" class="form-label">
+                  <span class="label-icon"><FaCalendarAlt /></span>
+                  End Date
+                </label>
+                <input
+                  id="endDate"
+                  type="date"
+                  bind:value={travelDetails.endDate}
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="participants" class="form-label">
+                  <span class="label-icon"><FaMapMarkerAlt /></span>
+                  Participants
+                </label>
+                <input
+                  id="participants"
                   type="text"
-                  bind:value={travelDetails.days}
-                  placeholder="7"
+                  bind:value={travelDetails.participants}
+                  placeholder="2"
                   class="form-input"
                 />
               </div>
@@ -392,7 +749,9 @@
               class="submit-btn"
               class:disabled={(selectedAnswer === true &&
                 !travelDetails.destination) ||
-                !travelDetails.days ||
+                !travelDetails.startDate ||
+                !travelDetails.endDate ||
+                !travelDetails.participants ||
                 !travelDetails.budget ||
                 isAnimating}
               onclick={handleTravelDetailsSubmit}
@@ -714,7 +1073,7 @@
   .steps-container {
     position: relative;
     width: 100%;
-    min-height: 420px;
+    min-height: 550px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -746,7 +1105,7 @@
   }
 
   .step-wrapper.form-step.active {
-    transform: translate(-50%, -60%) translateX(0) scale(1);
+    transform: translate(-50%, -55%) translateX(0) scale(1);
   }
 
   .step-wrapper.active .question-container {
@@ -789,8 +1148,10 @@
   }
 
   .step-wrapper.form-step {
-    padding: 0.5rem;
-    transform: translate(-50%, -60%);
+    padding: 1rem;
+    transform: translate(-50%, -55%);
+    max-height: none;
+    overflow: visible;
   }
 
   .question-container {
@@ -973,22 +1334,25 @@
   .travel-form {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     width: 100%;
-    max-width: 450px;
+    max-width: 500px;
+    margin-top: 1rem;
   }
 
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 1.5rem;
+    align-items: start;
   }
 
   .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
+    gap: 0.5rem;
     text-align: left;
+    min-height: 85px;
   }
 
   .form-label {
@@ -1017,6 +1381,21 @@
     font-size: 0.9rem;
     transition: all 0.3s ease;
     outline: none;
+    color-scheme: dark;
+  }
+
+  .form-input[type="date"] {
+    color-scheme: dark;
+  }
+
+  .form-input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+    cursor: pointer;
+  }
+
+  .form-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
   }
 
   .form-input::placeholder {
@@ -1083,6 +1462,14 @@
   .back-btn-container {
     align-self: flex-start;
     margin-bottom: 1rem;
+  }
+
+  .back-btn-container.top {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    margin-bottom: 0;
+    z-index: 15;
   }
 
   .back-btn {
@@ -1212,6 +1599,11 @@
       max-width: 100%;
     }
 
+    .back-btn-container.top {
+      top: 1rem;
+      left: 1rem;
+    }
+
     .header-section {
       gap: 0.5rem;
     }
@@ -1241,31 +1633,36 @@
 
     .form-row {
       grid-template-columns: 1fr;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .steps-container {
-      min-height: 350px;
+      min-height: 480px;
     }
 
     .step-wrapper {
       max-width: 100%;
-      padding: 0.5rem;
-      gap: 0.75rem;
+      padding: 0.75rem;
+      gap: 1rem;
     }
 
     .step-wrapper.form-step {
-      padding: 0.5rem;
-      gap: 0.75rem;
-      transform: translate(-50%, -55%);
+      padding: 0.75rem;
+      gap: 1rem;
+      transform: translate(-50%, -50%);
     }
 
     .step-wrapper.form-step.active {
-      transform: translate(-50%, -55%) translateX(0) scale(1);
+      transform: translate(-50%, -50%) translateX(0) scale(1);
     }
 
     .travel-form {
-      gap: 0.75rem;
+      gap: 1.25rem;
+      max-width: 100%;
+    }
+
+    .form-group {
+      min-height: 75px;
     }
 
     .question-container {
@@ -1300,6 +1697,11 @@
       padding: 0.75rem;
     }
 
+    .back-btn-container.top {
+      top: 0.75rem;
+      left: 0.75rem;
+    }
+
     .brand-text {
       font-size: 1.8rem;
     }
@@ -1313,19 +1715,28 @@
     }
 
     .steps-container {
-      min-height: 300px;
+      min-height: 420px;
     }
 
     .step-wrapper {
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
     .step-wrapper.form-step {
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -45%);
+      padding: 0.5rem;
     }
 
     .step-wrapper.form-step.active {
-      transform: translate(-50%, -50%) translateX(0) scale(1);
+      transform: translate(-50%, -45%) translateX(0) scale(1);
+    }
+
+    .travel-form {
+      gap: 1rem;
+    }
+
+    .form-group {
+      min-height: 70px;
     }
 
     .answer-buttons {

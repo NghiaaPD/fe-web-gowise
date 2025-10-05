@@ -1,0 +1,311 @@
+{
+  "success": true,
+  "location": "Hanoi, Vietnam",
+  "search_params": {
+    "check_in_date": "2025-11-15",
+    "check_out_date": "2025-11-17",
+    "adults": 3,
+    "children": 0,
+    "total_guests": 3,
+    "requested_limit": 5
+  },
+  "total_hotels_found": 20,
+  "top_1": {
+    "description": "Khách sạn tốt nhất về giá cả và chất lượng",
+    "optimization": "40% giá cả + 30% rating + 30% vị trí",
+    "hotel": {
+      "name": "Hanoi Wanderlust Hostel & Travel",
+      "type": "hotel",
+      "price": "$23",
+      "price_value": 23.0,
+      "currency": "USD",
+      "rating": 4.9,
+      "rating_count": 45,
+      "distance": "",
+      "neighborhood": "",
+      "address": "",
+      "score": 0.0152,
+      "main_image": {
+        "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipPR_oaQ35RUs7NKHUSZifmrNRULkJ8LcwbgJiqN=s287-w287-h192-n-k-no-v1",
+        "original_image": "https://lh5.googleusercontent.com/p/AF1QipPR_oaQ35RUs7NKHUSZifmrNRULkJ8LcwbgJiqN=s10000"
+      },
+      "images": [
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipPR_oaQ35RUs7NKHUSZifmrNRULkJ8LcwbgJiqN=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://lh5.googleusercontent.com/p/AF1QipPR_oaQ35RUs7NKHUSZifmrNRULkJ8LcwbgJiqN=s10000"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipNOhgnH_rt2bJ7-AFQibkaBG0pn3l5x8iHb2Dra=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://lh5.googleusercontent.com/p/AF1QipNOhgnH_rt2bJ7-AFQibkaBG0pn3l5x8iHb2Dra=s10000"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipOUBbBNJTCSEPQZAfBF9hIoin7hELrzpLcVIlob=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://lh5.googleusercontent.com/p/AF1QipOUBbBNJTCSEPQZAfBF9hIoin7hELrzpLcVIlob=s10000"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipMCGUGXkkfuYujwv7xDVYCFt1vAHAmNvbk6AOuq=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://lh5.googleusercontent.com/p/AF1QipMCGUGXkkfuYujwv7xDVYCFt1vAHAmNvbk6AOuq=s10000"
+        },
+        {
+          "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipPSwL_nTCtvwbh6Kzf_ym4Hmx_182L-9Rbbx_kG=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://lh5.googleusercontent.com/p/AF1QipPSwL_nTCtvwbh6Kzf_ym4Hmx_182L-9Rbbx_kG=s10000"
+        }
+      ],
+      "amenities": [
+        "Free breakfast",
+        "Free Wi-Fi",
+        "Air conditioning",
+        "Airport shuttle",
+        "Full-service laundry"
+      ],
+      "hotel_class": "",
+      "description": "",
+      "link": "https://wanderlusthostels.com/"
+    }
+  },
+  "top_5": {
+    "description": "4 khách sạn tốt nhất khác",
+    "hotels": [
+      {
+        "name": "Khách Sạn Hướng Dương",
+        "type": "hotel",
+        "price": "$27",
+        "price_value": 27.0,
+        "currency": "USD",
+        "rating": 4.9,
+        "rating_count": 400,
+        "distance": "",
+        "neighborhood": "",
+        "address": "",
+        "score": 0.0168,
+        "main_image": {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/Ezrfv3eA-fEQEM6tnCdEkC8kZJsrGYB9JuZO9IgijCd96v3Y7q0obietTRxdRKKQ1_1amcqQTCaGWO_dtYBLlfH1uSgCuZlEj0JD7qiHRV1qc4qxbHhaPsMSoxcMbczEhSLsC9uMJ7hPhgSUcuV5uurOWGTGPc8=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://images.trvl-media.com/lodging/20000000/19510000/19501900/19501878/a28b8efd_z.jpg"
+        },
+        "images": [
+          {
+            "thumbnail": "https://lh4.googleusercontent.com/proxy/Ezrfv3eA-fEQEM6tnCdEkC8kZJsrGYB9JuZO9IgijCd96v3Y7q0obietTRxdRKKQ1_1amcqQTCaGWO_dtYBLlfH1uSgCuZlEj0JD7qiHRV1qc4qxbHhaPsMSoxcMbczEhSLsC9uMJ7hPhgSUcuV5uurOWGTGPc8=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/20000000/19510000/19501900/19501878/a28b8efd_z.jpg"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipMEqM8TQ2-JrPpYrOy8rlGgS9bA6fhrgo3rKfDf=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://lh5.googleusercontent.com/p/AF1QipMEqM8TQ2-JrPpYrOy8rlGgS9bA6fhrgo3rKfDf=s10000"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/proxy/jj3RZRkNwodArYWk5-ql9oFuP8sZsS4-XKLyzITGByy5S8KjdIXtRfnVq2ISd4grcFgoU186Geos9B-Vg9B3b9q2MIhAo1dowWI0rnygeFk5U4c_bOrGnaMi2q9V1VnY5VcuZKTx0UQxGn4DpUVgGOYr_yN2Nw=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/20000000/19510000/19501900/19501878/fe75a5d5_z.jpg"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/proxy/XmBXtX18dMtwQgkk73OiV9hTUrV2kWnBkt910ebBUBsYG34j-ixwKHlHkHdQh--VVY4HGlW03MhsqUON2PbG3laqiDxfcTTaYOOt4wwMe-s04jONfKI_oHPjCMF4GTBI_U4bgsKjF6UbGfkLIqkrXZQcuiF33A=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://cdn.worldota.net/t/1024x768/content/cc/85/cc85f4b6ac119cd125bbbd4d5360ffc898e5f638.JPEG"
+          },
+          {
+            "thumbnail": "https://lh6.googleusercontent.com/proxy/Nwga-96GhCwOZo5yXvWxbSMk0DtiJ2UMbmGK8ZFgwV3jl_3S2Y1J_Yb_1LtH6tEqwuc7u0Mo8dZnInmahtneJp-spTMAz1kHXxw1cxvbnGeWrWMHCw221UzprLjfSwRjGTAjC1e3H7bGp6idgJmXx3Vs82ad3_k=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://cdn.worldota.net/t/1024x768/content/53/08/530880585ad896452cdc3a0f2d2257f05bac852b.jpeg"
+          }
+        ],
+        "amenities": [
+          "Free Wi-Fi",
+          "Free parking",
+          "Air conditioning",
+          "Pet-friendly",
+          "Room service",
+          "Kitchen in some rooms",
+          "Airport shuttle",
+          "Full-service laundry"
+        ],
+        "hotel_class": "3-star hotel",
+        "description": "",
+        "link": "https://huongduonghotel.vn/"
+      },
+      {
+        "name": "22Housing luxury Hotel  Residence 39 Linh Lang",
+        "type": "vacation rental",
+        "price": "$45",
+        "price_value": 45.0,
+        "currency": "USD",
+        "rating": 5,
+        "rating_count": 8,
+        "distance": "",
+        "neighborhood": "",
+        "address": "",
+        "score": 0.018,
+        "main_image": {
+          "thumbnail": "https://lh4.googleusercontent.com/proxy/k8nh1erlGlrNXs8WIpmAR-HujunRMZwLPU2EDYsM6QJdg3qd4U_aTIBMLFwX84CN7i3XH4pWaHHMseAtAkIR9QNY--BukDM63dqtxtK0rDGZL4dUGQtPHNd750BOu_dLXO0rxiCcaJm9paZHnj7esrNqI7ChhQ=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/267360217.jpg?k=284a63d4b57213be4c44111a25b0497d281d49671fbfc2c4931a73da5ff058ed&o="
+        },
+        "images": [
+          {
+            "thumbnail": "https://lh4.googleusercontent.com/proxy/k8nh1erlGlrNXs8WIpmAR-HujunRMZwLPU2EDYsM6QJdg3qd4U_aTIBMLFwX84CN7i3XH4pWaHHMseAtAkIR9QNY--BukDM63dqtxtK0rDGZL4dUGQtPHNd750BOu_dLXO0rxiCcaJm9paZHnj7esrNqI7ChhQ=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/267360217.jpg?k=284a63d4b57213be4c44111a25b0497d281d49671fbfc2c4931a73da5ff058ed&o="
+          },
+          {
+            "thumbnail": "https://lh5.googleusercontent.com/proxy/ZlHZ-w3pAusxHfgXjDrSOuQmcABINiBlp_FSd4orHTtgBsIFj6mVZzLEQbLwoWmnJPUYbKBzqIn1c2XD8_Vg1S82YYPRd7A81cXFZ6Z-hsaWNHveFLYYuKr3nBsbU6LwPI9aWr4usoi4t6we3kd-OfwGUpV-wiE=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/267360221.jpg?k=1ece72b1fa4082f67411848fc2e75bae3990c28835c15b30282e06a0d1a3586b&o="
+          },
+          {
+            "thumbnail": "https://lh4.googleusercontent.com/proxy/urr2iosJmpVSRx2LTPvqZ-zwIEQ9tdrFFArlDN9YNAis-e8BCsNIQn_WtJj0l4BLRWQziA6b_m8TouQNEjhLPC58L3IjgCytsqrLvZGwRkCCAqbVLR4fBD08eRnUVr6Qn75kZcBFLHEtlc0Psl3jTXrNZr5KtQ=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://q-xx.bstatic.com/xdata/images/hotel/max1024x683/485298329.jpg?k=feeb9be597d117dda0f996e57cda5554a3623c1a675c7728a74cf955a30c2e29&o="
+          },
+          {
+            "thumbnail": "https://lh5.googleusercontent.com/proxy/OIVb6obRGHcMoNIJOSyCXURwQyOUMgHX9-zeHQqauBsFqfi9X0uZzUCYrZ4TAIUqKrFVJtDMYLkeHEgNeOvzrFllDSG3JMJ6Fqn9MIbv4deiJVpz0Lh2exzPQcEAPuscteUHgj12xhuylqcFF6mR6rceV4BrpA=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://static.cupid.travel/hotels/231310874.jpg"
+          },
+          {
+            "thumbnail": "https://lh6.googleusercontent.com/proxy/mqE-9YDOJL2P-ta6iITcultjYF_Fm2cI9B_4F5bXBtKcHDm8NpXp-y7fxMl05aV7pgV70DU4W-U9Jia_btKoNaCZcl7L77q12ApQXHSIHzYWzD-4rn86vaxhjMfzqNnwSzw7VbrALjsmNfbC6sZkliJJtTQYN28=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://static.cupid.travel/hotels/279152416.jpg"
+          }
+        ],
+        "amenities": [
+          "Air conditioning",
+          "Airport shuttle",
+          "Kid-friendly",
+          "Crib",
+          "Elevator",
+          "Fireplace",
+          "Fitness center",
+          "Heating",
+          "Hot tub",
+          "Ironing board"
+        ],
+        "hotel_class": "",
+        "description": "",
+        "link": "https://www.bluepillow.com/search/5bb97d9b7c00cb0e04b1847f?dest=bkng&cat=Apartment&lat=21.03567&lng=105.8105&language=en"
+      },
+      {
+        "name": "Queen Cafe Hotel & Pub, Hanoi",
+        "type": "hotel",
+        "price": "$26",
+        "price_value": 26.0,
+        "currency": "USD",
+        "rating": 4.8,
+        "rating_count": 306,
+        "distance": "",
+        "neighborhood": "",
+        "address": "",
+        "score": 0.0224,
+        "main_image": {
+          "thumbnail": "https://lh6.googleusercontent.com/proxy/6MTm0dZ9w4IqWCKTt2uB5w8q28bDH0dRB3iAsW1n_OyrexlUAOy5j48LERiTraSmPEXZXyYfccwI-BHW4X8mI59fXNSt7FqmtL_Y4oQc18QlibrnYLS2gVaLkXw_Q5V70EZpYc_cKk3rF24pJ-nWxoB6Tuem6fg=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://images.trvl-media.com/lodging/92000000/91900000/91891500/91891493/cfcf2da6_z.jpg"
+        },
+        "images": [
+          {
+            "thumbnail": "https://lh6.googleusercontent.com/proxy/6MTm0dZ9w4IqWCKTt2uB5w8q28bDH0dRB3iAsW1n_OyrexlUAOy5j48LERiTraSmPEXZXyYfccwI-BHW4X8mI59fXNSt7FqmtL_Y4oQc18QlibrnYLS2gVaLkXw_Q5V70EZpYc_cKk3rF24pJ-nWxoB6Tuem6fg=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/92000000/91900000/91891500/91891493/cfcf2da6_z.jpg"
+          },
+          {
+            "thumbnail": "https://lh4.googleusercontent.com/proxy/s6OO4YzB9wgthUxeWYHi_qgvHGciBB2NGM5h84ywy6Zt03kI_V7FluqOThyUsunEyIlf6KJe9yBDcuYHt2o2BPmvcmC7KGjYOMuFIyRUbEGi2X9QfmZB5nQ4yuWIaqTabtKjMUh4LqT3knnFL7ltAlEdI_LA2E8=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/92000000/91900000/91891500/91891493/64ab4bf1_z.jpg"
+          },
+          {
+            "thumbnail": "https://lh5.googleusercontent.com/proxy/Ge5JlelVOshFtmacQqBa_ffHbOqKGA2m_Tf2PMnvbS7e0nirGEXTtjSGgLxEPWlK1TeCnEHYIb7dDJS9N5r8gWC_seUux0kEwfveNs5OwsXSHi4x3zkTdQI7n_P5dV7xon9GDI1aNhdWap8u8kRyjv1OI6TC2Fs=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/92000000/91900000/91891500/91891493/96377b28_z.jpg"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/proxy/aT8RrqbVl2IRnzipX_3NyTrlEo0zPnAlfTHTg0EAM4UhN1K53Kw1nRF_ejJBDYx07AkKhC7GqM_0mkcYZXTegbwKHuJec6bw25myb9oqox6ZNRGR-L9BgKTNhPKc2op2zujh6wQX8mC9rx1gLDvB6V2lnPvwiw=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/92000000/91900000/91891500/91891493/1a44be42_z.jpg"
+          },
+          {
+            "thumbnail": "https://lh5.googleusercontent.com/proxy/XepyHnugjj4I9EoU2Ehil6t7SaQMaSSfDce0NWlvjZyW1_IaQo6YdGlbICygkz5DBkwsVnR6OIvAg7Z7OWAuOWJ3sgdc2DP2ZjAKUXVIM40K0YJ7lF5qFxhlrirk2NbtneLtKFyyNjEQwDSWK6to-iqATbMiaZw=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://images.trvl-media.com/lodging/92000000/91900000/91891500/91891493/ca797128_z.jpg"
+          }
+        ],
+        "amenities": [],
+        "hotel_class": "",
+        "description": "",
+        "link": ""
+      },
+      {
+        "name": "The One Hostel Hanoi",
+        "type": "hotel",
+        "price": "$33",
+        "price_value": 33.0,
+        "currency": "USD",
+        "rating": 4.8,
+        "rating_count": 1336,
+        "distance": "",
+        "neighborhood": "",
+        "address": "",
+        "score": 0.0252,
+        "main_image": {
+          "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipNVWi-dqqAJEaEjVsvgI-WvhryLsFjwM7V2BjA-=s287-w287-h192-n-k-no-v1",
+          "original_image": "https://lh5.googleusercontent.com/p/AF1QipNVWi-dqqAJEaEjVsvgI-WvhryLsFjwM7V2BjA-=s10000"
+        },
+        "images": [
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipNVWi-dqqAJEaEjVsvgI-WvhryLsFjwM7V2BjA-=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://lh5.googleusercontent.com/p/AF1QipNVWi-dqqAJEaEjVsvgI-WvhryLsFjwM7V2BjA-=s10000"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipOZeigqeR-e-yliWWWqq3MZYebOiCztKN86QJH7=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://lh5.googleusercontent.com/p/AF1QipOZeigqeR-e-yliWWWqq3MZYebOiCztKN86QJH7=s10000"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipMdZWG6mVsTZSAab7mjOcptlKzIpup3_2YlFIw1=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://lh5.googleusercontent.com/p/AF1QipMdZWG6mVsTZSAab7mjOcptlKzIpup3_2YlFIw1=s10000"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipO1a2dzME6rIg9kdcddRDaQoJenF6ftcW6tXjMF=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://lh5.googleusercontent.com/p/AF1QipO1a2dzME6rIg9kdcddRDaQoJenF6ftcW6tXjMF=s10000"
+          },
+          {
+            "thumbnail": "https://lh3.googleusercontent.com/p/AF1QipOsAzMKdYBkFKsrQixMiadRfhufjHAW8ScMeXQg=s287-w287-h192-n-k-no-v1",
+            "original_image": "https://lh5.googleusercontent.com/p/AF1QipOsAzMKdYBkFKsrQixMiadRfhufjHAW8ScMeXQg=s10000"
+          }
+        ],
+        "amenities": [
+          "Free breakfast",
+          "Free Wi-Fi",
+          "Pool",
+          "Air conditioning",
+          "Spa",
+          "Restaurant",
+          "Full-service laundry"
+        ],
+        "hotel_class": "",
+        "description": "Streamlined dorms in a happening hostel featuring a rooftop bar & pool, plus a cafe & breakfast.",
+        "link": "https://onehostels.com/"
+      }
+    ]
+  },
+  "summary": {
+    "total_hotels_analyzed": 20,
+    "hotels_returned": 5,
+    "price_analysis": {
+      "count": 20,
+      "min": 16.0,
+      "max": 193.0,
+      "avg": 45.4,
+      "median": 28.5,
+      "std_dev": 39.95
+    },
+    "rating_analysis": {
+      "count": 20,
+      "min": 4.2,
+      "max": 5,
+      "avg": 4.65,
+      "median": 4.7
+    },
+    "distance_analysis": {
+      "count": 0,
+      "min": 0,
+      "max": 0,
+      "avg": 0,
+      "median": 0
+    },
+    "price_categories": {
+      "budget_count": 19,
+      "mid_range_count": 1,
+      "luxury_count": 0,
+      "budget_percentage": 95.0,
+      "mid_range_percentage": 5.0,
+      "luxury_percentage": 0.0
+    },
+    "rating_categories": {
+      "excellent_count": 17,
+      "very_good_count": 3,
+      "good_count": 0,
+      "fair_count": 0
+    }
+  }
+}
