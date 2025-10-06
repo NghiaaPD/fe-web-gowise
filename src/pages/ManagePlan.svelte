@@ -3,85 +3,142 @@
   import ViewDetail from "../components/ViewDetail.svelte";
   import { fade, slide } from "svelte/transition";
   import { quintOut } from "svelte/easing";
+  import { onMount } from "svelte";
   import FaSearch from "svelte-icons/fa/FaSearch.svelte";
   import FaPlus from "svelte-icons/fa/FaPlus.svelte";
   import FaFilter from "svelte-icons/fa/FaFilter.svelte";
   import FaPencilAlt from "svelte-icons/fa/FaPencilAlt.svelte";
-  import IoMdGrid from "svelte-icons/io/IoMdGrid.svelte";
-  import IoMdList from "svelte-icons/io/IoMdList.svelte";
+  import FaTh from "svelte-icons/fa/FaTh.svelte";
+  import FaList from "svelte-icons/fa/FaList.svelte";
 
   // View state
   let currentView = "list"; // "list" or "detail"
   let isTransitioning = false;
   type Plan = {
-    title: string;
-    location: string;
-    duration: string;
-    budget: string;
-    created: string;
-    status: "active" | "draft" | "completed";
-    description: string;
+    _id: { $oid: string };
+    user_id: string;
+    itinerary_data: {
+      plan_id: string;
+      hasExistingPlan: boolean;
+      travelType: string | null;
+      destination: string;
+      startDate: string;
+      endDate: string;
+      participants: string;
+      budget: string;
+      flightData: any;
+      hotelData: any;
+      itineraryData: any;
+      selectedInterests: string[];
+      userLocation: any;
+    };
+    flightOptions: any[];
+    hotelOptions: any[];
+    itineraryDays: any[];
+    created_at: string;
+    updated_at: string;
+    status?: "active" | "draft" | "completed";
   };
   let selectedPlan: Plan | null = null;
 
-  let plans = [
-    {
-      title: "Tokyo Adventure",
-      location: "Japan",
-      duration: "7 days",
-      budget: "$2000",
-      created: "1/15/2024",
-      status: "active" as const,
-      description: "Explore the vibrant city of Tokyo and its surroundings.",
-    },
-    {
-      title: "European Explorer",
-      location: "Europe",
-      duration: "14 days",
-      budget: "$3500",
-      created: "2/20/2024",
-      status: "draft" as const,
-      description: "A grand tour across Europe's most iconic cities.",
-    },
-    {
-      title: "Bali Retreat",
-      location: "Indonesia",
-      duration: "10 days",
-      budget: "$1800",
-      created: "3/10/2024",
-      status: "completed" as const,
-      description: "Relax and unwind on the beautiful beaches of Bali.",
-    },
-    {
-      title: "Safari Experience",
-      location: "Kenya",
-      duration: "12 days",
-      budget: "$4200",
-      created: "3/25/2024",
-      status: "active" as const,
-      description:
-        "Witness the majestic wildlife of Kenya on a safari adventure.",
-    },
-    {
-      title: "Northern Lights",
-      location: "Iceland",
-      duration: "5 days",
-      budget: "$2800",
-      created: "4/05/2024",
-      status: "draft" as const,
-      description: "Chase the magical aurora borealis in Iceland.",
-    },
-    {
-      title: "Mediterranean Cruise",
-      location: "Italy & Greece",
-      duration: "21 days",
-      budget: "$5500",
-      created: "4/15/2024",
-      status: "completed" as const,
-      description:
-        "Sail through the Mediterranean and explore Italy and Greece.",
-    },
-  ];
+  // API state
+  let plans: Plan[] = [];
+  let isLoading = true;
+  let error: string | null = null;
+  let userId: string | null = null;
+
+  // Get transformed selected plan for ViewDetail
+  $: selectedPlanTransformed = selectedPlan
+    ? {
+        ...selectedPlan,
+        title: `Trip to ${selectedPlan.itinerary_data?.destination || "Unknown"}`,
+        location: selectedPlan.itinerary_data?.destination || "Unknown",
+        duration:
+          selectedPlan.itinerary_data?.startDate &&
+          selectedPlan.itinerary_data?.endDate
+            ? `${Math.ceil((new Date(selectedPlan.itinerary_data.endDate).getTime() - new Date(selectedPlan.itinerary_data.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
+            : "Unknown",
+        budget: `$${selectedPlan.itinerary_data?.budget || "0"}`,
+        created: new Date(selectedPlan.created_at).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        status: (selectedPlan.status || "active") as
+          | "active"
+          | "draft"
+          | "completed",
+        description: `Travel plan for ${selectedPlan.itinerary_data?.participants || "1"} ${selectedPlan.itinerary_data?.participants === "1" ? "person" : "people"} to ${selectedPlan.itinerary_data?.destination || "destination"}`,
+      }
+    : undefined;
+
+  // Get user ID from token (similar to mainScreen logic)
+  function getUserIdFromToken(): string | null {
+    const cookies = document.cookie.split(";");
+    const tokenCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith("accessToken=")
+    );
+    if (!tokenCookie) return null;
+
+    const token = tokenCookie.split("=")[1];
+    try {
+      const payload = token.split(".")[1];
+      const decoded = atob(payload);
+      const tokenData = JSON.parse(decoded);
+      return tokenData?.user_id || tokenData?.id || tokenData?.sub || null;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  }
+
+  // Fetch plans from API
+  async function fetchPlans() {
+    try {
+      isLoading = true;
+      error = null;
+
+      userId = getUserIdFromToken();
+      if (!userId) {
+        error = "Unable to get user ID from token";
+        isLoading = false;
+        return;
+      }
+
+      console.log("📥 Fetching plans for user:", userId);
+
+      const response = await fetch(
+        `http://nghiapd.ddns.net:8081/plans/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("✅ Plans fetched successfully:", data);
+
+        // API returns {success: true, plans: [...], total_plans: number, user_id: string}
+        plans = data.plans || [];
+      } else {
+        console.error("❌ Failed to fetch plans:", response.statusText);
+        error = "Failed to load plans. Please try again.";
+      }
+    } catch (err) {
+      console.error("❌ Error fetching plans:", err);
+      error = "An error occurred while loading plans.";
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  // Load plans on component mount
+  onMount(() => {
+    fetchPlans();
+  });
 
   // Filter and search state
   let searchQuery = "";
@@ -89,8 +146,27 @@
   let viewMode = "grid"; // grid or list
   let sortBy = "created"; // created, budget, duration
 
+  // Transform API plans to UI format
+  $: transformedPlans = plans.map((plan) => ({
+    ...plan,
+    title: `Trip to ${plan.itinerary_data?.destination || "Unknown"}`,
+    location: plan.itinerary_data?.destination || "Unknown",
+    duration:
+      plan.itinerary_data?.startDate && plan.itinerary_data?.endDate
+        ? `${Math.ceil((new Date(plan.itinerary_data.endDate).getTime() - new Date(plan.itinerary_data.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
+        : "Unknown",
+    budget: `$${plan.itinerary_data?.budget || "0"}`,
+    created: new Date(plan.created_at).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    status: (plan.status || "active") as "active" | "draft" | "completed",
+    description: `Travel plan for ${plan.itinerary_data?.participants || "1"} ${plan.itinerary_data?.participants === "1" ? "person" : "people"} to ${plan.itinerary_data?.destination || "destination"}`,
+  }));
+
   // Computed filtered plans
-  $: filteredPlans = plans
+  $: filteredPlans = transformedPlans
     .filter((plan) => {
       const matchesSearch =
         plan.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -115,10 +191,10 @@
 
   // Statistics
   $: stats = {
-    total: plans.length,
-    active: plans.filter((p) => p.status === "active").length,
-    draft: plans.filter((p) => p.status === "draft").length,
-    completed: plans.filter((p) => p.status === "completed").length,
+    total: transformedPlans.length,
+    active: transformedPlans.filter((p) => p.status === "active").length,
+    draft: transformedPlans.filter((p) => p.status === "draft").length,
+    completed: transformedPlans.filter((p) => p.status === "completed").length,
   };
 
   function handleCreatePlan() {
@@ -192,7 +268,7 @@
       in:slide={{ duration: 400, easing: quintOut }}
       out:slide={{ duration: 300, easing: quintOut }}
     >
-      <ViewDetail plan={selectedPlan} on:back={handleBackToList} />
+      <ViewDetail plan={selectedPlanTransformed} on:back={handleBackToList} />
     </div>
   {:else if currentView === "list" && !isTransitioning}
     <div
@@ -370,7 +446,7 @@
                 : 'text-gray-500 hover:text-gray-700'}"
             >
               <div class="w-4 h-4">
-                <IoMdGrid />
+                <FaTh />
               </div>
             </button>
             <button
@@ -381,7 +457,7 @@
                 : 'text-gray-500 hover:text-gray-700'}"
             >
               <div class="w-4 h-4">
-                <IoMdList />
+                <FaList />
               </div>
             </button>
           </div>
@@ -390,7 +466,62 @@
 
       <!-- Plans Grid/List -->
       <div class="mb-8">
-        {#if filteredPlans.length === 0}
+        {#if isLoading}
+          <!-- Loading State -->
+          <div class="text-center py-16">
+            <div class="w-12 h-12 animate-spin mx-auto mb-4">
+              <svg
+                class="w-full h-full text-teal-600"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                  class="opacity-25"
+                ></circle>
+                <path
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  class="opacity-75"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+              Loading Plans
+            </h3>
+            <p class="text-gray-600">
+              Please wait while we fetch your travel plans...
+            </p>
+          </div>
+        {:else if error}
+          <!-- Error State -->
+          <div class="text-center py-16">
+            <div class="w-12 h-12 text-red-500 mx-auto mb-4">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+              Error Loading Plans
+            </h3>
+            <p class="text-gray-600 mb-6">{error}</p>
+            <button
+              on:click={fetchPlans}
+              class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
+            >
+              Try Again
+            </button>
+          </div>
+        {:else if filteredPlans.length === 0}
           <!-- Empty State -->
           <div class="text-center py-16">
             <div
@@ -444,10 +575,10 @@
       </div>
 
       <!-- Results Summary -->
-      {#if filteredPlans.length > 0}
+      {#if !isLoading && !error && filteredPlans.length > 0}
         <div class="text-center text-gray-600">
           <p>
-            Showing {filteredPlans.length} of {plans.length} plans
+            Showing {filteredPlans.length} of {transformedPlans.length} plans
           </p>
         </div>
       {/if}

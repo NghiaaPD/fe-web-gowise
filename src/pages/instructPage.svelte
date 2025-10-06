@@ -13,13 +13,24 @@
   import FaStar from "svelte-icons/fa/FaStar.svelte";
   import FaBullseye from "svelte-icons/fa/FaBullseye.svelte";
   import FaArrowLeft from "svelte-icons/fa/FaArrowLeft.svelte";
+  // Interest category icons
+  import FaUtensils from "svelte-icons/fa/FaUtensils.svelte";
+  import FaLeaf from "svelte-icons/fa/FaLeaf.svelte";
+  import FaHiking from "svelte-icons/fa/FaHiking.svelte";
+  import FaMountain from "svelte-icons/fa/FaMountain.svelte";
+  import FaUniversity from "svelte-icons/fa/FaUniversity.svelte";
+  import FaLandmark from "svelte-icons/fa/FaLandmark.svelte";
+  import FaShoppingBag from "svelte-icons/fa/FaShoppingBag.svelte";
+  import FaGamepad from "svelte-icons/fa/FaGamepad.svelte";
+  import FaGlobe from "svelte-icons/fa/FaGlobe.svelte";
+  import FaHeart from "svelte-icons/fa/FaHeart.svelte";
 
   const dispatch = createEventDispatcher();
 
   let selectedAnswer = $state<boolean | null>(null);
   let isAnimating = $state(false);
   let showContent = $state(false);
-  let currentStep = $state(1); // 1: first question, 2: domestic/international, 3: travel details form
+  let currentStep = $state(1); // 1: first question, 2: domestic/international, 3: travel details form, 4: interests
   let showSuccessOverlay = $state(false); // Control success overlay separately
   let travelType = $state<"domestic" | "international" | null>(null);
   let travelDetails = $state({
@@ -29,6 +40,20 @@
     participants: "",
     budget: "",
   });
+  let selectedInterests = $state<string[]>([]);
+
+  // Interest categories with icons
+  const interestCategories = [
+    { id: "food", label: "Food", icon: FaUtensils },
+    { id: "nature", label: "Nature", icon: FaLeaf },
+    { id: "hiking", label: "Hiking", icon: FaHiking },
+    { id: "mountain-climbing", label: "Mountain Climbing", icon: FaMountain },
+    { id: "culture", label: "Culture", icon: FaUniversity },
+    { id: "history", label: "History", icon: FaLandmark },
+    { id: "shop", label: "Shop", icon: FaShoppingBag },
+    { id: "adventure", label: "Adventure", icon: FaGlobe },
+    { id: "entertainment", label: "Entertainment", icon: FaGamepad },
+  ];
 
   // Animation timing
   setTimeout(() => {
@@ -71,12 +96,33 @@
     }, 300);
   }
 
+  function handleInterestToggle(interestId: string) {
+    if (selectedInterests.includes(interestId)) {
+      selectedInterests = selectedInterests.filter((id) => id !== interestId);
+    } else {
+      selectedInterests = [...selectedInterests, interestId];
+    }
+  }
+
+  function proceedToInterests() {
+    if (isAnimating) return;
+
+    isAnimating = true;
+    setTimeout(() => {
+      currentStep = 4;
+      isAnimating = false;
+    }, 300);
+  }
+
   function goBack() {
     if (isAnimating) return;
 
     isAnimating = true;
 
-    if (currentStep === 3) {
+    if (currentStep === 4) {
+      // From step 4, go back to step 3
+      currentStep = 3;
+    } else if (currentStep === 3) {
       // From step 3, go back based on how we got here
       if (selectedAnswer === true) {
         // "Yes I do" users go back to step 1
@@ -276,6 +322,61 @@
     }
   }
 
+  async function fetchItineraryData(
+    destination: string,
+    days: number,
+    interests: string,
+    budget: string,
+    groupSize: number
+  ) {
+    const requestData = {
+      city: destination, // destination from form
+      days: days, // calculated from endDate - startDate
+      interests: interests, // joined selected interests tags
+      budget: budget, // budget category (low/moderate/high)
+      group_size: groupSize, // participants from form
+    };
+
+    console.log("🗓️ Fetching itinerary data...");
+    console.log("📋 Itinerary request data:", requestData);
+    console.log("🔍 Request breakdown:");
+    console.log("  - City (destination):", requestData.city);
+    console.log("  - Days (endDate - startDate):", requestData.days);
+    console.log("  - Interests (selected tags):", requestData.interests);
+    console.log("  - Budget (category):", requestData.budget);
+    console.log("  - Group size (participants):", requestData.group_size);
+
+    try {
+      const response = await fetch(
+        "http://nghiapd.ddns.net:8081/agent/itinerary",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      console.log("📡 Itinerary API response status:", response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("✅ Itinerary data received:", data);
+        return data;
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Itinerary API error response:", errorText);
+        throw new Error(
+          `HTTP error! status: ${response.status}, body: ${errorText}`
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error fetching itinerary data:", error);
+      return null;
+    }
+  }
+
   function getRandomDestination(userLocation: {
     lat: number;
     lon: number;
@@ -387,9 +488,42 @@
       console.log("🔄 Travel type:", travelType);
       console.log("👤 Has existing plan:", selectedAnswer);
 
-      // Fetch flight and hotel data concurrently
+      // Calculate trip duration for itinerary (ngày đi - ngày về)
+      const tripDuration = Math.ceil(
+        (new Date(travelDetails.endDate).getTime() -
+          new Date(travelDetails.startDate).getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      console.log(
+        `📅 Date calculation: ${travelDetails.startDate} → ${travelDetails.endDate} = ${tripDuration} days`
+      );
+
+      // Convert selected interests to string (mấy cái tag tích tích)
+      const interestsString = selectedInterests.join(", ");
+
+      // Convert budget to appropriate format
+      const budgetValue = travelDetails.budget;
+      let budgetCategory = "moderate";
+      const numericBudget = parseInt(budgetValue) || 500;
+
+      // Determine budget category based on numeric value
+      // High: >= $2000, Moderate: $500-$1999, Low: < $500
+      if (numericBudget >= 2000) {
+        budgetCategory = "high";
+      } else if (numericBudget >= 500) {
+        budgetCategory = "moderate";
+      } else {
+        budgetCategory = "low";
+      }
+
+      console.log(
+        `💰 Budget conversion: $${numericBudget} → ${budgetCategory}`
+      );
+
+      // Fetch flight, hotel, and itinerary data concurrently
       console.log("📡 Making concurrent API calls...");
-      const [flightData, hotelData] = await Promise.all([
+      const [flightData, hotelData, itineraryData] = await Promise.all([
         fetchFlightData(
           userLocation,
           destination,
@@ -402,11 +536,19 @@
           travelDetails.endDate,
           travelDetails.participants
         ),
+        fetchItineraryData(
+          destination, // city
+          tripDuration, // days (ngày đi - ngày về)
+          interestsString, // interests (tag tích tích)
+          budgetCategory, // budget category
+          parseInt(travelDetails.participants) || 2 // group_size (participants)
+        ),
       ]);
 
       console.log("📊 API Results:");
       console.log("✈️ Flight data:", flightData);
       console.log("🏨 Hotel data:", hotelData);
+      console.log("🗓️ Itinerary data:", itineraryData);
 
       // Check if we have at least some data to proceed
       const hasValidData = flightData || hotelData;
@@ -440,6 +582,8 @@
           budget: travelDetails.budget,
           flightData: flightData,
           hotelData: hotelData,
+          itineraryData: itineraryData,
+          selectedInterests: selectedInterests,
           userLocation: userLocation,
         };
 
@@ -754,6 +898,62 @@
                 !travelDetails.participants ||
                 !travelDetails.budget ||
                 isAnimating}
+              onclick={proceedToInterests}
+            >
+              <span class="btn-icon"><FaHeart /></span>
+              <span class="btn-text">Choose Your Interests</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Interest Selection -->
+        <div
+          class="step-wrapper form-step interests-step"
+          class:active={currentStep === 4}
+          class:hidden={currentStep !== 4}
+        >
+          <div class="question-container">
+            <h1 class="question-title">
+              <span class="question-icon"><FaHeart /></span>
+              What interests you most?
+            </h1>
+            <p class="question-subtitle">
+              Select multiple categories to personalize your travel
+              recommendations
+            </p>
+          </div>
+
+          <div class="interests-container">
+            <div class="interests-grid">
+              {#each interestCategories as category}
+                {@const IconComponent = category.icon}
+                <button
+                  class="interest-card"
+                  class:selected={selectedInterests.includes(category.id)}
+                  onclick={() => handleInterestToggle(category.id)}
+                >
+                  <span class="interest-icon">
+                    <IconComponent />
+                  </span>
+                  <span class="interest-label">{category.label}</span>
+                  {#if selectedInterests.includes(category.id)}
+                    <span class="interest-check">
+                      <FaCheckCircle />
+                    </span>
+                  {/if}
+                </button>
+              {/each}
+            </div>
+
+            <div class="selected-count">
+              {selectedInterests.length} interest{selectedInterests.length !== 1
+                ? "s"
+                : ""} selected
+            </div>
+
+            <button
+              class="submit-btn"
+              class:disabled={selectedInterests.length === 0 || isAnimating}
               onclick={handleTravelDetailsSubmit}
             >
               <span class="btn-icon"><FaRocket /></span>
@@ -782,8 +982,9 @@
           <div class="dot" class:active={currentStep >= 1}></div>
           <div class="dot" class:active={currentStep >= 2}></div>
           <div class="dot" class:active={currentStep >= 3}></div>
+          <div class="dot" class:active={currentStep >= 4}></div>
         </div>
-        <p class="progress-text">Step {currentStep} of 3</p>
+        <p class="progress-text">Step {currentStep} of 4</p>
       </div>
     </div>
   {/if}
@@ -1408,6 +1609,112 @@
     background: rgba(255, 255, 255, 0.15);
   }
 
+  /* Interest Selection Styles */
+  .interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 550px;
+    margin: 1rem 0;
+    padding: 0 0.5rem;
+  }
+
+  .interest-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 80px;
+    outline: none;
+  }
+
+  .interest-card:hover {
+    border-color: #14b8a6;
+    background: rgba(20, 184, 166, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+  }
+
+  .interest-card.selected {
+    border-color: #14b8a6;
+    background: rgba(20, 184, 166, 0.15);
+    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.3);
+  }
+
+  .interest-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #14b8a6;
+    transition: all 0.3s ease;
+  }
+
+  .interest-card.selected .interest-icon {
+    color: #06d6a0;
+    transform: scale(1.05);
+  }
+
+  .interest-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: white;
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .interest-check {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    color: #06d6a0;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s ease;
+  }
+
+  .interest-card.selected .interest-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .selected-count {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin: 1rem 0;
+    font-weight: 500;
+  }
+
+  .interests-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .step-wrapper.interests-step {
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .step-wrapper.interests-step .question-container {
+    margin-bottom: 1.5rem;
+  }
+
   .submit-btn {
     display: flex;
     align-items: center;
@@ -1678,6 +1985,41 @@
     .progress-section {
       gap: 0.5rem;
     }
+
+    .interests-grid {
+      grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+      gap: 0.5rem;
+      max-width: 100%;
+      padding: 0;
+    }
+
+    .interest-card {
+      padding: 0.75rem 0.5rem;
+      min-height: 75px;
+      gap: 0.4rem;
+    }
+
+    .interest-icon {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    .interest-label {
+      font-size: 0.7rem;
+    }
+
+    .interests-container {
+      padding: 0 0.5rem;
+    }
+
+    .step-wrapper.interests-step {
+      padding: 1rem;
+      max-height: 85vh;
+    }
+
+    .step-wrapper.interests-step .question-container {
+      margin-bottom: 1rem;
+    }
   }
 
   @media (max-width: 1024px) and (min-width: 769px) {
@@ -1741,6 +2083,43 @@
 
     .answer-buttons {
       gap: 0.5rem;
+    }
+
+    .interests-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.4rem;
+      max-width: 100%;
+      padding: 0;
+    }
+
+    .interest-card {
+      padding: 0.6rem 0.3rem;
+      min-height: 70px;
+      gap: 0.3rem;
+    }
+
+    .interest-icon {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .interest-label {
+      font-size: 0.65rem;
+      line-height: 1;
+    }
+
+    .selected-count {
+      font-size: 0.85rem;
+      margin: 0.75rem 0;
+    }
+
+    .interests-container {
+      padding: 0;
+    }
+
+    .step-wrapper.interests-step {
+      padding: 0.75rem;
+      max-height: 80vh;
     }
   }
 </style>
