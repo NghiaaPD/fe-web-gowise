@@ -6,7 +6,6 @@
   import { onMount } from "svelte";
   import FaSearch from "svelte-icons/fa/FaSearch.svelte";
   import FaPlus from "svelte-icons/fa/FaPlus.svelte";
-  import FaFilter from "svelte-icons/fa/FaFilter.svelte";
   import FaPencilAlt from "svelte-icons/fa/FaPencilAlt.svelte";
   import FaTh from "svelte-icons/fa/FaTh.svelte";
   import FaList from "svelte-icons/fa/FaList.svelte";
@@ -15,29 +14,28 @@
   let currentView = "list"; // "list" or "detail"
   let isTransitioning = false;
   type Plan = {
-    _id: { $oid: string };
-    user_id: string;
-    itinerary_data: {
-      plan_id: string;
-      hasExistingPlan: boolean;
-      travelType: string | null;
-      destination: string;
-      startDate: string;
-      endDate: string;
-      participants: string;
-      budget: string;
-      flightData: any;
-      hotelData: any;
-      itineraryData: any;
-      selectedInterests: string[];
-      userLocation: any;
+    _id?: { $oid: string };
+    user_id?: string;
+    plan_content?: {
+      plan_id?: string;
+      hasExistingPlan?: boolean;
+      travelType?: string | null;
+      destination?: string;
+      startDate?: string;
+      endDate?: string;
+      participants?: string;
+      budget?: string;
+      flightData?: any;
+      hotelData?: any;
+      itineraryData?: any;
+      selectedInterests?: string[];
+      userLocation?: any;
+      [key: string]: any;
     };
-    flightOptions: any[];
-    hotelOptions: any[];
-    itineraryDays: any[];
     created_at: string;
-    updated_at: string;
+    updated_at?: string;
     status?: "active" | "draft" | "completed";
+    [key: string]: any;
   };
   let selectedPlan: Plan | null = null;
 
@@ -45,34 +43,10 @@
   let plans: Plan[] = [];
   let isLoading = true;
   let error: string | null = null;
+
   let userId: string | null = null;
 
-  // Get transformed selected plan for ViewDetail
-  $: selectedPlanTransformed = selectedPlan
-    ? {
-        ...selectedPlan,
-        title: `Trip to ${selectedPlan.itinerary_data?.destination || "Unknown"}`,
-        location: selectedPlan.itinerary_data?.destination || "Unknown",
-        duration:
-          selectedPlan.itinerary_data?.startDate &&
-          selectedPlan.itinerary_data?.endDate
-            ? `${Math.ceil((new Date(selectedPlan.itinerary_data.endDate).getTime() - new Date(selectedPlan.itinerary_data.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
-            : "Unknown",
-        budget: `$${selectedPlan.itinerary_data?.budget || "0"}`,
-        created: new Date(selectedPlan.created_at).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-        status: (selectedPlan.status || "active") as
-          | "active"
-          | "draft"
-          | "completed",
-        description: `Travel plan for ${selectedPlan.itinerary_data?.participants || "1"} ${selectedPlan.itinerary_data?.participants === "1" ? "person" : "people"} to ${selectedPlan.itinerary_data?.destination || "destination"}`,
-      }
-    : undefined;
-
-  // Get user ID from token (similar to mainScreen logic)
+  // Helper to get userId from JWT token in cookies
   function getUserIdFromToken(): string | null {
     const cookies = document.cookie.split(";");
     const tokenCookie = cookies.find((cookie) =>
@@ -87,7 +61,6 @@
       const tokenData = JSON.parse(decoded);
       return tokenData?.user_id || tokenData?.id || tokenData?.sub || null;
     } catch (error) {
-      console.error("Error decoding token:", error);
       return null;
     }
   }
@@ -100,12 +73,10 @@
 
       userId = getUserIdFromToken();
       if (!userId) {
-        error = "Unable to get user ID from token";
+        error = "Unable to get user ID from token.";
         isLoading = false;
         return;
       }
-
-      console.log("📥 Fetching plans for user:", userId);
 
       const response = await fetch(
         `http://nghiapd.ddns.net:8081/plans/${userId}`,
@@ -119,26 +90,33 @@
 
       if (response.ok) {
         const data = await response.json();
-        console.log("✅ Plans fetched successfully:", data);
-
-        // API returns {success: true, plans: [...], total_plans: number, user_id: string}
         plans = data.plans || [];
       } else {
-        console.error("❌ Failed to fetch plans:", response.statusText);
         error = "Failed to load plans. Please try again.";
       }
     } catch (err) {
-      console.error("❌ Error fetching plans:", err);
       error = "An error occurred while loading plans.";
     } finally {
       isLoading = false;
     }
   }
 
-  // Load plans on component mount
   onMount(() => {
     fetchPlans();
   });
+  // Get transformed selected plan for ViewDetail
+  $: selectedPlanTransformed = selectedPlan
+    ? {
+        ...selectedPlan,
+        title: selectedPlan.title,
+        location: selectedPlan.location,
+        duration: selectedPlan.duration,
+        budget: selectedPlan.budget,
+        created: selectedPlan.created,
+        status: selectedPlan.status ?? "active",
+        description: selectedPlan.description,
+      }
+    : undefined;
 
   // Filter and search state
   let searchQuery = "";
@@ -146,24 +124,34 @@
   let viewMode = "grid"; // grid or list
   let sortBy = "created"; // created, budget, duration
 
-  // Transform API plans to UI format
-  $: transformedPlans = plans.map((plan) => ({
-    ...plan,
-    title: `Trip to ${plan.itinerary_data?.destination || "Unknown"}`,
-    location: plan.itinerary_data?.destination || "Unknown",
-    duration:
-      plan.itinerary_data?.startDate && plan.itinerary_data?.endDate
-        ? `${Math.ceil((new Date(plan.itinerary_data.endDate).getTime() - new Date(plan.itinerary_data.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
-        : "Unknown",
-    budget: `$${plan.itinerary_data?.budget || "0"}`,
-    created: new Date(plan.created_at).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
-    status: (plan.status || "active") as "active" | "draft" | "completed",
-    description: `Travel plan for ${plan.itinerary_data?.participants || "1"} ${plan.itinerary_data?.participants === "1" ? "person" : "people"} to ${plan.itinerary_data?.destination || "destination"}`,
-  }));
+  // Transform API plans to UI format (use plan_content)
+  $: transformedPlans = plans.map((plan) => {
+    const content = plan.plan_content || {};
+    const startDate = content.startDate || content.start_date;
+    const endDate = content.endDate || content.end_date;
+    const duration =
+      startDate && endDate
+        ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
+        : "Unknown";
+    return {
+      ...plan,
+      title: content.destination
+        ? `Trip to ${content.destination}`
+        : "Unknown Plan",
+      location: content.destination || "Unknown",
+      duration,
+      budget: content.budget ? `$${content.budget}` : "$0",
+      created: plan.created_at
+        ? new Date(plan.created_at).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "",
+      status: (plan.status || "active") as "active" | "draft" | "completed",
+      description: `Travel plan for ${content.participants || "1"} ${content.participants === "1" ? "person" : "people"} to ${content.destination || "destination"}`,
+    };
+  });
 
   // Computed filtered plans
   $: filteredPlans = transformedPlans
@@ -205,15 +193,98 @@
     console.log("Import plan");
   }
 
-  function handleViewDetail(plan: any) {
+  async function handleViewDetail(plan: any) {
     isTransitioning = true;
+    selectedPlan = null;
+    currentView = "list";
 
-    // Add transition delay for smooth effect
-    setTimeout(() => {
-      selectedPlan = plan;
+    // Always get userId from access token in cookies
+    const userId = getUserIdFromToken();
+    // Always get planId from the plan object as received from the initial plans list
+    const planId = plan._id?.$oid || plan.plan_content?.plan_id || plan.plan_id;
+
+    try {
+      if (!userId || !planId) {
+        error = "Missing user or plan ID.";
+        isTransitioning = false;
+        return;
+      }
+      console.log("[ViewDetail] Fetching detail:", { userId, planId });
+      const response = await fetch(
+        `http://nghiapd.ddns.net:8081/plans/${userId}/${planId}`
+      );
+      if (!response.ok) {
+        error = "Failed to load plan details.";
+        isTransitioning = false;
+        return;
+      }
+      const data = await response.json();
+      console.log("[ViewDetail] API response:", data);
+      const planRaw = data.plan || data;
+      // Merge itinerary_data and root-level fields into plan_content for consistency
+      let content = { ...(planRaw.plan_content || {}) };
+      // If itinerary_data exists, merge its fields in (but don't overwrite plan_content fields)
+      if (
+        planRaw.itinerary_data &&
+        typeof planRaw.itinerary_data === "object"
+      ) {
+        content = { ...planRaw.itinerary_data, ...content };
+      }
+      // Merge root-level fields (flightOptions, hotelOptions, itineraryDays, selectedInterests, etc.) if not present in content
+      const mergeFields = [
+        "flightOptions",
+        "hotelOptions",
+        "itineraryDays",
+        "selectedInterests",
+        "participants",
+        "userLocation",
+        "flightData",
+        "hotelData",
+        "itineraryData",
+        "budget",
+        "destination",
+        "startDate",
+        "endDate",
+        "plan_id",
+        "travelType",
+      ];
+      for (const key of mergeFields) {
+        if (planRaw[key] !== undefined && content[key] === undefined) {
+          content[key] = planRaw[key];
+        }
+      }
+      const startDate = content.startDate || content.start_date;
+      const endDate = content.endDate || content.end_date;
+      const duration =
+        startDate && endDate
+          ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
+          : "Unknown";
+      selectedPlan = {
+        ...planRaw,
+        plan_content: content,
+        title: content.destination
+          ? `Trip to ${content.destination}`
+          : "Unknown Plan",
+        location: content.destination || "Unknown",
+        duration,
+        budget: content.budget ? `$${content.budget}` : "$0",
+        created: planRaw.created_at
+          ? new Date(planRaw.created_at).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "",
+        status: planRaw.status || "active",
+        description: `Travel plan for ${content.participants || "1"} ${content.participants === "1" ? "person" : "people"} to ${content.destination || "destination"}`,
+      };
       currentView = "detail";
+    } catch (e) {
+      error = "An error occurred while loading plan details.";
+      console.error("[ViewDetail] Error fetching plan detail:", e);
+    } finally {
       isTransitioning = false;
-    }, 200);
+    }
   }
 
   function handleBackToList() {
@@ -566,7 +637,7 @@
                   budget={plan.budget}
                   created={plan.created}
                   status={plan.status}
-                  on:viewDetail={(event) => handleViewDetail(event.detail)}
+                  on:viewDetail={() => handleViewDetail(plan)}
                 />
               </div>
             {/each}

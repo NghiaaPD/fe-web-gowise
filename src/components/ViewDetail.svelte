@@ -1,341 +1,446 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
-    import FaArrowLeft from 'svelte-icons/fa/FaArrowLeft.svelte';
-    import FaCalendarAlt from 'svelte-icons/fa/FaCalendarAlt.svelte';
-    import FaDollarSign from 'svelte-icons/fa/FaDollarSign.svelte';
-    import FaMapMarkerAlt from 'svelte-icons/fa/FaMapMarkerAlt.svelte';
-    import FaUsers from 'svelte-icons/fa/FaUsers.svelte';
-    import FaStar from 'svelte-icons/fa/FaStar.svelte';
-    import IoMdTime from 'svelte-icons/io/IoMdTime.svelte';
-    import FaBed from 'svelte-icons/fa/FaBed.svelte';
-    import FaUtensils from 'svelte-icons/fa/FaUtensils.svelte';
+  import { createEventDispatcher } from "svelte";
+  import FaArrowLeft from "svelte-icons/fa/FaArrowLeft.svelte";
+  import FaCalendarAlt from "svelte-icons/fa/FaCalendarAlt.svelte";
+  import FaDollarSign from "svelte-icons/fa/FaDollarSign.svelte";
+  import FaMapMarkerAlt from "svelte-icons/fa/FaMapMarkerAlt.svelte";
+  import FaUsers from "svelte-icons/fa/FaUsers.svelte";
+  import FaStar from "svelte-icons/fa/FaStar.svelte";
+  import IoMdTime from "svelte-icons/io/IoMdTime.svelte";
+  import FaBed from "svelte-icons/fa/FaBed.svelte";
+  import FaUtensils from "svelte-icons/fa/FaUtensils.svelte";
+  import FlightTicketCard from "./flightTicketCard.svelte";
 
-    const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
-    export let plan = {
-        title: "Tokyo Adventure",
-        location: "Japan",
-        duration: "7 days",
-        budget: "$2000",
-        created: "1/15/2024",
-        status: "active",
-        description: "Experience the vibrant culture, cutting-edge technology, and incredible cuisine of Tokyo. From ancient temples to modern skyscrapers, this adventure covers the best of both traditional and contemporary Japan."
+  // plan prop: expects the full plan object, with plan_content and transformed fields
+  export let plan: any = {};
+
+  // Defensive: extract plan_content, merge with itinerary_data and root fields if needed
+  $: planContent = (() => {
+    let content = { ...(plan.plan_content || {}) };
+    // Merge itinerary_data if present
+    if (plan.itinerary_data && typeof plan.itinerary_data === "object") {
+      content = { ...plan.itinerary_data, ...content };
+    }
+    // Merge root-level fields if not present in content
+    const mergeFields = [
+      "flightOptions",
+      "hotelOptions",
+      "itineraryDays",
+      "selectedInterests",
+      "participants",
+      "userLocation",
+      "flightData",
+      "hotelData",
+      "itineraryData",
+      "budget",
+      "destination",
+      "startDate",
+      "endDate",
+      "plan_id",
+      "travelType",
+    ];
+    for (const key of mergeFields) {
+      if (plan[key] !== undefined && content[key] === undefined) {
+        content[key] = plan[key];
+      }
+    }
+    return content;
+  })();
+  $: title = plan.title || planContent.destination || "Unknown Plan";
+  $: location = plan.location || planContent.destination || "Unknown";
+  $: duration =
+    plan.duration ||
+    (() => {
+      const s = planContent.startDate || planContent.start_date;
+      const e = planContent.endDate || planContent.end_date;
+      if (s && e) {
+        return `${Math.ceil((new Date(e).getTime() - new Date(s).getTime()) / (1000 * 60 * 60 * 24))} days`;
+      }
+      return "Unknown";
+    })();
+  $: budget =
+    plan.budget || (planContent.budget ? `$${planContent.budget}` : "$0");
+  $: created = plan.created || plan.created_at || "";
+  $: status = plan.status || "active";
+  $: description =
+    plan.description ||
+    `Travel plan for ${planContent.participants || "1"} ${planContent.participants === "1" ? "person" : "people"} to ${planContent.destination || "destination"}`;
+
+  // Flight, hotel, itinerary, interests (single declaration each, with fallback logic)
+  $: flightOptions = (() => {
+    let fo = planContent.flightOptions || [];
+    if (!Array.isArray(fo)) return [];
+    return fo;
+  })();
+
+  // Extract top 1 flight from flightData if available
+  $: topFlight = (() => {
+    const fd = planContent.flightData;
+    if (
+      fd &&
+      typeof fd === "object" &&
+      fd.top_1 &&
+      Array.isArray(fd.top_1) &&
+      fd.top_1.length > 0
+    ) {
+      return fd.top_1[0].flight;
+    }
+    // fallback: use first flightOption if available
+    if (flightOptions.length > 0) return flightOptions[0];
+    return null;
+  })();
+
+  import HotelBookCard from "./hotelBookCard.svelte";
+  $: hotelOptions = (() => {
+    let ho = planContent.hotelOptions || [];
+    if (!Array.isArray(ho)) return [];
+    return ho;
+  })();
+
+  // Extract top 1 hotel from hotelData if available
+  $: topHotel = (() => {
+    const hd = planContent.hotelData;
+    if (
+      hd &&
+      typeof hd === "object" &&
+      hd.top_1 &&
+      Array.isArray(hd.top_1) &&
+      hd.top_1.length > 0
+    ) {
+      // Some APIs may wrap hotel in { hotel: {...} }, some may not
+      return hd.top_1[0].hotel || hd.top_1[0];
+    }
+    // fallback: use first hotelOption if available
+    if (hotelOptions.length > 0) return hotelOptions[0];
+    return null;
+  })();
+  $: itineraryDays = (() => {
+    let it = planContent.itineraryDays || [];
+    if (Array.isArray(it)) return it;
+    if (it && typeof it === "object") {
+      return Object.entries(it)
+        .filter(([key]) => key.startsWith("day_"))
+        .map(([key, value]) => ({
+          dayNumber: parseInt(key.split("_")[1]),
+          dayData: value,
+        }))
+        .sort((a, b) => a.dayNumber - b.dayNumber);
+    }
+    // Fallback: try to extract from planContent.itineraryData?.data?.itinerary
+    if (
+      planContent.itineraryData &&
+      planContent.itineraryData.data &&
+      planContent.itineraryData.data.itinerary
+    ) {
+      return Object.entries(planContent.itineraryData.data.itinerary)
+        .filter(([key]) => key.startsWith("day_"))
+        .map(([key, value]) => ({
+          dayNumber: parseInt(key.split("_")[1]),
+          dayData: value,
+        }))
+        .sort((a, b) => a.dayNumber - b.dayNumber);
+    }
+    return [];
+  })();
+  $: selectedInterests = planContent.selectedInterests || [];
+  $: participants = planContent.participants || "1";
+
+  // Calculate pricing
+  $: flightPrice = flightOptions[0]?.price_value || 0;
+  $: hotelPrice = hotelOptions[0]?.price_value || 0;
+  $: tripDuration = (() => {
+    const s = planContent.startDate || planContent.start_date;
+    const e = planContent.endDate || planContent.end_date;
+    if (s && e) {
+      return Math.ceil(
+        (new Date(e).getTime() - new Date(s).getTime()) / (1000 * 60 * 60 * 24)
+      );
+    }
+    return 1;
+  })();
+
+  function handleBackClick() {
+    dispatch("back");
+  }
+
+  function getStatusColor(status: string): string {
+    const colors: Record<string, string> = {
+      active: "bg-green-100 text-green-800",
+      draft: "bg-yellow-100 text-yellow-800",
+      completed: "bg-blue-100 text-blue-800",
     };
+    return colors[status] || "bg-gray-100 text-gray-800";
+  }
 
-    // Sample detailed data
-    const planDetails = {
-        activities: 2,
-        itinerary: [
-            {
-                day: 1,
-                date: "2024-03-01",
-                title: "Shibuya & Harajuku",
-                activities: [
-                    "Arrive in Tokyo Airport",
-                    "Check-in at hotel",
-                    "Explore Shibuya Crossing",
-                    "Dinner in Harajuku"
-                ]
-            },
-            {
-                day: 2,
-                date: "2024-03-02",
-                title: "Asakusa & Skytree",
-                activities: [
-                    "Visit Senso-ji Temple",
-                    "Explore Asakusa district",
-                    "Traditional sushi lunch",
-                    "Tokyo Skytree observation"
-                ]
-            },
-            {
-                day: 3,
-                date: "2024-03-03",
-                title: "Central Tokyo",
-                activities: [
-                    "Tsukiji Outer Market",
-                    "Imperial Palace gardens",
-                    "Ginza shopping",
-                    "Robot Restaurant show"
-                ]
-            },
-            {
-                day: 4,
-                date: "2024-03-04",
-                title: "Nikko",
-                activities: [
-                    "Day trip to Nikko",
-                    "Toshogu Shrine",
-                    "Lake Chuzenji",
-                    "Traditional ryokan dinner"
-                ]
-            },
-            {
-                day: 5,
-                date: "2024-03-05",
-                title: "Shibuya & Shopping",
-                activities: [
-                    "Meiji Shrine visit",
-                    "Omotesando shopping",
-                    "Rooftop bar nightlife",
-                    "Karaoke experience"
-                ]
-            }
-        ],
-        budgetBreakdown: [
-            { category: "Round Trip Airfare", description: "International flights to/from Tokyo", amount: 800, percentage: 40 },
-            { category: "Accommodation", description: "Hotel stay (7 nights)", amount: 700, percentage: 35 },
-            { category: "Food & Dining", description: "Meals and restaurants", amount: 300, percentage: 15 },
-            { category: "Local Transportation", description: "Trains, buses, and taxis", amount: 200, percentage: 10 },
-            { category: "Activities & Tours", description: "Tours and experiences", amount: 400, percentage: 20 },
-            { category: "Shopping & Souvenirs", description: "Souvenirs and personal items", amount: 200, percentage: 10 }
-        ],
-        totalBudget: 2800,
-        accommodations: [
-            {
-                name: "Tokyo Grand Hotel",
-                type: "Business Hotel",
-                dates: "2024-03-01 - 2024-03-08",
-                price: 700,
-                rating: 4.5
-            }
-        ],
-        specialActivities: [
-            {
-                name: "Sushi Making Class",
-                description: "Learn to make traditional sushi with a master chef",
-                duration: "2 hours",
-                date: "2024-03-03",
-                price: 80,
-                type: "Culinary"
-            },
-            {
-                name: "Tokyo Skytree Admission",
-                description: "Visit the tallest structure in Japan!",
-                duration: "3 hours",
-                date: "2024-03-02",
-                price: 25,
-                type: "Sightseeing"
-            }
-        ]
-    };
-
-    function handleBackClick() {
-        dispatch('back');
-    }
-
-    function getStatusColor(status: string): string {
-        const colors: Record<string, string> = {
-            active: "bg-green-100 text-green-800",
-            draft: "bg-yellow-100 text-yellow-800", 
-            completed: "bg-blue-100 text-blue-800"
-        };
-        return colors[status] || "bg-gray-100 text-gray-800";
-    }
-
-    function formatCurrency(amount: number): string {
-        return `$${amount.toLocaleString()}`;
-    }
+  function formatCurrency(amount: number): string {
+    if (typeof amount !== "number" || isNaN(amount)) return "$0";
+    return `$${amount.toLocaleString()}`;
+  }
 </script>
 
 <div class="bg-gray-50 min-h-screen">
-    <!-- Header with Back Button -->
-    <div class="bg-white border-b border-gray-200 px-6 py-4">
+  <!-- Header with Back Button -->
+  <div class="bg-white border-b border-gray-200 px-6 py-4">
+    <div class="flex items-center">
+      <button
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-teal-200 text-teal-700 font-semibold rounded-lg shadow-sm hover:bg-teal-50 hover:text-teal-800 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2"
+        on:click={() => dispatch("back")}
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        <span>Back to Plans</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-6xl mx-auto p-6">
+    <!-- Plan Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-start justify-between mb-4">
         <div class="flex items-center">
-            <button
-                on:click={handleBackClick}
-                class="flex items-center text-gray-600 hover:text-gray-800 transition-colors duration-200 mr-4"
-            >
-                <div class="w-4 h-4 mr-2">
-                    <FaArrowLeft />
-                </div>
-                Back to Plans
-            </button>
+          <div
+            class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mr-4"
+          >
+            <div class="w-6 h-6 text-teal-600">
+              <FaMapMarkerAlt />
+            </div>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">{title}</h1>
+            <p class="text-gray-600">{location}</p>
+          </div>
         </div>
+        <span
+          class="px-3 py-1 rounded-full text-sm font-medium {getStatusColor(
+            status
+          )}"
+        >
+          {status.toUpperCase()}
+        </span>
+      </div>
+
+      <p class="text-gray-700 mb-6">{description}</p>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-5 h-5 text-gray-600 mr-2">
+              <FaCalendarAlt />
+            </div>
+            <span class="text-sm text-gray-600">Duration</span>
+          </div>
+          <p class="text-lg font-semibold text-gray-800">{duration}</p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-5 h-5 text-gray-600 mr-2">
+              <FaDollarSign />
+            </div>
+            <span class="text-sm text-gray-600">Budget</span>
+          </div>
+          <p class="text-lg font-semibold text-gray-800">{budget}</p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-5 h-5 text-gray-600 mr-2">
+              <FaCalendarAlt />
+            </div>
+            <span class="text-sm text-gray-600">Created</span>
+          </div>
+          <p class="text-lg font-semibold text-gray-800">{created}</p>
+        </div>
+
+        <div class="text-center">
+          <div class="flex items-center justify-center mb-2">
+            <div class="w-5 h-5 text-gray-600 mr-2">
+              <FaUsers />
+            </div>
+            <span class="text-sm text-gray-600">Participants</span>
+          </div>
+          <p class="text-lg font-semibold text-gray-800">{participants}</p>
+        </div>
+      </div>
     </div>
 
-    <div class="max-w-6xl mx-auto p-6">
-        <!-- Plan Header -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center">
-                    <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mr-4">
-                        <div class="w-6 h-6 text-teal-600">
-                            <FaMapMarkerAlt />
-                        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left Column -->
+      <div class="space-y-6">
+        <!-- Itinerary -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Itinerary</h2>
+          <div class="space-y-8">
+            {#if itineraryDays.length > 0}
+              {#each itineraryDays as day, idx}
+                <div class="relative pl-8">
+                  <!-- Timeline vertical line -->
+                  <div
+                    class="absolute left-2 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-teal-200 rounded-full opacity-30"
+                  ></div>
+                  <!-- Day badge -->
+                  <div class="flex items-center mb-4">
+                    <div
+                      class="z-10 w-8 h-8 flex items-center justify-center rounded-full bg-teal-500 text-white font-bold shadow-md border-2 border-white mr-3"
+                    >
+                      {day.dayNumber ?? day.day}
                     </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800 mb-1">{plan.title}</h1>
-                        <p class="text-gray-600">{plan.location}</p>
-                    </div>
+                    <span class="text-lg font-semibold text-teal-700"
+                      >Day {day.dayNumber ?? day.day}</span
+                    >
+                  </div>
+                  <!-- Activities timeline -->
+                  {#if day.dayData}
+                    <ul class="space-y-4 ml-2">
+                      {#each Object.entries(day.dayData) as [slot, slotDataRaw], slotIdx}
+                        {@const slotData = slotDataRaw as {
+                          activity?: string;
+                          location?: string;
+                          time?: string;
+                        }}
+                        <li class="flex items-start group">
+                          <!-- Dot for each slot -->
+                          <div class="mt-1 w-4 flex flex-col items-center">
+                            <div
+                              class="w-3 h-3 rounded-full bg-white border-2 border-teal-400 group-hover:bg-teal-400 transition"
+                            ></div>
+                            {#if slotIdx < Object.keys(day.dayData).length - 1}
+                              <div
+                                class="flex-1 w-px bg-teal-200 opacity-60"
+                              ></div>
+                            {/if}
+                          </div>
+                          <div class="ml-4 flex-1">
+                            <div class="flex items-center mb-1">
+                              <span
+                                class="inline-block px-3 py-1 rounded-full bg-teal-100 text-teal-700 text-xs font-semibold mr-2 shadow-sm capitalize"
+                                >{slot}</span
+                              >
+                              {#if slotData.time}
+                                <span class="text-xs text-gray-500 font-medium"
+                                  >{slotData.time}</span
+                                >
+                              {/if}
+                            </div>
+                            <div class="font-medium text-gray-800 mb-1">
+                              {slotData.activity}
+                            </div>
+                            {#if slotData.location}
+                              <div class="text-xs text-gray-500 italic">
+                                {slotData.location}
+                              </div>
+                            {/if}
+                          </div>
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
                 </div>
-                <span class="px-3 py-1 rounded-full text-sm font-medium {getStatusColor(plan.status)}">
-                    {plan.status.toUpperCase()}
-                </span>
-            </div>
+              {/each}
+            {:else}
+              <div class="text-gray-500">No itinerary available.</div>
+            {/if}
+          </div>
+        </div>
+      </div>
 
-            <p class="text-gray-700 mb-6">{plan.description}</p>
-
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-2">
-                        <div class="w-5 h-5 text-gray-600 mr-2">
-                            <FaCalendarAlt />
-                        </div>
-                        <span class="text-sm text-gray-600">Duration</span>
-                    </div>
-                    <p class="text-lg font-semibold text-gray-800">{plan.duration}</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-2">
-                        <div class="w-5 h-5 text-gray-600 mr-2">
-                            <FaDollarSign />
-                        </div>
-                        <span class="text-sm text-gray-600">Budget</span>
-                    </div>
-                    <p class="text-lg font-semibold text-gray-800">{formatCurrency(planDetails.totalBudget)}</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-2">
-                        <div class="w-5 h-5 text-gray-600 mr-2">
-                            <FaCalendarAlt />
-                        </div>
-                        <span class="text-sm text-gray-600">Created</span>
-                    </div>
-                    <p class="text-lg font-semibold text-gray-800">{plan.created}</p>
-                </div>
-
-                <div class="text-center">
-                    <div class="flex items-center justify-center mb-2">
-                        <div class="w-5 h-5 text-gray-600 mr-2">
-                            <FaUsers />
-                        </div>
-                        <span class="text-sm text-gray-600">Activities</span>
-                    </div>
-                    <p class="text-lg font-semibold text-gray-800">{planDetails.activities}</p>
-                </div>
-            </div>
+      <!-- Right Column -->
+      <div class="space-y-6">
+        <!-- Flight Info -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Flight</h2>
+          {#if topFlight}
+            <FlightTicketCard flight={topFlight} />
+          {:else}
+            <div class="text-gray-500">No flight data.</div>
+          {/if}
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Left Column -->
-            <div class="space-y-6">
-                <!-- Itinerary -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Itinerary</h2>
-                    <div class="space-y-4">
-                        {#each planDetails.itinerary as day}
-                            <div class="border-l-4 border-teal-500 pl-4">
-                                <div class="flex items-center mb-2">
-                                    <span class="bg-teal-100 text-teal-800 text-sm font-medium px-2 py-1 rounded mr-3">
-                                        Day {day.day}
-                                    </span>
-                                    <span class="text-sm text-gray-600">{day.date}</span>
-                                </div>
-                                <h3 class="font-semibold text-gray-800 mb-2">{day.title}</h3>
-                                <ul class="space-y-1">
-                                    {#each day.activities as activity}
-                                        <li class="text-sm text-gray-600">• {activity}</li>
-                                    {/each}
-                                </ul>
-                            </div>
-                        {/each}
-                    </div>
-                </div>
-
-                <!-- Accommodations -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Accommodations</h2>
-                    {#each planDetails.accommodations as accommodation}
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <div class="flex items-start justify-between mb-2">
-                                <div>
-                                    <h3 class="font-semibold text-gray-800">{accommodation.name}</h3>
-                                    <p class="text-sm text-gray-600">{accommodation.type}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-4 h-4 text-yellow-400 mr-1">
-                                        <FaStar />
-                                    </div>
-                                    <span class="text-sm font-medium">{accommodation.rating}</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between text-sm text-gray-600">
-                                <span>{accommodation.dates}</span>
-                                <span class="font-semibold">{formatCurrency(accommodation.price)}</span>
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-            </div>
-
-            <!-- Right Column -->
-            <div class="space-y-6">
-                <!-- Budget Breakdown -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Budget Breakdown</h2>
-                    <div class="space-y-4">
-                        {#each planDetails.budgetBreakdown as item}
-                            <div class="flex items-center justify-between">
-                                <div class="flex-1">
-                                    <h3 class="font-medium text-gray-800">{item.category}</h3>
-                                    <p class="text-sm text-gray-600">{item.description}</p>
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                                        <div 
-                                            class="bg-teal-600 h-2 rounded-full transition-all duration-300"
-                                            style="width: {item.percentage}%"
-                                        ></div>
-                                    </div>
-                                </div>
-                                <div class="text-right ml-4">
-                                    <p class="font-semibold text-gray-800">{formatCurrency(item.amount)}</p>
-                                    <p class="text-sm text-gray-600">{item.percentage}%</p>
-                                </div>
-                            </div>
-                        {/each}
-                        <div class="border-t pt-4 mt-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-lg font-bold text-gray-800">Total Budget</span>
-                                <span class="text-2xl font-bold text-teal-600">{formatCurrency(planDetails.totalBudget)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Special Activities -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Special Activities</h2>
-                    <div class="space-y-4">
-                        {#each planDetails.specialActivities as activity}
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div>
-                                        <h3 class="font-semibold text-gray-800">{activity.name}</h3>
-                                        <p class="text-sm text-gray-600">{activity.description}</p>
-                                    </div>
-                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
-                                        {activity.type}
-                                    </span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm text-gray-600">
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 mr-1">
-                                            <IoMdTime />
-                                        </div>
-                                        <span>{activity.duration}</span>
-                                        <span class="mx-2">•</span>
-                                        <span>{activity.date}</span>
-                                    </div>
-                                    <span class="font-semibold">{formatCurrency(activity.price)}</span>
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
-                </div>
-            </div>
+        <!-- Accommodations (moved below Flight) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Accommodations</h2>
+          {#if topHotel}
+            <HotelBookCard hotel={topHotel} />
+          {:else}
+            <div class="text-gray-500">No accommodation data.</div>
+          {/if}
         </div>
+
+        <!-- Trip Summary -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Trip Summary</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-teal-600">
+                {formatCurrency(flightPrice)}
+              </div>
+              <div class="text-sm text-gray-500">Flight Cost</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-teal-600">
+                {formatCurrency(hotelPrice)}
+              </div>
+              <div class="text-sm text-gray-500">Hotel per night</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900">
+                {formatCurrency(flightPrice + hotelPrice * tripDuration)}
+              </div>
+              <div class="text-sm text-gray-500">Total Estimated</div>
+            </div>
+          </div>
+          {#if selectedInterests && selectedInterests.length > 0}
+            <div class="border-t border-gray-200 pt-4">
+              <div class="font-semibold text-gray-800 mb-2">Interests</div>
+              <div class="flex flex-wrap gap-2">
+                {#each selectedInterests as interest}
+                  <span
+                    class="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-medium"
+                    >{interest}</span
+                  >
+                {/each}
+              </div>
+            </div>
+          {/if}
+        </div>
+      </div>
     </div>
+  </div>
 </div>
+
+<style>
+  /* Custom styles for better animations */
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+  /* Timeline styles for itinerary */
+  .itinerary-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+  .itinerary-timeline:before {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #14b8a6, #99f6e4);
+    border-radius: 2px;
+    opacity: 0.2;
+  }
+</style>

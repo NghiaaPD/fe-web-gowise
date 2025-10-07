@@ -197,7 +197,7 @@
           },
           body: JSON.stringify({
             email: email,
-            currentPassword: currentPassword,
+            oldPassword: currentPassword,
             newPassword: newPassword,
           }),
         }
