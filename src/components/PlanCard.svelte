@@ -26,7 +26,14 @@
   }
 
   function handleEdit() {
-    // Placeholder for edit action
+    dispatch("edit", {
+      title,
+      location,
+      duration,
+      budget,
+      created,
+      status,
+    });
   }
 
   function handleViewDetails() {

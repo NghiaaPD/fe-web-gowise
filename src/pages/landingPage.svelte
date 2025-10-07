@@ -194,7 +194,15 @@
                 class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300 text-white hover:scale-110 hover:text-teal-600"
               >
                 <div class="w-5 h-5">
-                  <svelte:component this={s.icon} />
+                  {#if s.icon === IoLogoFacebook}
+                    <IoLogoFacebook />
+                  {:else if s.icon === IoLogoInstagram}
+                    <IoLogoInstagram />
+                  {:else if s.icon === IoLogoYoutube}
+                    <IoLogoYoutube />
+                  {:else if s.icon === IoLogoLinkedin}
+                    <IoLogoLinkedin />
+                  {/if}
                 </div>
               </a>
             {/each}
@@ -1220,7 +1228,7 @@
               <div class="w-5 h-5 mr-3 text-teal-400">
                 <IoIosMail />
               </div>
-              gowise@gmail.com
+              gowise2025@gmail.com
             </div>
           </div>
 

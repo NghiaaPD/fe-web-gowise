@@ -1,4 +1,11 @@
 <script lang="ts">
+  // Edit plan: save plan data to localStorage and route to planResults
+  function handleEditPlan(plan: any) {
+    // Save the full plan_content if available, else save the plan object
+    const planData = plan.plan_content ? { ...plan.plan_content } : { ...plan };
+    localStorage.setItem("travelPlanData", JSON.stringify(planData));
+    window.location.href = "/planResults";
+  }
   import PlanCard from "../components/PlanCard.svelte";
   import ViewDetail from "../components/ViewDetail.svelte";
   import { fade, slide } from "svelte/transition";
@@ -638,6 +645,7 @@
                   created={plan.created}
                   status={plan.status}
                   on:viewDetail={() => handleViewDetail(plan)}
+                  on:edit={(event) => handleEditPlan(plan)}
                 />
               </div>
             {/each}
