@@ -235,13 +235,31 @@
 
   // Only fetch weather when visible
   async function lazyLoadWeather() {
-    if (!weatherBoardVisible || isWeatherLoading || weatherData.length > 0) return;
+    if (!weatherBoardVisible || isWeatherLoading || weatherData.length > 0)
+      return;
     isWeatherLoading = true;
     weatherData = [];
     for (const plan of transformedPlans) {
+      let lat = null;
+      let lon = null;
+      // Only use geocodeLocation for lat/lon
       const geo = await geocodeLocation(plan.location);
       if (geo) {
-        const weather = await fetchWeather(geo.lat, geo.lon);
+        lat = geo.lat;
+        lon = geo.lon;
+      }
+      console.log(
+        "[Weather] Plan:",
+        plan.title,
+        "location:",
+        plan.location,
+        "lat/lon:",
+        lat,
+        lon
+      );
+      if (lat && lon) {
+        const weather = await fetchWeather(lat, lon);
+        console.log("[Weather] Weather result:", weather);
         if (weather) {
           weatherData.push({
             location: plan.location,
@@ -255,28 +273,19 @@
             backgroundColor: "#A7F3D0",
             textColor: "#065F46",
           });
-        } else {
-          weatherData.push({
-            location: plan.location,
-            temperature: "-",
-            visibility: "-",
-            soilMoisture: "-",
-            uvIndex: "-",
-            backgroundColor: "#F3F4F6",
-            textColor: "#374151",
-          });
+          continue;
         }
-      } else {
-        weatherData.push({
-          location: plan.location,
-          temperature: "-",
-          visibility: "-",
-          soilMoisture: "-",
-          uvIndex: "-",
-          backgroundColor: "#F3F4F6",
-          textColor: "#374151",
-        });
       }
+      // fallback: no weather
+      weatherData.push({
+        location: plan.location,
+        temperature: "-",
+        visibility: "-",
+        soilMoisture: "-",
+        uvIndex: "-",
+        backgroundColor: "#F3F4F6",
+        textColor: "#374151",
+      });
     }
     isWeatherLoading = false;
   }

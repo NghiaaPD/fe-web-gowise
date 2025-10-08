@@ -1,6 +1,17 @@
 <script lang="ts">
   import DeletePlanDialog from "../components/deletePlanDialog.svelte";
   import { showNotification } from "$lib/index";
+  
+  import PlanCard from "../components/PlanCard.svelte";
+  import ViewDetail from "../components/ViewDetail.svelte";
+  import { fade, slide } from "svelte/transition";
+  import { quintOut } from "svelte/easing";
+  import { onMount } from "svelte";
+  import FaSearch from "svelte-icons/fa/FaSearch.svelte";
+  import FaPlus from "svelte-icons/fa/FaPlus.svelte";
+  import FaPencilAlt from "svelte-icons/fa/FaPencilAlt.svelte";
+  import FaTh from "svelte-icons/fa/FaTh.svelte";
+  import FaList from "svelte-icons/fa/FaList.svelte";
 
   let showDeleteDialog = false;
   let planToDelete: any = null;
@@ -65,16 +76,6 @@
     localStorage.setItem("travelPlanData", JSON.stringify(planData));
     window.location.href = "/planResults";
   }
-  import PlanCard from "../components/PlanCard.svelte";
-  import ViewDetail from "../components/ViewDetail.svelte";
-  import { fade, slide } from "svelte/transition";
-  import { quintOut } from "svelte/easing";
-  import { onMount } from "svelte";
-  import FaSearch from "svelte-icons/fa/FaSearch.svelte";
-  import FaPlus from "svelte-icons/fa/FaPlus.svelte";
-  import FaPencilAlt from "svelte-icons/fa/FaPencilAlt.svelte";
-  import FaTh from "svelte-icons/fa/FaTh.svelte";
-  import FaList from "svelte-icons/fa/FaList.svelte";
 
   // View state
   let currentView = "list"; // "list" or "detail"
