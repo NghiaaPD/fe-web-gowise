@@ -1,4 +1,63 @@
 <script lang="ts">
+  import DeletePlanDialog from "../components/deletePlanDialog.svelte";
+  import { showNotification } from "$lib/index";
+
+  let showDeleteDialog = false;
+  let planToDelete: any = null;
+
+  function handleDeleteDialogCancel() {
+    showDeleteDialog = false;
+    planToDelete = null;
+  }
+
+  // Called when delete button is clicked on a plan card
+  function handleDeletePlan(plan: any) {
+    showDeleteDialog = true;
+    planToDelete = plan;
+  }
+
+  // Called when user confirms delete in the dialog
+  async function handleDeleteDialogConfirm() {
+    if (!planToDelete) return;
+    const userId = getUserIdFromToken();
+    const planId =
+      planToDelete._id?.$oid ||
+      planToDelete.plan_content?.plan_id ||
+      planToDelete.plan_id;
+    if (!userId || !planId) {
+      showDeleteDialog = false;
+      planToDelete = null;
+      return;
+    }
+    try {
+      const response = await fetch(
+        `http://nghiapd.ddns.net:8081/plans/${userId}/${planId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        plans = plans.filter(
+          (p) =>
+            (p._id?.$oid || p.plan_content?.plan_id || p.plan_id) !== planId
+        );
+        showNotification(
+          {
+            title: "Plan Deleted",
+            message: "The plan was deleted successfully.",
+          },
+          "success"
+        );
+      } else {
+        // Optionally handle error
+      }
+    } catch (e) {
+      // Optionally handle error
+    } finally {
+      showDeleteDialog = false;
+      planToDelete = null;
+    }
+  }
   // Edit plan: save plan data to localStorage and route to planResults
   function handleEditPlan(plan: any) {
     // Save the full plan_content if available, else save the plan object
@@ -591,7 +650,9 @@
             <h3 class="text-lg font-semibold text-gray-800 mb-2">
               Error Loading Plans
             </h3>
-            <p class="text-gray-600 mb-6">{error}</p>
+            <p class="text-gray-600 mb-6">
+              An error occurred while loading plans.
+            </p>
             <button
               on:click={fetchPlans}
               class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
@@ -646,9 +707,16 @@
                   status={plan.status}
                   on:viewDetail={() => handleViewDetail(plan)}
                   on:edit={(event) => handleEditPlan(plan)}
+                  on:delete={() => handleDeletePlan(plan)}
                 />
               </div>
             {/each}
+            <DeletePlanDialog
+              open={showDeleteDialog}
+              planTitle={planToDelete ? planToDelete.title : ""}
+              on:cancel={handleDeleteDialogCancel}
+              on:confirm={handleDeleteDialogConfirm}
+            />
           </div>
         {/if}
       </div>

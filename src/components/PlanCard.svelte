@@ -50,6 +50,10 @@
       isLoading = false;
     }, 300);
   }
+
+  function handleDelete() {
+    dispatch("delete");
+  }
 </script>
 
 <div
@@ -118,6 +122,31 @@
       {:else}
         View Details
       {/if}
+    </button>
+    <button
+      class="flex items-center justify-center p-0.5 w-9 h-9 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition text-base font-medium"
+      title="Delete"
+      aria-label="Delete plan"
+      on:click={handleDelete}
+      type="button"
+    >
+      <svg
+        class="w-5 h-5 mx-auto"
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        ><path d="M10 11v6" /><path d="M14 11v6" /><path
+          d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+        /><path d="M3 6h18" /><path
+          d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+        /></svg
+      >
     </button>
   </div>
 </div>

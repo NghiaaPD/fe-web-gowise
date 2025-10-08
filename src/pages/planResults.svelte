@@ -3,6 +3,8 @@
   import HotelBookCard from "../components/hotelBookCard.svelte";
   import DayPlan from "../components/dayPlan.svelte";
   import { onMount } from "svelte";
+  import Notification from "../components/Notification.svelte";
+  import { showNotification } from "$lib/index";
 
   import FaPlane from "svelte-icons/fa/FaPlane.svelte";
 
@@ -171,14 +173,29 @@
       if (response.ok) {
         const result = await response.json();
         console.log("✅ Plan saved successfully:", result);
-        alert("Travel plan saved successfully!");
+        showNotification(
+          { title: "Plan Saved", message: "Travel plan saved successfully!" },
+          "success"
+        );
       } else {
         console.error("❌ Failed to save plan:", response.statusText);
-        alert("Failed to save travel plan. Please try again.");
+        showNotification(
+          {
+            title: "Save Failed",
+            message: "Failed to save travel plan. Please try again.",
+          },
+          "error"
+        );
       }
     } catch (error) {
       console.error("❌ Error saving plan:", error);
-      alert("An error occurred while saving the plan.");
+      showNotification(
+        {
+          title: "Save Failed",
+          message: "An error occurred while saving the plan.",
+        },
+        "error"
+      );
     }
   }
 </script>
@@ -194,32 +211,42 @@
       class="back-btn flex items-center gap-2 text-teal-600 hover:text-teal-800 font-medium py-2 px-4 rounded-lg bg-white border border-gray-200 shadow-sm transition-all duration-200 mb-4"
       on:click={() => window.history.back()}
     >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M15 19l-7-7 7-7"
+        />
       </svg>
       Back
     </button>
   </div>
 
-<style>
-.back-btn {
-  transition:
-    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.22s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform, box-shadow, background;
-}
-.back-btn:hover {
-  transform: scale(1.045) translateX(-3px);
-  box-shadow: 0 6px 24px 0 rgba(20, 184, 166, 0.13);
-  background: linear-gradient(90deg, #f0fdfa 0%, #e0f7fa 100%);
-}
-.back-btn:active {
-  transform: scale(0.98) translateX(-1px);
-  box-shadow: 0 2px 8px 0 rgba(20, 184, 166, 0.16);
-  background: #f0fdfa;
-}
-</style>
+  <style>
+    .back-btn {
+      transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, box-shadow, background;
+    }
+    .back-btn:hover {
+      transform: scale(1.045) translateX(-3px);
+      box-shadow: 0 6px 24px 0 rgba(20, 184, 166, 0.13);
+      background: linear-gradient(90deg, #f0fdfa 0%, #e0f7fa 100%);
+    }
+    .back-btn:active {
+      transform: scale(0.98) translateX(-1px);
+      box-shadow: 0 2px 8px 0 rgba(20, 184, 166, 0.16);
+      background: #f0fdfa;
+    }
+  </style>
   <!-- Header -->
   <div class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -546,4 +573,7 @@
       </div>
     </div>
   </div>
+
+  <!-- Notification Component -->
+  <Notification />
 </div>

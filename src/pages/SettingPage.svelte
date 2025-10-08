@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
+  import { showNotification } from "$lib/index";
   import NavigatorSetting from "../components/NavigatorSetting.svelte";
   import ProfilePage from "./ProfilePage.svelte";
   import SecurityPage from "./SecurityPage.svelte";
@@ -16,6 +17,13 @@
 
   function handleProfileUpdated() {
     dispatch("profileUpdated");
+    showNotification(
+      {
+        title: "Profile Updated",
+        message: "Your profile has been updated successfully.",
+      },
+      "success"
+    );
   }
 
   function getPageTitle(itemId: string): string {
