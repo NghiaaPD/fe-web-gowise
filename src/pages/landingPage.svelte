@@ -1076,7 +1076,7 @@
           <!-- Social Icons -->
           <div class="flex space-x-4">
             <a
-              href="#"
+              href="https://www.facebook.com/profile.php?id=61580929276868"
               class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-teal-500 transition-all duration-300 cursor-pointer"
             >
               <div class="w-5 h-5">
