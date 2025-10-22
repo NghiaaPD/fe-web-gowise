@@ -26,7 +26,7 @@
   let messages: Message[] = [
     {
       id: "1",
-      text: "Hello! I'm your AI travel assistant. How can I help you plan your next trip?",
+      text: "Xin chào! Tôi là trợ lý du lịch AI của bạn. Tôi có thể giúp gì cho kế hoạch chuyến đi tiếp theo của bạn?",
       isUser: false,
       timestamp: new Date("2024-01-15T10:30:00"),
     },
@@ -42,11 +42,11 @@
     plans = plans.map((p) => ({ ...p, selected: p.id === plan.id }));
     selectedPlan = plan;
     planChatReady = false;
-    if (plan.name === "General Chat") {
+    if (plan.name === "Trò chuyện chung") {
       messages = [
         {
           id: Date.now().toString(),
-          text: "Hello! I'm your AI travel assistant. How can I help you plan your next trip?",
+          text: "Xin chào! Tôi là trợ lý AI du lịch của bạn. Tôi có thể giúp bạn lên kế hoạch cho chuyến đi tiếp theo như thế nào?",
           isUser: false,
           timestamp: new Date(),
         },
@@ -56,7 +56,7 @@
       messages = [
         {
           id: Date.now().toString(),
-          text: `Welcome to ${plan.name}! I'm here to help you with your ${plan.location} travel plans. Click 'Start Chat' to begin.`,
+          text: `Chào mừng đến với ${plan.name}! Tôi ở đây để giúp bạn với kế hoạch du lịch ${plan.location}. Nhấn 'Bắt đầu trò chuyện' để bắt đầu.`,
           isUser: false,
           timestamp: new Date(),
         },
@@ -76,7 +76,7 @@
         messages = [
           {
             id: Date.now().toString(),
-            text: "Missing user or plan ID. Cannot start chat.",
+            text: "Thiếu thông tin người dùng hoặc kế hoạch. Không thể bắt đầu trò chuyện.",
             isUser: false,
             timestamp: new Date(),
           },
@@ -85,7 +85,7 @@
       }
       // Fetch plan details (like ManagePlan.svelte)
       const res = await fetch(
-        `http://nghiapd.ddns.net:8081/plans/${userId}/${planId}`
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/plans/${userId}/${planId}`
       );
       console.log("[startPlanChat] Fetching plan details:", {
         userId,
@@ -96,7 +96,7 @@
         messages = [
           {
             id: Date.now().toString(),
-            text: "Failed to load plan details. Cannot start chat.",
+            text: "Không thể tải chi tiết kế hoạch. Không thể bắt đầu trò chuyện.",
             isUser: false,
             timestamp: new Date(),
           },
@@ -106,47 +106,37 @@
       const data = await res.json();
       console.log("[startPlanChat] Plan details response:", data);
       const planRaw = data.plan || data;
-      let content = { ...(planRaw.plan_content || {}) };
-      if (
-        planRaw.itinerary_data &&
-        typeof planRaw.itinerary_data === "object"
-      ) {
-        content = { ...planRaw.itinerary_data, ...content };
-      }
-      // Merge root-level fields if not present in content
-      const mergeFields = [
-        "flightOptions",
-        "hotelOptions",
-        "itineraryDays",
-        "selectedInterests",
-        "participants",
-        "userLocation",
-        "flightData",
-        "hotelData",
-        "itineraryData",
-        "budget",
-        "destination",
-        "startDate",
-        "endDate",
-        "plan_id",
-        "travelType",
-      ];
-      for (const key of mergeFields) {
-        if (planRaw[key] !== undefined && content[key] === undefined) {
-          content[key] = planRaw[key];
-        }
-      }
-      console.log("[startPlanChat] plan_content to send:", content);
+
+      // Extract only the required fields for chat context
+      const planData = {
+        destination: planRaw.destination || planRaw.plan_content?.destination,
+        startDate: planRaw.startDate || planRaw.plan_content?.startDate,
+        endDate: planRaw.endDate || planRaw.plan_content?.endDate,
+        budget: planRaw.budget || planRaw.plan_content?.budget,
+        plan_id:
+          planRaw.plan_id || planRaw._id?.$oid || planRaw.plan_content?.plan_id,
+        selectedInterests:
+          planRaw.selectedInterests || planRaw.plan_content?.selectedInterests,
+      };
+
+      console.log("[startPlanChat] plan_data to send:", planData);
+
+      const requestBody = {
+        message:
+          "Đây là chi tiết kế hoạch du lịch của tôi. Vui lòng xem xét và hỗ trợ tôi.",
+        plan_content: planData,
+      };
+      console.log("[startPlanChat] Full request body:", requestBody);
+
       // Send plan_content and a default message to chatbot endpoint
-      const chatRes = await fetch("http://nghiapd.ddns.net:8081/chatbot/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message:
-            "Here are the details of my travel plan. Please review and assist me.",
-          plan_content: content,
-        }),
-      });
+      const chatRes = await fetch(
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/chatbot/chat`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
       console.log("[startPlanChat] Chatbot response status:", chatRes.status);
       let aiText = "";
       if (chatRes.ok) {
@@ -155,7 +145,7 @@
         aiText = chatData.reply || chatData.message || chatData.response || "";
       }
       if (!aiText.trim()) {
-        aiText = "Ready to chat about your plan!";
+        aiText = "Sẵn sàng trò chuyện về kế hoạch của bạn!";
       }
       // Replace the welcome message with the AI response
       messages = [
@@ -171,7 +161,7 @@
       messages = [
         {
           id: Date.now().toString(),
-          text: "Error starting chat for this plan.",
+          text: "Lỗi khi bắt đầu trò chuyện cho kế hoạch này.",
           isUser: false,
           timestamp: new Date(),
         },
@@ -205,7 +195,12 @@
     let userId = getUserIdFromToken();
     if (!userId) {
       plans = [
-        { id: "general", name: "General Chat", location: "", selected: true },
+        {
+          id: "general",
+          name: "Trò chuyện chung",
+          location: "",
+          selected: true,
+        },
       ];
       selectedPlan = plans[0];
       isPlansLoading = false;
@@ -213,7 +208,7 @@
     }
     try {
       const response = await fetch(
-        `http://nghiapd.ddns.net:8081/plans/${userId}`
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/plans/${userId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -229,19 +224,34 @@
           };
         });
         plans = [
-          { id: "general", name: "General Chat", location: "", selected: true },
+          {
+            id: "general",
+            name: "Trò chuyện chung",
+            location: "",
+            selected: true,
+          },
           ...realPlans,
         ];
         selectedPlan = plans[0];
       } else {
         plans = [
-          { id: "general", name: "General Chat", location: "", selected: true },
+          {
+            id: "general",
+            name: "Trò chuyện chung",
+            location: "",
+            selected: true,
+          },
         ];
         selectedPlan = plans[0];
       }
     } catch (e) {
       plans = [
-        { id: "general", name: "General Chat", location: "", selected: true },
+        {
+          id: "general",
+          name: "Trò chuyện chung",
+          location: "",
+          selected: true,
+        },
       ];
       selectedPlan = plans[0];
     } finally {
@@ -266,11 +276,17 @@
     // If General Chat, call chatbot API
     if (selectedPlan && selectedPlan.id === "general") {
       try {
-        const res = await fetch("http://nghiapd.ddns.net:8081/chatbot/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: trimmedMsg }),
-        });
+        const requestBody = { message: trimmedMsg };
+        console.log("[sendMessage] General chat request:", requestBody);
+
+        const res = await fetch(
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/chatbot/chat`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody),
+          }
+        );
         let aiText = "Sorry, I couldn't get a response.";
         if (res.ok) {
           const data = await res.json();
@@ -300,11 +316,17 @@
       // For plan chat after Start Chat, send message to chatbot with plan context
       try {
         // Optionally, you can keep plan_content in memory if needed for context
-        const res = await fetch("http://nghiapd.ddns.net:8081/chatbot/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: trimmedMsg }),
-        });
+        const requestBody = { message: trimmedMsg };
+        console.log("[sendMessage] Plan chat request:", requestBody);
+
+        const res = await fetch(
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/chatbot/chat`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestBody),
+          }
+        );
         let aiText = "Sorry, I couldn't get a response.";
         if (res.ok) {
           const data = await res.json();
@@ -389,7 +411,7 @@
       <div class="relative">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Tìm kiếm..."
           class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
         />
       </div>
@@ -398,9 +420,9 @@
     <!-- Plan Selection -->
     <div class="flex-1 overflow-y-auto">
       <div class="p-4">
-        <p class="text-sm text-gray-600 mb-3">Select a Plan</p>
+        <p class="text-sm text-gray-600 mb-3">Chọn kế hoạch</p>
         {#if isPlansLoading}
-          <div class="text-center text-gray-400 py-8">Loading plans...</div>
+          <div class="text-center text-gray-400 py-8">Đang tải kế hoạch...</div>
         {:else}
           <div class="space-y-2">
             {#each plans as plan}
@@ -436,8 +458,8 @@
     <div class="bg-white border-b border-gray-200 p-4">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-xl font-bold text-gray-800">AI Travel Assistant</h2>
-          <p class="text-sm text-gray-600">General travel assistance</p>
+          <h2 class="text-xl font-bold text-gray-800">Trợ lý du lịch AI</h2>
+          <p class="text-sm text-gray-600">Hỗ trợ du lịch chung</p>
         </div>
         <div class="flex items-center space-x-2">
           <!-- User info removed as requested -->
@@ -504,10 +526,10 @@
             on:click={startPlanChat}
             disabled={isStartingChat}
           >
-            {isStartingChat ? "Starting..." : "Start Chat"}
+            {isStartingChat ? "Đang bắt đầu..." : "Bắt đầu trò chuyện"}
           </button>
           <p class="text-xs text-gray-500">
-            You need to start chat for this plan before sending messages.
+            Bạn cần bắt đầu trò chuyện cho kế hoạch này trước khi gửi tin nhắn.
           </p>
         </div>
       {:else}
@@ -516,7 +538,7 @@
             <input
               bind:value={newMessage}
               on:keydown={(e) => e.key === "Enter" && sendMessage()}
-              placeholder="Hello! I'm your AI travel assistant. How can I help you plan your next trip?"
+              placeholder="Xin chào! Tôi là trợ lý du lịch AI của bạn. Tôi có thể giúp gì cho kế hoạch chuyến đi tiếp theo của bạn?"
               class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
               disabled={selectedPlan &&
                 selectedPlan.id !== "general" &&

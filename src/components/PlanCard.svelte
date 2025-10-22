@@ -76,15 +76,15 @@
   </div>
   <div class="flex flex-col gap-1 text-sm text-gray-700 mt-2">
     <div class="flex justify-between">
-      <span class="text-gray-500">Duration:</span>
+      <span class="text-gray-500">Thời gian:</span>
       <span class="font-medium">{duration}</span>
     </div>
     <div class="flex justify-between">
-      <span class="text-gray-500">Budget:</span>
+      <span class="text-gray-500">Ngân sách:</span>
       <span class="font-medium">{budget}</span>
     </div>
     <div class="flex justify-between">
-      <span class="text-gray-500">Created:</span>
+      <span class="text-gray-500">Ngày tạo:</span>
       <span class="font-medium">{created}</span>
     </div>
   </div>
@@ -93,7 +93,7 @@
       class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition text-sm font-medium"
       on:click={handleEdit}
     >
-      Edit
+      Chỉnh sửa
     </button>
     <button
       class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition text-sm font-medium"
@@ -118,15 +118,15 @@
             ></path>
           </svg>
         </span>
-        Loading...
+        Đang tải...
       {:else}
-        View Details
+        Xem chi tiết
       {/if}
     </button>
     <button
       class="flex items-center justify-center p-0.5 w-9 h-9 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition text-base font-medium"
-      title="Delete"
-      aria-label="Delete plan"
+      title="Xóa"
+      aria-label="Xóa kế hoạch"
       on:click={handleDelete}
       type="button"
     >

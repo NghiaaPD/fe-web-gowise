@@ -188,7 +188,7 @@
       const token = tokenCookie.split("=")[1];
 
       const res = await fetch(
-        "http://nghiapd.ddns.net:8081/auth/change-password",
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/auth/change-password`,
         {
           method: "POST",
           headers: {
@@ -254,7 +254,7 @@
     otpLoading = true;
     try {
       const res = await fetch(
-        "http://nghiapd.ddns.net:8081/auth/validate-otp",
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/auth/validate-otp`,
         {
           method: "POST",
           headers: {

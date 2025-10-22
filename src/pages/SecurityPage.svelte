@@ -52,7 +52,7 @@
 
       // Send OTP request
       const res = await fetch(
-        "http://nghiapd.ddns.net:8081/auth/forgot-password",
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/auth/forgot-password`,
         {
           method: "POST",
           headers: {

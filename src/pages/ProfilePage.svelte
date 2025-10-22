@@ -46,26 +46,32 @@
 
       // Update first name if changed
       if (userData.firstName !== originalData.firstName) {
-        await fetch(`http://nghiapd.ddns.net:8081/users/${userId}/first_name`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ firstName: userData.firstName }),
-        });
+        await fetch(
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/first_name`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ firstName: userData.firstName }),
+          }
+        );
       }
 
       // Update last name if changed
       if (userData.lastName !== originalData.lastName) {
-        await fetch(`http://nghiapd.ddns.net:8081/users/${userId}/last_name`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ lastName: userData.lastName }),
-        });
+        await fetch(
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/last_name`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ lastName: userData.lastName }),
+          }
+        );
       }
 
       // Update original data with new values
@@ -114,11 +120,14 @@
 
       const token = tokenCookie.split("=")[1];
 
-      const res = await fetch(`http://nghiapd.ddns.net:8081/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.ok) {
         const response = await res.json();

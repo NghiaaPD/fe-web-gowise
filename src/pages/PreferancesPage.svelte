@@ -130,11 +130,14 @@
         return;
       }
 
-      const res = await fetch(`http://nghiapd.ddns.net:8081/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.ok) {
         const response = await res.json();
@@ -171,7 +174,7 @@
       if (!token) return;
 
       const res = await fetch(
-        `http://nghiapd.ddns.net:8081/users/${userId}/language`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/language`,
         {
           method: "PUT",
           headers: {
@@ -209,7 +212,7 @@
       if (!token) return;
 
       const res = await fetch(
-        `http://nghiapd.ddns.net:8081/users/${userId}/region`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/region`,
         {
           method: "PUT",
           headers: {
@@ -246,7 +249,7 @@
       if (!token) return;
 
       const res = await fetch(
-        `http://nghiapd.ddns.net:8081/users/${userId}/city`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/city`,
         {
           method: "PUT",
           headers: {

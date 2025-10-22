@@ -99,22 +99,25 @@
         alert("User ID not found");
         return;
       }
-      const res = await fetch(`http://nghiapd.ddns.net:8081/users/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          region: country,
-          city,
-          language: "en",
-          isPremium: false,
-          isAddCreditCard: false,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            region: country,
+            city,
+            language: "en",
+            isPremium: false,
+            isAddCreditCard: false,
+          }),
+        }
+      );
       if (res.ok) {
         dispatch("close");
         dispatch("updated", { userId });
@@ -145,10 +148,10 @@
       <h2
         class="text-3xl font-bold text-gray-900 mb-2 transition-all duration-300"
       >
-        Update Personal Information
+        Cập nhật thông tin cá nhân
       </h2>
       <p class="text-gray-600 transition-all duration-300">
-        Please fill in all information to continue
+        Vui lòng điền đầy đủ thông tin để tiếp tục
       </p>
     </div>
 
@@ -166,7 +169,7 @@
           for="firstName"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          First Name
+          Tên
         </label>
         <div class="relative">
           <div
@@ -180,7 +183,7 @@
             id="firstName"
             type="text"
             bind:value={firstName}
-            placeholder="Enter your first name"
+            placeholder="Nhập tên của bạn"
             class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           />
@@ -193,7 +196,7 @@
           for="lastName"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          Last Name
+          Họ
         </label>
         <div class="relative">
           <div
@@ -207,7 +210,7 @@
             id="lastName"
             type="text"
             bind:value={lastName}
-            placeholder="Enter your last name"
+            placeholder="Nhập họ của bạn"
             class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           />
@@ -220,7 +223,7 @@
           for="country"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          Country
+          Quốc gia
         </label>
         <div class="relative">
           <div
@@ -236,7 +239,7 @@
             class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           >
-            <option value="" disabled selected>Select your country</option>
+            <option value="" disabled selected>Chọn quốc gia của bạn</option>
             {#each countries as c}
               <option value={c.id}>{c.name}</option>
             {/each}
@@ -247,7 +250,7 @@
       <!-- City Field -->
       <div>
         <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-          City/State
+          Thành phố/Tỉnh
         </label>
         <div class="relative">
           <div
@@ -264,7 +267,7 @@
             required
             disabled={!selectedCountryId}
           >
-            <option value="" disabled selected>Select your city</option>
+            <option value="" disabled selected>Chọn thành phố của bạn</option>
             {#each cities as c}
               <option value={c.name}>{c.name}</option>
             {/each}
@@ -300,10 +303,10 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            Updating...
+            Đang cập nhật...
           </div>
         {:else}
-          Update Information
+          Cập nhật thông tin
         {/if}
       </button>
     </form>

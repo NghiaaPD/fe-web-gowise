@@ -25,17 +25,24 @@
     </div>
 
     <!-- Main Content -->
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">Mobile Not Supported in Browser</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">
+      Không hỗ trợ di động trên trình duyệt
+    </h1>
     <p class="text-lg text-gray-600 mb-6">
-      This application is optimized for desktop use only. For the best
-      experience, please resize your browser window to a larger size or use a
-      desktop device.
+      Ứng dụng này được tối ưu hóa chỉ dành cho máy tính để bàn. Để có trải
+      nghiệm tốt nhất, vui lòng thay đổi kích thước cửa sổ trình duyệt sang kích
+      thước lớn hơn hoặc sử dụng thiết bị máy tính để bàn.
     </p>
 
     <!-- Additional Info -->
     <div class="mt-8 text-sm text-gray-500">
-      <p>Recommended browsers: Chrome, Firefox, Safari (latest versions)</p>
-      <p class="mt-2">Please switch to desktop view for full functionality.</p>
+      <p>
+        Trình duyệt được khuyến nghị: Chrome, Firefox, Safari (phiên bản mới
+        nhất)
+      </p>
+      <p class="mt-2">
+        Vui lòng chuyển sang chế độ xem máy tính để bàn để có đầy đủ chức năng.
+      </p>
     </div>
   </div>
 </div>

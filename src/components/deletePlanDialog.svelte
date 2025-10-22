@@ -38,21 +38,20 @@
         >
       </div>
       <h2 class="text-lg font-semibold text-gray-800 mb-2 text-center">
-        Delete Plan?
+        Xóa kế hoạch?
       </h2>
       <p class="text-gray-600 text-sm mb-4 text-center">
-        Are you sure you want to delete <span class="font-semibold"
-          >{planTitle}</span
-        >? This action cannot be undone.
+        Bạn có chắc chắn muốn xóa <span class="font-semibold">{planTitle}</span
+        >? Hành động này không thể hoàn tác.
       </p>
       <div class="flex gap-3 w-full mt-2">
         <button
           class="flex-1 px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium"
-          on:click={handleCancel}>Cancel</button
+          on:click={handleCancel}>Hủy</button
         >
         <button
           class="flex-1 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition font-medium"
-          on:click={handleConfirm}>Delete</button
+          on:click={handleConfirm}>Xóa</button
         >
       </div>
     </div>

@@ -63,7 +63,7 @@
             onkeypress={handleKeyPress}
             onfocus={handleSearchFocus}
             onblur={handleSearchBlur}
-            placeholder="Search..."
+            placeholder="Tìm kiếm..."
             class="w-full pl-10 pr-16 py-2.5 border border-gray-300 rounded-lg
                                focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100
                                transition-all duration-200 bg-white
@@ -129,7 +129,7 @@
               : userData?.name || userData?.username || "User"}
           </div>
           <div class="text-xs text-gray-500">
-            {userData?.isPremium ? "Premium Member" : "Free Member"}
+            {userData?.isPremium ? "Thành viên Premium" : "Thành viên Miễn phí"}
           </div>
         </div>
         <button

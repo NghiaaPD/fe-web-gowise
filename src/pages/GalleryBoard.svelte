@@ -1,5 +1,5 @@
 <script lang="ts">
-  import FundCard from "../components/FundCard.svelte";
+  import FundCard from "../components/GalleryCard.svelte";
   import FaSearch from "svelte-icons/fa/FaSearch.svelte";
   import FaPlus from "svelte-icons/fa/FaPlus.svelte";
   import FaFilter from "svelte-icons/fa/FaFilter.svelte";
@@ -160,16 +160,7 @@
           <div class="w-4 h-4">
             <FaPlus />
           </div>
-          <span class="font-medium">Tạo quỹ</span>
-        </button>
-
-        <button
-          class="flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl transition-all duration-300 hover:shadow-md"
-        >
-          <div class="w-4 h-4">
-            <FaFilter />
-          </div>
-          <span class="font-medium">Lọc</span>
+          <span class="font-medium">Tạo Kho Ảnh</span>
         </button>
       </div>
     </div>
@@ -250,100 +241,6 @@
     </div>
   </div>
 
-  <!-- Filters and Search Section -->
-  <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-    <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-      <!-- Search Bar -->
-      <div class="flex-1 relative">
-        <div
-          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
-        >
-          <div class="w-4 h-4 text-gray-400">
-            <FaSearch />
-          </div>
-        </div>
-        <input
-          type="text"
-          bind:value={searchQuery}
-          placeholder="Search funds by title or description..."
-          class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
-        />
-      </div>
-
-      <!-- Status Filter -->
-      <select
-        bind:value={selectedStatus}
-        class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
-      >
-        <option value="all">All Status</option>
-        <option value="active">Active</option>
-        <option value="completed">Completed</option>
-        <option value="pending">Pending</option>
-      </select>
-
-      <!-- Sort By -->
-      <select
-        bind:value={sortBy}
-        class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
-      >
-        <option value="recent">Most Recent</option>
-        <option value="amount">Highest Amount</option>
-        <option value="progress">Best Progress</option>
-      </select>
-
-      <!-- View Mode Toggle -->
-      <div class="relative flex bg-gray-100 rounded-lg p-1">
-        <!-- Sliding background indicator -->
-        <div
-          class="absolute top-1 bottom-1 bg-white rounded-md shadow-sm transition-all duration-300 ease-in-out"
-          style="left: {viewMode === 'grid'
-            ? '4px'
-            : 'calc(50% + 2px)'}; width: calc(50% - 6px);"
-        ></div>
-
-        <button
-          on:click={() => (viewMode = "grid")}
-          class="relative z-10 flex items-center justify-center w-10 h-10 rounded-md transition-colors duration-300 {viewMode ===
-          'grid'
-            ? 'text-teal-600'
-            : 'text-gray-500 hover:text-gray-700'}"
-        >
-          <div class="w-4 h-4">
-            <IoMdGrid />
-          </div>
-        </button>
-        <button
-          on:click={() => (viewMode = "list")}
-          class="relative z-10 flex items-center justify-center w-10 h-10 rounded-md transition-colors duration-300 {viewMode ===
-          'list'
-            ? 'text-teal-600'
-            : 'text-gray-500 hover:text-gray-700'}"
-        >
-          <div class="w-4 h-4">
-            <IoMdList />
-          </div>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Activity Section -->
-  <div class="mb-8">
-    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">Recent Activity</h3>
-      <div class="text-center py-8">
-        <div
-          class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
-        >
-          <div class="w-8 h-8 text-gray-400">
-            <FaImages />
-          </div>
-        </div>
-        <p class="text-gray-600">Chọn một kỉ niệm để xem hoạt động</p>
-      </div>
-    </div>
-  </div>
-
   <!-- Funds Grid/List -->
   <div class="mb-8">
     {#if filteredFunds.length === 0}
@@ -356,15 +253,17 @@
             <FaSearch />
           </div>
         </div>
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">No funds found</h3>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+          Không tìm thấy quỹ nào
+        </h3>
         <p class="text-gray-600 mb-6">
-          Try adjusting your search or filters to find what you're looking for.
+          Hãy thử điều chỉnh tìm kiếm hoặc bộ lọc để tìm thấy những gì bạn cần.
         </p>
         <button
           on:click={handleCreateFund}
           class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
         >
-          Create Your First Fund
+          Tạo quỹ đầu tiên của bạn
         </button>
       </div>
     {:else}

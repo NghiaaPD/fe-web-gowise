@@ -164,20 +164,20 @@
         </div>
         <nav class="hidden md:flex space-x-8 font-semibold text-sm">
           <a href="#home" class="hover:underline hover:decoration-teal-500"
-            >HOME</a
+            >TRANG CHỦ</a
           >
           <a href="#features" class="hover:underline hover:decoration-teal-500"
-            >FEATURES</a
+            >TÍNH NĂNG</a
           >
           <a href="#pricing" class="hover:underline hover:decoration-teal-500"
-            >PRICING</a
+            >GIÁ</a
           >
           <a
             href="#how-it-works"
-            class="hover:underline hover:decoration-teal-500">HOW IT WORKS</a
+            class="hover:underline hover:decoration-teal-500">CÁCH HOẠT ĐỘNG</a
           >
           <a href="#contact" class="hover:underline hover:decoration-teal-500"
-            >CONTACT</a
+            >LIÊN HỆ</a
           >
         </nav>
         <div class="flex items-center space-x-6">
@@ -185,7 +185,7 @@
             onclick={showAuth}
             class="bg-[#14B8A6] hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold text-sm cursor-pointer"
           >
-            Sign In
+            Đăng nhập
           </button>
           <div class="flex space-x-3">
             {#each socials as s}
@@ -218,27 +218,27 @@
         <div class="lg:w-1/2 flex justify-center relative">
           <div class="text-left">
             <h1 class="text-5xl md:text-6xl font-bold leading-tight mb-6">
-              AUTOMATE YOUR<br />
-              PERSONALIZED<br />
-              TRAVEL PLANNING.
+              TỰ ĐỘNG LÊN<br />
+              KẾ HOẠCH DU LỊCH<br />
+              CÁ NHÂN HÓA.
             </h1>
             <p class="mt-6 text-lg text-white/90 mb-8 max-w-lg">
-              Let our AI create perfect itineraries tailored to your
-              preferences, budget, and travel style. From flights to activities,
-              everything planned automatically in seconds.
+              Hãy để AI của chúng tôi tạo lịch trình hoàn hảo phù hợp với sở
+              thích, ngân sách và phong cách du lịch của bạn. Từ vé máy bay đến
+              hoạt động, mọi thứ được lên kế hoạch tự động trong vài giây.
             </p>
             <div class="mt-8 space-x-4">
               <button
                 onclick={showAuth}
                 class="bg-[#14B8A6] hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-bold text-sm cursor-pointer"
               >
-                START FREE TRIAL
+                DÙNG THỬ MIỄN PHÍ
               </button>
               <button
                 type="button"
                 class="border-2 border-white/50 px-8 py-3 font-bold hover:bg-white/50 text-sm rounded-lg cursor-pointer"
               >
-                WATCH DEMO
+                XEM DEMO
               </button>
             </div>
           </div>
@@ -297,17 +297,17 @@
           <!-- Title và description -->
           <div class="mb-12">
             <p class="text-teal-500 font-bold text-sm tracking-widest mb-4">
-              HOW IT WORKS
+              CÁCH HOẠT ĐỘNG
             </p>
             <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              AI-Powered Travel<br />
-              Planning Made Simple
+              Lập kế hoạch du lịch<br />
+              được hỗ trợ bởi AI
             </h2>
             <p class="text-gray-600 text-lg">
-              Our advanced AI analyzes millions of travel data points, your
-              preferences, and real-time information to create the perfect
-              personalized itinerary. No more hours of research - just tell us
-              what you want and let AI do the rest.
+              AI tiên tiến của chúng tôi phân tích hàng triệu điểm dữ liệu du
+              lịch, sở thích của bạn và thông tin thời gian thực để tạo ra lịch
+              trình cá nhân hóa hoàn hảo. Không còn mất hàng giờ nghiên cứu -
+              chỉ cần cho chúng tôi biết bạn muốn gì và để AI làm phần còn lại.
             </p>
           </div>
 
@@ -323,7 +323,7 @@
                 </div>
               </div>
               <div class="text-3xl font-bold text-gray-900 mb-2">10K+</div>
-              <div class="text-gray-600 text-sm">AI Itineraries Created</div>
+              <div class="text-gray-600 text-sm">Lịch trình AI được tạo</div>
             </div>
 
             <!-- 5K+ Happy Users -->
@@ -336,7 +336,7 @@
                 </div>
               </div>
               <div class="text-3xl font-bold text-gray-900 mb-2">5K+</div>
-              <div class="text-gray-600 text-sm">Happy Users</div>
+              <div class="text-gray-600 text-sm">Người dùng hài lòng</div>
             </div>
 
             <!-- 30sec Average Planning Time -->
@@ -349,7 +349,9 @@
                 </div>
               </div>
               <div class="text-3xl font-bold text-gray-900 mb-2">30sec</div>
-              <div class="text-gray-600 text-sm">Average Planning Time</div>
+              <div class="text-gray-600 text-sm">
+                Thời gian lập kế hoạch trung bình
+              </div>
             </div>
 
             <!-- 200+ Destinations Covered -->
@@ -362,7 +364,7 @@
                 </div>
               </div>
               <div class="text-3xl font-bold text-gray-900 mb-2">200+</div>
-              <div class="text-gray-600 text-sm">Destinations Covered</div>
+              <div class="text-gray-600 text-sm">Điểm đến được bao phủ</div>
             </div>
           </div>
         </div>
@@ -381,11 +383,11 @@
             </div>
             <div>
               <h3 class="text-xl font-bold text-gray-900 mb-2">
-                Tell Us Your Preferences
+                Cho chúng tôi biết sở thích của bạn
               </h3>
               <p class="text-gray-600">
-                Share your travel style, budget, interests, and any special
-                requirements.
+                Chia sẻ phong cách du lịch, ngân sách, sở thích và bất kỳ yêu
+                cầu đặc biệt nào của bạn.
               </p>
             </div>
           </div>
@@ -402,11 +404,11 @@
             </div>
             <div>
               <h3 class="text-xl font-bold text-gray-900 mb-2">
-                AI Analyzes & Plans
+                AI Phân tích & Lập kế hoạch
               </h3>
               <p class="text-gray-600">
-                Our AI processes millions of data points to create your perfect
-                itinerary.
+                AI của chúng tôi xử lý hàng triệu điểm dữ liệu để tạo ra lịch
+                trình hoàn hảo cho bạn.
               </p>
             </div>
           </div>
@@ -423,11 +425,11 @@
             </div>
             <div>
               <h3 class="text-xl font-bold text-gray-900 mb-2">
-                Get Your Custom Plan
+                Nhận kế hoạch tùy chỉnh của bạn
               </h3>
               <p class="text-gray-600">
-                Receive a detailed, personalized travel plan with bookings and
-                recommendations.
+                Nhận kế hoạch du lịch chi tiết, cá nhân hóa với đặt chỗ và
+                khuyến nghị.
               </p>
             </div>
           </div>
@@ -440,14 +442,15 @@
       <!-- Header -->
       <div class="text-center mb-16">
         <p class="text-teal-500 font-bold text-sm tracking-widest mb-4">
-          PRICING PLANS
+          GÓI GIÁ
         </p>
         <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Choose Your AI Travel Assistant
+          Chọn Trợ lý Du lịch AI của bạn
         </h2>
         <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-          Start with our free plan or unlock the full power of AI travel
-          planning with Premium for less than the cost of a coffee.
+          Bắt đầu với gói miễn phí của chúng tôi hoặc mở khóa sức mạnh đầy đủ
+          của lập kế hoạch du lịch AI với Premium với giá rẻ hơn chi phí một ly
+          cà phê.
         </p>
       </div>
 
@@ -458,13 +461,14 @@
           class="bg-white border border-gray-200 rounded-2xl p-8 relative shadow-lg hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 hover:border-teal-300"
         >
           <div class="text-center mb-8">
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Basic Plan</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Gói Cơ bản</h3>
             <div class="flex items-baseline justify-center">
-              <span class="text-5xl font-bold text-gray-900">FREE</span>
-              <span class="text-gray-500 ml-2">Forever</span>
+              <span class="text-5xl font-bold text-gray-900">MIỄN PHÍ</span>
+              <span class="text-gray-500 ml-2">Mãi mãi</span>
             </div>
             <p class="text-gray-600 mt-4">
-              Perfect for occasional travelers who want to try AI planning
+              Hoàn hảo cho những người du lịch thỉnh thoảng muốn thử lập kế
+              hoạch AI
             </p>
           </div>
 
@@ -474,38 +478,38 @@
               <div class="w-4 h-4 text-teal-500 mr-2">
                 <IoMdCheckmark />
               </div>
-              What's Included:
+              Bao gồm:
             </h4>
             <ul class="space-y-3">
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Up to 3 AI itineraries per month
+                Tối đa 3 lịch trình AI mỗi tháng
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Basic destination recommendations
+                Khuyến nghị điểm đến cơ bản
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Standard travel templates
+                Mẫu du lịch tiêu chuẩn
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Email support
+                Hỗ trợ qua email
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Mobile app access
+                Truy cập ứng dụng di động
               </li>
             </ul>
           </div>
@@ -516,32 +520,32 @@
               <div class="w-4 h-4 text-red-500 mr-2">
                 <IoMdClose />
               </div>
-              Limitations:
+              Hạn chế:
             </h4>
             <ul class="space-y-3">
               <li class="flex items-center text-gray-500">
                 <div class="w-4 h-4 text-red-500 mr-3">
                   <IoMdClose />
                 </div>
-                No real-time updates
+                Không có cập nhật thời gian thực
               </li>
               <li class="flex items-center text-gray-500">
                 <div class="w-4 h-4 text-red-500 mr-3">
                   <IoMdClose />
                 </div>
-                Limited customization options
+                Tùy chọn tùy chỉnh hạn chế
               </li>
               <li class="flex items-center text-gray-500">
                 <div class="w-4 h-4 text-red-500 mr-3">
                   <IoMdClose />
                 </div>
-                No premium destinations
+                Không có điểm đến cao cấp
               </li>
               <li class="flex items-center text-gray-500">
                 <div class="w-4 h-4 text-red-500 mr-3">
                   <IoMdClose />
                 </div>
-                Basic customer support
+                Hỗ trợ khách hàng cơ bản
               </li>
             </ul>
           </div>
@@ -550,7 +554,7 @@
             onclick={showAuth}
             class="w-full bg-white border-2 border-teal-500 text-teal-500 py-3 rounded-lg font-semibold hover:bg-teal-50 hover:scale-105 transition-all duration-300 hover:shadow-lg cursor-pointer"
           >
-            Start Free
+            Bắt đầu miễn phí
           </button>
         </div>
 
@@ -566,18 +570,18 @@
               <div class="w-4 h-4 mr-2">
                 <IoIosStar />
               </div>
-              Most Popular
+              Phổ biến nhất
             </div>
           </div>
 
           <div class="text-center mb-8">
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Premium Plan</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Gói Premium</h3>
             <div class="flex items-baseline justify-center">
-              <span class="text-5xl font-bold text-gray-900">$1.99</span>
-              <span class="text-gray-500 ml-2">per month</span>
+              <span class="text-5xl font-bold text-gray-900">1.99$</span>
+              <span class="text-gray-500 ml-2">mỗi tháng</span>
             </div>
             <p class="text-gray-600 mt-4">
-              For serious travelers who want the full AI experience
+              Dành cho những người du lịch nghiêm túc muốn trải nghiệm AI đầy đủ
             </p>
           </div>
 
@@ -587,68 +591,68 @@
               <div class="w-4 h-4 text-teal-500 mr-2">
                 <IoMdCheckmark />
               </div>
-              What's Included:
+              Bao gồm:
             </h4>
             <ul class="space-y-3">
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Unlimited AI itineraries
+                Lịch trình AI không giới hạn
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Advanced personalization
+                Cá nhân hóa nâng cao
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Real-time itinerary updates
+                Cập nhật lịch trình thời gian thực
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Premium destinations & experiences
+                Điểm đến & trải nghiệm cao cấp
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Priority customer support
+                Hỗ trợ khách hàng ưu tiên
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Offline access
+                Truy cập ngoại tuyến
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Group travel planning
+                Lập kế hoạch du lịch nhóm
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Budget optimization
+                Budget Optimization
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Local insider recommendations
+                Khuyến nghị từ người trong cuộc địa phương
               </li>
               <li class="flex items-center text-gray-600">
                 <div class="w-4 h-4 text-teal-500 mr-3">
                   <IoMdCheckmark />
                 </div>
-                Travel insurance integration
+                Tích hợp bảo hiểm du lịch
               </li>
             </ul>
           </div>
@@ -657,7 +661,7 @@
             onclick={showAuth}
             class="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 hover:scale-105 transition-all duration-300 flex items-center justify-center hover:shadow-lg transform hover:-translate-y-1 cursor-pointer"
           >
-            Start Premium
+            Bắt đầu Premium
             <div class="w-6 h-6 ml-2">
               <IoIosFlash />
             </div>
@@ -674,12 +678,12 @@
             <FaShieldAlt />
           </div>
           <span class="text-green-700 font-semibold"
-            >30-day money-back guarantee</span
+            >Bảo đảm hoàn tiền 30 ngày</span
           >
         </div>
         <p class="text-gray-600 mt-4">
-          Try Premium risk-free. If you're not completely satisfied, get a full
-          refund within 30 days.
+          Thử Premium không rủi ro. Nếu bạn không hoàn toàn hài lòng, nhận hoàn
+          tiền đầy đủ trong vòng 30 ngày.
         </p>
       </div>
     </div>
@@ -689,15 +693,15 @@
       <!-- Header -->
       <div class="text-center mb-16">
         <p class="text-teal-500 font-bold text-sm tracking-widest mb-4">
-          AI FEATURES
+          TÍNH NĂNG AI
         </p>
         <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Powerful AI Travel Planning Features
+          Tính năng lập kế hoạch du lịch AI mạnh mẽ
         </h2>
         <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-          Experience the future of travel planning with our cutting-edge AI
-          technology that makes personalized trip planning effortless and
-          intelligent.
+          Trải nghiệm tương lai của lập kế hoạch du lịch với công nghệ AI tiên
+          tiến của chúng tôi giúp việc lập kế hoạch chuyến đi cá nhân hóa trở
+          nên dễ dàng và thông minh.
         </p>
       </div>
 
@@ -717,13 +721,13 @@
           <h3
             class="text-xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-300"
           >
-            Smart AI Planning
+            Lập kế hoạch AI thông minh
           </h3>
           <p
             class="text-gray-600 group-hover:text-white transition-colors duration-300"
           >
-            Advanced machine learning algorithms analyze your preferences to
-            create perfect itineraries tailored just for you.
+            Thuật toán học máy tiên tiến phân tích sở thích của bạn để tạo ra
+            lịch trình hoàn hảo được cá nhân hóa chỉ dành cho bạn.
           </p>
         </div>
 
@@ -741,13 +745,13 @@
           <h3
             class="text-xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-300"
           >
-            Instant Itineraries
+            Lịch trình tức thì
           </h3>
           <p
             class="text-gray-600 group-hover:text-white transition-colors duration-300"
           >
-            Get complete travel plans in under 30 seconds, including flights,
-            hotels, activities, and dining recommendations.
+            Nhận kế hoạch du lịch hoàn chỉnh trong vòng 30 giây, bao gồm chuyến
+            bay, khách sạn, hoạt động và khuyến nghị ăn uống.
           </p>
         </div>
 
@@ -765,13 +769,14 @@
           <h3
             class="text-xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-300"
           >
-            Local Insights
+            Thông tin địa phương
           </h3>
           <p
             class="text-gray-600 group-hover:text-white transition-colors duration-300"
           >
-            Access hidden gems and local experiences that only AI can discover
-            by analyzing millions of traveler reviews.
+            Truy cập những viên ngọc ẩn và trải nghiệm địa phương mà chỉ AI mới
+            có thể khám phá bằng cách phân tích hàng triệu đánh giá của du
+            khách.
           </p>
         </div>
 
@@ -789,13 +794,13 @@
           <h3
             class="text-xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-300"
           >
-            Budget Optimization
+            Tối ưu hóa ngân sách
           </h3>
           <p
             class="text-gray-600 group-hover:text-white transition-colors duration-300"
           >
-            AI finds the best deals and optimizes your spending to get maximum
-            value within your specified budget.
+            AI tìm những ưu đãi tốt nhất và tối ưu hóa chi tiêu của bạn để đạt
+            giá trị tối đa trong ngân sách đã chỉ định.
           </p>
         </div>
 
@@ -813,13 +818,13 @@
           <h3
             class="text-xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-300"
           >
-            Real-time Updates
+            Cập nhật thời gian thực
           </h3>
           <p
             class="text-gray-600 group-hover:text-white transition-colors duration-300"
           >
-            Dynamic itinerary adjustments based on weather, events, and
-            real-time availability for seamless travel.
+            Điều chỉnh lịch trình động dựa trên thời tiết, sự kiện và tình trạng
+            có sẵn thời gian thực để du lịch liền mạch.
           </p>
         </div>
 
@@ -837,13 +842,13 @@
           <h3
             class="text-xl font-bold text-gray-900 mb-4 group-hover:text-white transition-colors duration-300"
           >
-            Travel Protection
+            Bảo vệ du lịch
           </h3>
           <p
             class="text-gray-600 group-hover:text-white transition-colors duration-300"
           >
-            Built-in travel insurance recommendations and 24/7 AI support to
-            handle any unexpected situations.
+            Khuyến nghị bảo hiểm du lịch tích hợp và hỗ trợ AI 24/7 để xử lý bất
+            kỳ tình huống bất ngờ nào.
           </p>
         </div>
       </div>
@@ -859,23 +864,23 @@
 
         <!-- Content -->
         <div class="relative z-10">
-          <h3 class="text-3xl font-bold mb-4">See GoWise in Action</h3>
+          <h3 class="text-3xl font-bold mb-4">Xem GoWise hoạt động</h3>
           <p class="text-lg mb-8 max-w-2xl mx-auto">
-            Watch how our AI creates a complete 7-day European itinerary in
-            under 30 seconds, including flights, hotels, activities, and local
-            recommendations.
+            Xem cách AI của chúng tôi tạo ra lịch trình châu Âu hoàn chỉnh 7
+            ngày trong vòng 30 giây, bao gồm chuyến bay, khách sạn, hoạt động và
+            khuyến nghị địa phương.
           </p>
           <div class="space-x-4">
             <button
               class="bg-white text-teal-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition cursor-pointer transform hover:scale-105"
             >
-              Watch Demo Video
+              Xem video demo
             </button>
             <button
               onclick={showAuth}
               class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10 transition cursor-pointer transform hover:scale-105"
             >
-              Try Free Now
+              Thử miễn phí ngay
             </button>
           </div>
         </div>
@@ -887,14 +892,14 @@
       <!-- Header -->
       <div class="text-center mb-16">
         <p class="text-teal-500 font-bold text-sm tracking-widest mb-4">
-          USER REVIEWS
+          ĐÁNH GIÁ NGƯỜI DÙNG
         </p>
         <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Travelers Love GoWise
+          Du khách yêu thích GoWise
         </h2>
         <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-          Join thousands of satisfied travelers who have discovered the power of
-          AI-driven personalized travel planning.
+          Tham gia cùng hàng nghìn du khách hài lòng đã khám phá sức mạnh của
+          lập kế hoạch du lịch cá nhân hóa được hỗ trợ bởi AI.
         </p>
       </div>
 
@@ -1023,26 +1028,26 @@
 
       <!-- Title -->
       <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-        Get AI Travel Tips & Updates
+        Nhận mẹo du lịch AI & cập nhật
       </h2>
 
       <!-- Description -->
       <p class="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-        Subscribe to receive the latest AI travel planning tips, destination
-        insights, and exclusive updates about new GoWise features.
+        Đăng ký nhận mẹo lập kế hoạch du lịch AI mới nhất, thông tin điểm đến và
+        cập nhật độc quyền về các tính năng GoWise mới.
       </p>
 
       <!-- Email Form -->
       <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-6">
         <input
           type="email"
-          placeholder="Enter your email for AI travel tips"
+          placeholder="Nhập email của bạn để nhận mẹo du lịch AI"
           class="flex-1 px-6 py-3 rounded-lg border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50"
         />
         <button
           class="bg-teal-700 hover:bg-teal-800 text-white px-8 py-3 rounded-lg font-semibold transition cursor-pointer flex items-center justify-center"
         >
-          Subscribe
+          Đăng ký
           <div class="w-5 h-5 ml-2">
             <IoIosArrowForward />
           </div>
@@ -1051,8 +1056,8 @@
 
       <!-- Small Text -->
       <p class="text-sm text-white/70">
-        Join 10,000+ travelers getting AI-powered travel insights. Unsubscribe
-        anytime.
+        Tham gia cùng 10,000+ du khách đang nhận thông tin du lịch được hỗ trợ
+        bởi AI. Hủy đăng ký bất cứ lúc nào.
       </p>
     </div>
   </section>
@@ -1068,9 +1073,8 @@
             <span class="text-2xl font-bold text-teal-400">GoWise</span>
           </div>
           <p class="text-gray-400 mb-6 leading-relaxed">
-            The world's most advanced AI travel planning software. Create
-            personalized itineraries in seconds with the power of artificial
-            intelligence.
+            Phần mềm lập kế hoạch du lịch AI tiên tiến nhất thế giới. Tạo lịch
+            trình cá nhân hóa trong vài giây với sức mạnh của trí tuệ nhân tạo.
           </p>
 
           <!-- Social Icons -->
@@ -1112,48 +1116,48 @@
 
         <!-- Product -->
         <div>
-          <h3 class="text-xl font-bold mb-6 text-white">Product</h3>
+          <h3 class="text-xl font-bold mb-6 text-white">Sản phẩm</h3>
           <ul class="space-y-3">
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Features</a
+                >Tính năng</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Pricing</a
+                >Giá cả</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >API Access</a
+                >Truy cập API</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Mobile App</a
+                >Ứng dụng di động</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Integrations</a
+                >Tích hợp</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Enterprise</a
+                >Doanh nghiệp</a
               >
             </li>
           </ul>
@@ -1161,48 +1165,48 @@
 
         <!-- Support -->
         <div>
-          <h3 class="text-xl font-bold mb-6 text-white">Support</h3>
+          <h3 class="text-xl font-bold mb-6 text-white">Hỗ trợ</h3>
           <ul class="space-y-3">
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Help Center</a
+                >Trung tâm trợ giúp</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Documentation</a
+                >Tài liệu</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >AI Training</a
+                >Đào tạo AI</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Community</a
+                >Cộng đồng</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Status Page</a
+                >Trang trạng thái</a
               >
             </li>
             <li>
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Contact Support</a
+                >Liên hệ hỗ trợ</a
               >
             </li>
           </ul>
@@ -1210,7 +1214,7 @@
 
         <!-- Contact -->
         <div>
-          <h3 class="text-xl font-bold mb-6 text-white">Contact</h3>
+          <h3 class="text-xl font-bold mb-6 text-white">Liên hệ</h3>
           <div class="space-y-4">
             <div class="flex items-center text-gray-400">
               <div class="w-5 h-5 mr-3 text-teal-400">
@@ -1234,11 +1238,9 @@
 
           <!-- AI Support Badge -->
           <div class="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
-            <div class="text-white font-semibold mb-2">
-              AI Support Available
-            </div>
+            <div class="text-white font-semibold mb-2">Hỗ trợ AI có sẵn</div>
             <div class="text-sm text-gray-400">
-              24/7 AI-powered customer support for Premium users
+              Hỗ trợ khách hàng được hỗ trợ bởi AI 24/7 cho người dùng Premium
             </div>
           </div>
         </div>
@@ -1249,23 +1251,23 @@
         class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center"
       >
         <div class="text-gray-400 text-sm">
-          © 2024 GoWise. All rights reserved.
+          © 2024 GoWise. Tất cả quyền được bảo lưu.
         </div>
         <div class="flex space-x-6 mt-4 md:mt-0">
           <a
             href="#"
             class="text-gray-400 hover:text-teal-400 text-sm transition cursor-pointer"
-            >Privacy Policy</a
+            >Chính sách bảo mật</a
           >
           <a
             href="#"
             class="text-gray-400 hover:text-teal-400 text-sm transition cursor-pointer"
-            >Terms of Service</a
+            >Điều khoản dịch vụ</a
           >
           <button
             type="button"
             class="text-gray-400 hover:text-teal-400 text-sm transition cursor-pointer"
-            >Cookie Policy</button
+            >Chính sách cookie</button
           >
         </div>
       </div>

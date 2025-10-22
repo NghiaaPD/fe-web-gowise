@@ -4,7 +4,8 @@
   import DashBoard from "../../../pages/DashBoard.svelte";
   import ManagePlan from "../../../pages/ManagePlan.svelte";
   import BlogBoard from "../../../pages/BlogBoard.svelte";
-  import FundBoard from "../../../pages/FundBoard.svelte";
+  import FundBoard from "../../../pages/GalleryBoard.svelte";
+  import AchievementPage from "../../../pages/achievementPage.svelte";
   import ChatBotPage from "../../../pages/ChatBotPage.svelte";
   import SettingPage from "../../../pages/SettingPage.svelte";
   import FillInformation from "../../../components/fillInformation.svelte";
@@ -16,6 +17,9 @@
   // Current active page
   let currentPage = $state("dashboard");
 
+  // Achievement reload key - increments each time achievement tab is clicked
+  let achievementKey = $state(0);
+
   // Show fill information dialog
   let showFillDialog = $state(false);
 
@@ -24,7 +28,13 @@
 
   // Handle navigation from sidebar
   function handleNavigation(event: CustomEvent<{ page: string }>) {
+    const previousPage = currentPage;
     currentPage = event.detail.page;
+
+    // Increment achievement key when navigating to achievement page
+    if (event.detail.page === "achievement") {
+      achievementKey++;
+    }
   }
 
   // Function to refresh user data
@@ -41,11 +51,14 @@
 
       const token = tokenCookie.split("=")[1];
 
-      const res = await fetch(`http://nghiapd.ddns.net:8081/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (res.ok) {
         const response = await res.json();
@@ -115,7 +128,7 @@
       // Gọi API để lấy thông tin user
       try {
         const res = await fetch(
-          `http://nghiapd.ddns.net:8081/users/${userId}`,
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -156,6 +169,10 @@
         <BlogBoard />
       {:else if currentPage === "fund"}
         <FundBoard />
+      {:else if currentPage === "achievement"}
+        {#key achievementKey}
+          <AchievementPage />
+        {/key}
       {:else if currentPage === "chat"}
         <ChatBotPage />
       {:else if currentPage === "settings"}

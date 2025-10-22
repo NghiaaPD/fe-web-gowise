@@ -65,7 +65,7 @@
 </script>
 
 <div class="demo-container">
-  <h2>Hotel Book Card Demo</h2>
+  <h2>Demo thẻ đặt khách sạn</h2>
   <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
     <HotelBookCard hotel={sampleHotelData} onSelect={handleHotelSelect} />
   </div>

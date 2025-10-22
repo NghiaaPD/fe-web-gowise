@@ -1,7 +1,7 @@
 <script lang="ts">
   import DeletePlanDialog from "../components/deletePlanDialog.svelte";
   import { showNotification } from "$lib/index";
-  
+
   import PlanCard from "../components/PlanCard.svelte";
   import ViewDetail from "../components/ViewDetail.svelte";
   import { fade, slide } from "svelte/transition";
@@ -42,7 +42,7 @@
     }
     try {
       const response = await fetch(
-        `http://nghiapd.ddns.net:8081/plans/${userId}/${planId}`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/plans/${userId}/${planId}`,
         {
           method: "DELETE",
         }
@@ -54,8 +54,8 @@
         );
         showNotification(
           {
-            title: "Plan Deleted",
-            message: "The plan was deleted successfully.",
+            title: "Đã xóa kế hoạch",
+            message: "Kế hoạch đã được xóa thành công.",
           },
           "success"
         );
@@ -140,13 +140,13 @@
 
       userId = getUserIdFromToken();
       if (!userId) {
-        error = "Unable to get user ID from token.";
+        error = "Không thể lấy ID người dùng từ token.";
         isLoading = false;
         return;
       }
 
       const response = await fetch(
-        `http://nghiapd.ddns.net:8081/plans/${userId}`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/plans/${userId}`,
         {
           method: "GET",
           headers: {
@@ -159,10 +159,10 @@
         const data = await response.json();
         plans = data.plans || [];
       } else {
-        error = "Failed to load plans. Please try again.";
+        error = "Không thể tải kế hoạch. Vui lòng thử lại.";
       }
     } catch (err) {
-      error = "An error occurred while loading plans.";
+      error = "Đã xảy ra lỗi khi tải kế hoạch.";
     } finally {
       isLoading = false;
     }
@@ -198,14 +198,14 @@
     const endDate = content.endDate || content.end_date;
     const duration =
       startDate && endDate
-        ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
-        : "Unknown";
+        ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} ngày`
+        : "Không xác định";
     return {
       ...plan,
       title: content.destination
-        ? `Trip to ${content.destination}`
-        : "Unknown Plan",
-      location: content.destination || "Unknown",
+        ? `Chuyến đi đến ${content.destination}`
+        : "Kế hoạch không xác định",
+      location: content.destination || "Không xác định",
       duration,
       budget: content.budget ? `$${content.budget}` : "$0",
       created: plan.created_at
@@ -216,7 +216,7 @@
           })
         : "",
       status: (plan.status || "active") as "active" | "draft" | "completed",
-      description: `Travel plan for ${content.participants || "1"} ${content.participants === "1" ? "person" : "people"} to ${content.destination || "destination"}`,
+      description: `Kế hoạch du lịch cho ${content.participants || "1"} ${content.participants === "1" ? "người" : "người"} đến ${content.destination || "điểm đến"}`,
     };
   });
 
@@ -272,16 +272,16 @@
 
     try {
       if (!userId || !planId) {
-        error = "Missing user or plan ID.";
+        error = "Thiếu ID người dùng hoặc kế hoạch.";
         isTransitioning = false;
         return;
       }
       console.log("[ViewDetail] Fetching detail:", { userId, planId });
       const response = await fetch(
-        `http://nghiapd.ddns.net:8081/plans/${userId}/${planId}`
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/plans/${userId}/${planId}`
       );
       if (!response.ok) {
-        error = "Failed to load plan details.";
+        error = "Không thể tải chi tiết kế hoạch.";
         isTransitioning = false;
         return;
       }
@@ -324,15 +324,15 @@
       const endDate = content.endDate || content.end_date;
       const duration =
         startDate && endDate
-          ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
-          : "Unknown";
+          ? `${Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))} ngày`
+          : "Không xác định";
       selectedPlan = {
         ...planRaw,
         plan_content: content,
         title: content.destination
-          ? `Trip to ${content.destination}`
-          : "Unknown Plan",
-        location: content.destination || "Unknown",
+          ? `Chuyến đi đến ${content.destination}`
+          : "Kế hoạch không xác định",
+        location: content.destination || "Không xác định",
         duration,
         budget: content.budget ? `$${content.budget}` : "$0",
         created: planRaw.created_at
@@ -343,11 +343,11 @@
             })
           : "",
         status: planRaw.status || "active",
-        description: `Travel plan for ${content.participants || "1"} ${content.participants === "1" ? "person" : "people"} to ${content.destination || "destination"}`,
+        description: `Kế hoạch du lịch cho ${content.participants || "1"} ${content.participants === "1" ? "người" : "người"} đến ${content.destination || "điểm đến"}`,
       };
       currentView = "detail";
     } catch (e) {
-      error = "An error occurred while loading plan details.";
+      error = "Đã xảy ra lỗi khi tải chi tiết kế hoạch.";
       console.error("[ViewDetail] Error fetching plan detail:", e);
     } finally {
       isTransitioning = false;
@@ -396,7 +396,7 @@
             ></path>
           </svg>
         </div>
-        <p class="text-gray-600 font-medium">Loading...</p>
+        <p class="text-gray-600 font-medium">Đang tải...</p>
       </div>
     </div>
   {/if}
@@ -420,9 +420,11 @@
         >
           <!-- Title and Description -->
           <div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Manage Plans</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+              Quản lý kế hoạch
+            </h1>
             <p class="text-gray-600">
-              Organize and manage all your travel plans in one place ✈️
+              Tổ chức và quản lý tất cả kế hoạch du lịch của bạn ở một nơi ✈️
             </p>
           </div>
 
@@ -435,14 +437,14 @@
               <div class="w-4 h-4">
                 <FaPlus />
               </div>
-              <span class="font-medium">Create New Plan</span>
+              <span class="font-medium">Tạo kế hoạch mới</span>
             </button>
 
             <button
               on:click={handleImportPlan}
               class="flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl transition-all duration-300 hover:shadow-md"
             >
-              <span class="font-medium">Import Plan</span>
+              <span class="font-medium">Nhập kế hoạch</span>
             </button>
           </div>
         </div>
@@ -453,7 +455,7 @@
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Total Plans</p>
+              <p class="text-sm text-gray-600 mb-1">Tổng kế hoạch</p>
               <p class="text-2xl font-bold text-gray-800">
                 {stats.total}
               </p>
@@ -471,7 +473,7 @@
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Active</p>
+              <p class="text-sm text-gray-600 mb-1">Đang hoạt động</p>
               <p class="text-2xl font-bold text-green-600">
                 {stats.active}
               </p>
@@ -489,7 +491,7 @@
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Drafts</p>
+              <p class="text-sm text-gray-600 mb-1">Bản nháp</p>
               <p class="text-2xl font-bold text-yellow-600">
                 {stats.draft}
               </p>
@@ -507,7 +509,7 @@
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Completed</p>
+              <p class="text-sm text-gray-600 mb-1">Hoàn thành</p>
               <p class="text-2xl font-bold text-blue-600">
                 {stats.completed}
               </p>
@@ -540,7 +542,7 @@
             <input
               type="text"
               bind:value={searchQuery}
-              placeholder="Search plans by title or location..."
+              placeholder="Tìm kế hoạch theo tiêu đề hoặc địa điểm..."
               class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
             />
           </div>
@@ -550,10 +552,10 @@
             bind:value={selectedStatus}
             class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="completed">Completed</option>
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="draft">Bản nháp</option>
+            <option value="completed">Hoàn thành</option>
           </select>
 
           <!-- Sort By -->
@@ -561,9 +563,9 @@
             bind:value={sortBy}
             class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
           >
-            <option value="created">Sort by Created</option>
-            <option value="budget">Sort by Budget</option>
-            <option value="duration">Sort by Duration</option>
+            <option value="created">Sắp xếp theo ngày tạo</option>
+            <option value="budget">Sắp xếp theo ngân sách</option>
+            <option value="duration">Sắp xếp theo thời gian</option>
           </select>
 
           <!-- View Mode Toggle -->
@@ -629,10 +631,10 @@
               </svg>
             </div>
             <h3 class="text-lg font-semibold text-gray-800 mb-2">
-              Loading Plans
+              Đang tải kế hoạch
             </h3>
             <p class="text-gray-600">
-              Please wait while we fetch your travel plans...
+              Vui lòng đợi trong khi chúng tôi tải kế hoạch du lịch của bạn...
             </p>
           </div>
         {:else if error}
@@ -649,16 +651,14 @@
               </svg>
             </div>
             <h3 class="text-lg font-semibold text-gray-800 mb-2">
-              Error Loading Plans
+              Lỗi tải kế hoạch
             </h3>
-            <p class="text-gray-600 mb-6">
-              An error occurred while loading plans.
-            </p>
+            <p class="text-gray-600 mb-6">Đã xảy ra lỗi khi tải kế hoạch.</p>
             <button
               on:click={fetchPlans}
               class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
             >
-              Try Again
+              Thử lại
             </button>
           </div>
         {:else if filteredPlans.length === 0}
@@ -672,17 +672,17 @@
               </div>
             </div>
             <h3 class="text-lg font-semibold text-gray-800 mb-2">
-              No plans found
+              Không tìm thấy kế hoạch
             </h3>
             <p class="text-gray-600 mb-6">
-              Try adjusting your search or filters to find what you're looking
-              for.
+              Hãy thử điều chỉnh tìm kiếm hoặc bộ lọc để tìm những gì bạn đang
+              tìm.
             </p>
             <button
               on:click={handleCreatePlan}
               class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
             >
-              Create Your First Plan
+              Tạo kế hoạch đầu tiên của bạn
             </button>
           </div>
         {:else}
@@ -726,7 +726,8 @@
       {#if !isLoading && !error && filteredPlans.length > 0}
         <div class="text-center text-gray-600">
           <p>
-            Showing {filteredPlans.length} of {transformedPlans.length} plans
+            Hiển thị {filteredPlans.length} trong số {transformedPlans.length} kế
+            hoạch
           </p>
         </div>
       {/if}

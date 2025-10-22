@@ -44,15 +44,15 @@
 
   // Interest categories with icons
   const interestCategories = [
-    { id: "food", label: "Food", icon: FaUtensils },
-    { id: "nature", label: "Nature", icon: FaLeaf },
-    { id: "hiking", label: "Hiking", icon: FaHiking },
-    { id: "mountain-climbing", label: "Mountain Climbing", icon: FaMountain },
-    { id: "culture", label: "Culture", icon: FaUniversity },
-    { id: "history", label: "History", icon: FaLandmark },
-    { id: "shop", label: "Shop", icon: FaShoppingBag },
-    { id: "adventure", label: "Adventure", icon: FaGlobe },
-    { id: "entertainment", label: "Entertainment", icon: FaGamepad },
+    { id: "food", label: "Ẩm thực", icon: FaUtensils },
+    { id: "nature", label: "Thiên nhiên", icon: FaLeaf },
+    { id: "hiking", label: "Leo núi", icon: FaHiking },
+    { id: "mountain-climbing", label: "Chinh phục núi", icon: FaMountain },
+    { id: "culture", label: "Văn hóa", icon: FaUniversity },
+    { id: "history", label: "Lịch sử", icon: FaLandmark },
+    { id: "shop", label: "Mua sắm", icon: FaShoppingBag },
+    { id: "adventure", label: "Phiêu lưu", icon: FaGlobe },
+    { id: "entertainment", label: "Giải trí", icon: FaGamepad },
   ];
 
   // Animation timing
@@ -208,7 +208,7 @@
 
     try {
       const response = await fetch(
-        "http://nghiapd.ddns.net:8081/flights/search",
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/flights/search`,
         {
           method: "POST",
           headers: {
@@ -273,7 +273,7 @@
 
     try {
       const response = await fetch(
-        "http://nghiapd.ddns.net:8081/hotels/search",
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/hotels/search`,
         {
           method: "POST",
           headers: {
@@ -348,7 +348,7 @@
 
     try {
       const response = await fetch(
-        "http://nghiapd.ddns.net:8081/agent/itinerary",
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/agent/itinerary`,
         {
           method: "POST",
           headers: {
@@ -691,7 +691,7 @@
         </div>
 
         <div class="tagline">
-          <span class="tagline-text">Your Travel Planning Assistant</span>
+          <span class="tagline-text">Trợ lý lập kế hoạch du lịch của bạn</span>
         </div>
       </div>
 
@@ -706,11 +706,11 @@
           <div class="question-container">
             <h1 class="question-title">
               <span class="question-icon"><FaPlane /></span>
-              Are you have a travel plan?
+              Bạn đã có kế hoạch du lịch chưa?
             </h1>
             <p class="question-subtitle">
-              Let us know if you're planning a trip so we can personalize your
-              experience
+              Cho chúng tôi biết nếu bạn đang lên kế hoạch cho chuyến đi để
+              chúng tôi có thể cá nhân hóa trải nghiệm của bạn
             </p>
           </div>
 
@@ -723,8 +723,8 @@
             >
               <div class="btn-content">
                 <span class="btn-icon"><FaBullseye /></span>
-                <span class="btn-text">Yes, I do!</span>
-                <span class="btn-subtitle">Help me plan</span>
+                <span class="btn-text">Có rồi!</span>
+                <span class="btn-subtitle">Giúp tôi lên kế hoạch</span>
               </div>
               <div class="btn-glow"></div>
             </button>
@@ -737,8 +737,8 @@
             >
               <div class="btn-content">
                 <span class="btn-icon"><FaStar /></span>
-                <span class="btn-text">Not yet</span>
-                <span class="btn-subtitle">Just exploring</span>
+                <span class="btn-text">Chưa có</span>
+                <span class="btn-subtitle">Chỉ đang khám phá</span>
               </div>
               <div class="btn-glow"></div>
             </button>
@@ -754,10 +754,11 @@
           <div class="question-container">
             <h1 class="question-title">
               <span class="question-icon"><FaMap /></span>
-              Would you like to travel domestically or internationally?
+              Bạn muốn đi du lịch trong nước hay quốc tế?
             </h1>
             <p class="question-subtitle">
-              Let us know your preference so we can suggest the best options
+              Cho chúng tôi biết sở thích của bạn để chúng tôi có thể gợi ý các
+              lựa chọn tốt nhất
             </p>
           </div>
 
@@ -770,8 +771,8 @@
             >
               <div class="btn-content">
                 <span class="btn-icon"><FaMapMarkerAlt /></span>
-                <span class="btn-text">Domestic</span>
-                <span class="btn-subtitle">Explore locally</span>
+                <span class="btn-text">Trong nước</span>
+                <span class="btn-subtitle">Khám phá địa phương</span>
               </div>
               <div class="btn-glow"></div>
             </button>
@@ -784,8 +785,8 @@
             >
               <div class="btn-content">
                 <span class="btn-icon"><FaPlane /></span>
-                <span class="btn-text">International</span>
-                <span class="btn-subtitle">Go abroad</span>
+                <span class="btn-text">Quốc tế</span>
+                <span class="btn-subtitle">Đi ra nước ngoài</span>
               </div>
               <div class="btn-glow"></div>
             </button>
@@ -801,16 +802,16 @@
           <div class="question-container">
             <h1 class="question-title">
               <span class="question-icon"><FaRocket /></span>
-              Tell us about your {selectedAnswer === true
-                ? "travel plan"
+              Cho chúng tôi biết {selectedAnswer === true
+                ? "kế hoạch du lịch"
                 : travelType === "domestic"
-                  ? "domestic trip"
-                  : "international adventure"}
+                  ? "một số thông tin"
+                  : "chuyến đi quốc tế"} của bạn
             </h1>
             <p class="question-subtitle">
               {selectedAnswer === true
-                ? "Fill in the details so we can create the perfect plan for you"
-                : "Just a few more details to get you started"}
+                ? "Điền thông tin chi tiết để chúng tôi có thể tạo kế hoạch hoàn hảo cho bạn"
+                : "Chỉ cần thêm một vài thông tin để bắt đầu"}
             </p>
           </div>
 
@@ -819,13 +820,13 @@
               <div class="form-group">
                 <label for="destination" class="form-label">
                   <span class="label-icon"><FaMapMarkerAlt /></span>
-                  Destination
+                  Điểm đến
                 </label>
                 <input
                   id="destination"
                   type="text"
                   bind:value={travelDetails.destination}
-                  placeholder="e.g., Tokyo, Japan"
+                  placeholder="vd: Tokyo, Nhật Bản"
                   class="form-input"
                 />
               </div>
@@ -835,7 +836,7 @@
               <div class="form-group">
                 <label for="startDate" class="form-label">
                   <span class="label-icon"><FaCalendarAlt /></span>
-                  Start Date
+                  Ngày bắt đầu
                 </label>
                 <input
                   id="startDate"
@@ -848,7 +849,7 @@
               <div class="form-group">
                 <label for="endDate" class="form-label">
                   <span class="label-icon"><FaCalendarAlt /></span>
-                  End Date
+                  Ngày kết thúc
                 </label>
                 <input
                   id="endDate"
@@ -863,7 +864,7 @@
               <div class="form-group">
                 <label for="participants" class="form-label">
                   <span class="label-icon"><FaMapMarkerAlt /></span>
-                  Participants
+                  Số người tham gia
                 </label>
                 <input
                   id="participants"
@@ -877,7 +878,7 @@
               <div class="form-group">
                 <label for="budget" class="form-label">
                   <span class="label-icon"><FaMoneyBillWave /></span>
-                  Budget (USD)
+                  Ngân sách (USD)
                 </label>
                 <input
                   id="budget"
@@ -901,7 +902,7 @@
               onclick={proceedToInterests}
             >
               <span class="btn-icon"><FaHeart /></span>
-              <span class="btn-text">Choose Your Interests</span>
+              <span class="btn-text">Chọn sở thích của bạn</span>
             </button>
           </div>
         </div>
@@ -915,11 +916,10 @@
           <div class="question-container">
             <h1 class="question-title">
               <span class="question-icon"><FaHeart /></span>
-              What interests you most?
+              Bạn quan tâm đến điều gì nhất?
             </h1>
             <p class="question-subtitle">
-              Select multiple categories to personalize your travel
-              recommendations
+              Chọn nhiều danh mục để cá nhân hóa các gợi ý du lịch của bạn
             </p>
           </div>
 
@@ -946,9 +946,7 @@
             </div>
 
             <div class="selected-count">
-              {selectedInterests.length} interest{selectedInterests.length !== 1
-                ? "s"
-                : ""} selected
+              {selectedInterests.length} sở thích đã chọn
             </div>
 
             <button
@@ -959,8 +957,8 @@
               <span class="btn-icon"><FaRocket /></span>
               <span class="btn-text">
                 {selectedAnswer === true
-                  ? "Create Travel Plan"
-                  : "Get Recommendations"}
+                  ? "Tạo kế hoạch du lịch"
+                  : "Nhận gợi ý"}
               </span>
             </button>
           </div>
@@ -984,7 +982,7 @@
           <div class="dot" class:active={currentStep >= 3}></div>
           <div class="dot" class:active={currentStep >= 4}></div>
         </div>
-        <p class="progress-text">Step {currentStep} of 4</p>
+        <p class="progress-text">Bước {currentStep} / 4</p>
       </div>
     </div>
   {/if}
@@ -1005,9 +1003,9 @@
         <div class="success-text">
           {currentStep === 3
             ? selectedAnswer === true
-              ? "Perfect! We'll create your detailed travel plan!"
-              : `Great! We'll find amazing ${travelType} destinations for you!`
-            : "Let's get started on your journey!"}
+              ? "Hoàn hảo! Chúng tôi sẽ tạo kế hoạch du lịch chi tiết cho bạn!"
+              : `Tuyệt vời! Chúng tôi sẽ tìm các điểm đến ${travelType === "domestic" ? "trong nước" : "quốc tế"} tuyệt vời cho bạn!`
+            : "Hãy bắt đầu hành trình của bạn!"}
         </div>
       </div>
     </div>

@@ -12,22 +12,22 @@
   const menuItems = [
     {
       id: "profile",
-      label: "Profile",
+      label: "Hồ sơ",
       icon: FaUser,
     },
     {
       id: "security",
-      label: "Account & Security",
+      label: "Tài khoản & Bảo mật",
       icon: FaShieldAlt,
     },
     {
       id: "preferences",
-      label: "Preferences",
+      label: "Tùy chọn",
       icon: FaAtlas,
     },
     {
       id: "help",
-      label: "Help & Support",
+      label: "Trợ giúp & Hỗ trợ",
       icon: IoMdHelpCircleOutline,
     },
   ];

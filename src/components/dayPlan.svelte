@@ -146,8 +146,8 @@
               <circle cx=\"16\" cy=\"11\" r=\"1.2\" fill=\"#4ecdc4\"/>
             </svg>
             <div class=\"map-text\">
-              <div class=\"map-title\">No locations to display</div>
-              <div class=\"map-sub\">Add activities with locations to see the map</div>
+              <div class=\"map-title\">Không có địa điểm để hiển thị</div>
+              <div class=\"map-sub\">Thêm hoạt động có địa điểm để xem bản đồ</div>
             </div>
           </div>
         </div>
@@ -168,13 +168,13 @@
   });
 </script>
 
-<div class="day-plan-container" aria-label="Day plan for day {dayNumber}">
+<div class="day-plan-container" aria-label="Kế hoạch ngày {dayNumber}">
   <!-- Left Side - Schedule -->
   <div class="schedule-section">
     <div class="day-header">
-      <h2 class="day-title">Day {dayNumber}</h2>
+      <h2 class="day-title">Ngày {dayNumber}</h2>
       <span class="day-activities-count" aria-live="polite"
-        >{getActivitiesInOrder(dayData).length} activities</span
+        >{getActivitiesInOrder(dayData).length} hoạt động</span
       >
     </div>
     <div class="activities-list">
@@ -426,23 +426,23 @@
   <!-- Right Side - Map -->
   <div class="map-section">
     <div class="map-header">
-      <h3 class="map-title">Locations Map</h3>
+      <h3 class="map-title">Bản đồ địa điểm</h3>
       <div class="map-legend">
         <div class="legend-item">
           <div class="legend-color" style="background-color: #ff6b6b;"></div>
-          <span>Restaurants</span>
+          <span>Nhà hàng</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background-color: #4ecdc4;"></div>
-          <span>Attractions</span>
+          <span>Địa điểm tham quan</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background-color: #45b7d1;"></div>
-          <span>Parks</span>
+          <span>Công viên</span>
         </div>
         <div class="legend-item">
           <div class="legend-color" style="background-color: #96ceb4;"></div>
-          <span>Mountains</span>
+          <span>Núi</span>
         </div>
       </div>
     </div>

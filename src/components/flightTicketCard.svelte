@@ -117,7 +117,7 @@
     <div class="flex-2 flex flex-col items-center gap-2">
       <div class="text-center">
         <span class="text-xs text-gray-500 whitespace-nowrap"
-          >Travel time: {flight.duration}</span
+          >Thời gian bay: {flight.duration}</span
         >
       </div>
       <div class="flex items-center w-full relative">
@@ -151,24 +151,24 @@
   >
     <div class="flex-1">
       <span class="text-xs text-gray-600 font-medium"
-        >Economy • {flight.airline_info.airplane}</span
+        >Phổ thông • {flight.airline_info.airplane}</span
       >
     </div>
     <div class="flex-2 md:text-right text-left">
       <span class="text-xs text-gray-500 block leading-relaxed"
-        >Average legroom (31 in)</span
+        >Không gian chân trung bình (31 inch)</span
       >
       <span class="text-xs text-teal-600 font-medium block leading-relaxed">
         {emissionsStatus === "higher" ? "+" : ""}{flight.carbon_emissions
-          .difference_percent}% emissions • {Math.round(
+          .difference_percent}% phát thải • {Math.round(
           flight.carbon_emissions.this_flight / 1000
         )} kg
       </span>
       <span class="text-xs text-gray-500 block leading-relaxed"
-        >On-demand video</span
+        >Video theo yêu cầu</span
       >
       <span class="text-xs text-gray-500 block leading-relaxed">
-        Carbon emissions estimate • {Math.round(
+        >Ước tính phát thải carbon • {Math.round(
           flight.carbon_emissions.this_flight / 1000
         )} kg
       </span>

@@ -76,7 +76,7 @@
     try {
       // Fetch user data from API
       const res = await fetch(
-        `http://nghiapd.ddns.net:8081/api/users/${userId}`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/api/users/${userId}`,
         {
           method: "GET",
           headers: {
@@ -127,16 +127,19 @@
     if (!isSignUp) {
       // Đăng nhập
       try {
-        const res = await fetch("http://nghiapd.ddns.net:8081/auth/signin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            login: username, // hoặc username nếu muốn dùng username thay vì email
-            password,
-          }),
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/auth/signin`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              login: username, // hoặc username nếu muốn dùng username thay vì email
+              password,
+            }),
+          }
+        );
         const text = await res.text();
         let data;
         try {
@@ -202,17 +205,20 @@
       // Đăng ký
       loading = true;
       try {
-        const res = await fetch("http://nghiapd.ddns.net:8081/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            email,
-            password,
-          }),
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/auth/signup`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username,
+              email,
+              password,
+            }),
+          }
+        );
         const text = await res.text();
         let data;
         try {
@@ -329,8 +335,8 @@
     </h2>
     <p class="text-gray-600 transition-all duration-300">
       {isSignUp
-        ? "Create your account and start planning with AI"
-        : "Sign in to your GoWise account"}
+        ? "Tạo tài khoản và bắt đầu lập kế hoạch với AI"
+        : "Đăng nhập vào tài khoản GoWise của bạn"}
     </p>
   </div>
   <!-- Form -->
@@ -366,7 +372,7 @@
             id="username"
             type="text"
             bind:value={username}
-            placeholder="Choose a username"
+            placeholder="Chọn tên người dùng"
             class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           />
@@ -381,7 +387,7 @@
           for="username"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          Username
+          Tên người dùng
         </label>
         <div class="relative">
           <div
@@ -395,7 +401,7 @@
             id="username"
             type="text"
             bind:value={username}
-            placeholder="Enter your username"
+            placeholder="Nhập tên người dùng"
             class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           />
@@ -418,7 +424,7 @@
             id="email"
             type="email"
             bind:value={email}
-            placeholder="Enter your email"
+            placeholder="Nhập email của bạn"
             class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           />
@@ -446,7 +452,7 @@
           id="password"
           type={showPassword ? "text" : "password"}
           bind:value={password}
-          placeholder="Enter your password"
+          placeholder="Nhập mật khẩu"
           class="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
           required
         />
@@ -493,7 +499,7 @@
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
             bind:value={confirmPassword}
-            placeholder="Confirm your password"
+            placeholder="Xác nhận mật khẩu"
             class="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
             required
           />
@@ -532,17 +538,17 @@
           required
         />
         <label for="agree-terms" class="ml-2 block text-sm text-gray-700">
-          I agree to the
+          Tôi đồng ý với
           <button
             type="button"
             class="text-teal-600 hover:text-teal-500 font-medium"
-            >Terms of Service</button
+            >Điều khoản dịch vụ</button
           >
-          and
+          và
           <button
             type="button"
             class="text-teal-600 hover:text-teal-500 font-medium"
-            >Privacy Policy</button
+            >Chính sách bảo mật</button
           >
         </label>
       </div>
@@ -559,7 +565,7 @@
             class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
           />
           <label for="remember-me" class="ml-2 block text-sm text-gray-700">
-            Remember me
+            Ghi nhớ đăng nhập
           </label>
         </div>
         <button
@@ -567,7 +573,7 @@
           class="text-sm text-teal-600 hover:text-teal-500 font-medium"
           onclick={handleForgotPassword}
         >
-          Forgot password?
+          Quên mật khẩu?
         </button>
       </div>
     {/if}
@@ -599,7 +605,7 @@
         >
         Đang tạo tài khoản...
       {:else}
-        {isSignUp ? "Create Account" : "Sign In"}
+        {isSignUp ? "Tạo tài khoản" : "Đăng nhập"}
       {/if}
     </button>
     {#if showSuccess}
@@ -667,7 +673,7 @@
         class="text-teal-600 hover:text-teal-500 font-medium ml-1"
         onclick={toggleAuthMode}
       >
-        {isSignUp ? "Sign in" : "Sign up for free"}
+        {isSignUp ? "Đăng nhập" : "Đăng ký miễn phí"}
       </button>
     </p>
   </div>

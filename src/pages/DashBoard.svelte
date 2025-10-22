@@ -73,7 +73,7 @@
       }
 
       const response = await fetch(
-        `http://nghiapd.ddns.net:8081/plans/${userId}`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/plans/${userId}`,
         {
           method: "GET",
           headers: {
@@ -352,7 +352,8 @@
   <div class="mb-6">
     <h1 class="text-2xl font-bold text-[#0D9488] mb-2">Dashboard</h1>
     <p class="text-gray-600 text-sm">
-      Welcome back! Here's what's happening with your travel plans ✈️
+      Chào mừng trở lại! Đây là những gì đang xảy ra với kế hoạch du lịch của
+      bạn ✈️
     </p>
   </div>
 
@@ -460,7 +461,7 @@
     <!-- Recent Plans Section -->
     <div>
       <div class="mb-4">
-        <h2 class="text-lg font-bold text-cyan-700 mb-1">Recent Plans</h2>
+        <h2 class="text-lg font-bold text-cyan-700 mb-1">Kế hoạch gần đây</h2>
         <p class="text-gray-600 text-sm">
           Your latest travel planning activity 🗺️
         </p>
@@ -475,7 +476,7 @@
           </div>
         {:else if recentPlans.length === 0}
           <div class="text-center text-gray-400 py-8">
-            No recent plans found.
+            Không tìm thấy kế hoạch gần đây.
           </div>
         {:else}
           {#each recentPlans as plan}
@@ -496,8 +497,8 @@
     <!-- Weather Board Section -->
     <div bind:this={weatherBoardRef}>
       <div class="mb-4">
-        <h2 class="text-lg font-bold text-emerald-700 mb-1">Weather Board</h2>
-        <p class="text-gray-600 text-sm">Current weather conditions 🌤️</p>
+        <h2 class="text-lg font-bold text-emerald-700 mb-1">Bảng thời tiết</h2>
+        <p class="text-gray-600 text-sm">Điều kiện thời tiết hiện tại 🌤️</p>
       </div>
 
       <div class="space-y-3">

@@ -70,7 +70,7 @@
       <button
         class="flex-shrink-0 ml-3 p-1 rounded-full hover:bg-slate-100 transition-colors duration-200 flex items-center justify-center"
         onclick={close}
-        aria-label="Close notification"
+        aria-label="Đóng thông báo"
       >
         <svg
           width="22"

@@ -201,7 +201,7 @@
             d="M15 19l-7-7 7-7"
           />
         </svg>
-        <span>Back to Plans</span>
+        <span>Quay lại Danh sách Kế hoạch</span>
       </button>
     </div>
   </div>
@@ -241,7 +241,7 @@
             <div class="w-5 h-5 text-gray-600 mr-2">
               <FaCalendarAlt />
             </div>
-            <span class="text-sm text-gray-600">Duration</span>
+            <span class="text-sm text-gray-600">Thời gian</span>
           </div>
           <p class="text-lg font-semibold text-gray-800">{duration}</p>
         </div>
@@ -251,7 +251,7 @@
             <div class="w-5 h-5 text-gray-600 mr-2">
               <FaDollarSign />
             </div>
-            <span class="text-sm text-gray-600">Budget</span>
+            <span class="text-sm text-gray-600">Ngân sách</span>
           </div>
           <p class="text-lg font-semibold text-gray-800">{budget}</p>
         </div>
@@ -261,7 +261,7 @@
             <div class="w-5 h-5 text-gray-600 mr-2">
               <FaCalendarAlt />
             </div>
-            <span class="text-sm text-gray-600">Created</span>
+            <span class="text-sm text-gray-600">Ngày tạo</span>
           </div>
           <p class="text-lg font-semibold text-gray-800">{created}</p>
         </div>
@@ -271,7 +271,7 @@
             <div class="w-5 h-5 text-gray-600 mr-2">
               <FaUsers />
             </div>
-            <span class="text-sm text-gray-600">Participants</span>
+            <span class="text-sm text-gray-600">Người tham gia</span>
           </div>
           <p class="text-lg font-semibold text-gray-800">{participants}</p>
         </div>
@@ -283,7 +283,7 @@
       <div class="space-y-6">
         <!-- Itinerary -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Itinerary</h2>
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Lịch trình</h2>
           <div class="space-y-8">
             {#if itineraryDays.length > 0}
               {#each itineraryDays as day, idx}
@@ -300,7 +300,7 @@
                       {day.dayNumber ?? day.day}
                     </div>
                     <span class="text-lg font-semibold text-teal-700"
-                      >Day {day.dayNumber ?? day.day}</span
+                      >Ngày {day.dayNumber ?? day.day}</span
                     >
                   </div>
                   <!-- Activities timeline -->
@@ -352,7 +352,7 @@
                 </div>
               {/each}
             {:else}
-              <div class="text-gray-500">No itinerary available.</div>
+              <div class="text-gray-500">Không có lịch trình.</div>
             {/if}
           </div>
         </div>
@@ -362,50 +362,52 @@
       <div class="space-y-6">
         <!-- Flight Info -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Flight</h2>
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Chuyến bay</h2>
           {#if topFlight}
             <FlightTicketCard flight={topFlight} />
           {:else}
-            <div class="text-gray-500">No flight data.</div>
+            <div class="text-gray-500">Không có dữ liệu chuyến bay.</div>
           {/if}
         </div>
 
         <!-- Accommodations (moved below Flight) -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Accommodations</h2>
+          <h2 class="text-xl font-bold text-gray-800 mb-4">Chỗ ở</h2>
           {#if topHotel}
             <HotelBookCard hotel={topHotel} />
           {:else}
-            <div class="text-gray-500">No accommodation data.</div>
+            <div class="text-gray-500">Không có dữ liệu chỗ ở.</div>
           {/if}
         </div>
 
         <!-- Trip Summary -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-4">Trip Summary</h2>
+          <h2 class="text-xl font-bold text-gray-800 mb-4">
+            Tóm tắt chuyến đi
+          </h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
             <div class="text-center">
               <div class="text-2xl font-bold text-teal-600">
                 {formatCurrency(flightPrice)}
               </div>
-              <div class="text-sm text-gray-500">Flight Cost</div>
+              <div class="text-sm text-gray-500">Chi phí chuyến bay</div>
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-teal-600">
                 {formatCurrency(hotelPrice)}
               </div>
-              <div class="text-sm text-gray-500">Hotel per night</div>
+              <div class="text-sm text-gray-500">Khách sạn mỗi đêm</div>
             </div>
             <div class="text-center">
               <div class="text-2xl font-bold text-gray-900">
                 {formatCurrency(flightPrice + hotelPrice * tripDuration)}
               </div>
-              <div class="text-sm text-gray-500">Total Estimated</div>
+              <div class="text-sm text-gray-500">Tổng ước tính</div>
             </div>
           </div>
           {#if selectedInterests && selectedInterests.length > 0}
             <div class="border-t border-gray-200 pt-4">
-              <div class="font-semibold text-gray-800 mb-2">Interests</div>
+              <div class="font-semibold text-gray-800 mb-2">Sở thích</div>
               <div class="flex flex-wrap gap-2">
                 {#each selectedInterests as interest}
                   <span

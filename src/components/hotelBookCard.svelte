@@ -122,7 +122,7 @@
           {/each}
         </div>
         <span class="text-sm text-gray-600">
-          {hotel.rating} ({hotel.rating_count} reviews)
+          {hotel.rating} ({hotel.rating_count} đánh giá)
         </span>
       </div>
 
@@ -150,7 +150,7 @@
           {/each}
           {#if hotel.amenities.length > 3}
             <span class="text-gray-500 text-xs">
-              +{hotel.amenities.length - 3} more
+              +{hotel.amenities.length - 3} thêm
             </span>
           {/if}
         </div>
@@ -165,7 +165,7 @@
         {/if}
         <div class="flex items-baseline gap-1">
           <span class="text-2xl font-bold text-gray-900">{hotel.price}</span>
-          <span class="text-sm text-gray-600">per night</span>
+          <span class="text-sm text-gray-600">mỗi đêm</span>
         </div>
       </div>
 
@@ -176,7 +176,7 @@
           window.open(hotel.link, "_blank");
         }}
       >
-        Book Now
+        Đặt ngay
       </button>
     </div>
   </div>

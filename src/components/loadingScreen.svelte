@@ -64,7 +64,7 @@
 
     <!-- Loading Text -->
     <div class="loading-text">
-      <span class="loading-label">loading</span>
+      <span class="loading-label">đang tải</span>
       <span class="progress-dots">
         <span class="dot" style="animation-delay: 0ms">.</span>
         <span class="dot" style="animation-delay: 200ms">.</span>

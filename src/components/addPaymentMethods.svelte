@@ -164,7 +164,7 @@
 
       // Make API call using same base URL as other API calls
       const response = await fetch(
-        `http://nghiapd.ddns.net:8081/users/${userId}/credit-cards`,
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/credit-cards`,
         {
           method: "POST",
           headers: {
@@ -182,7 +182,7 @@
         console.error("Status:", response.status, response.statusText);
         console.error(
           "URL:",
-          `http://nghiapd.ddns.net:8081/users/${userId}/credit-cards`
+          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}/credit-cards`
         );
         console.error("Request Body:", requestBody);
         console.error("Response Text:", errorText);
@@ -319,12 +319,14 @@
         <div class="w-6 h-6 mr-3 text-teal-600">
           <FaCreditCard />
         </div>
-        <h2 class="text-2xl font-bold text-gray-900">Add Payment Method</h2>
+        <h2 class="text-2xl font-bold text-gray-900">
+          Thêm phương thức thanh toán
+        </h2>
       </div>
       <button
         class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
         onclick={closeModal}
-        aria-label="Close modal"
+        aria-label="Đóng cửa sổ"
       >
         <div class="w-5 h-5">
           <FaTimes />
@@ -346,13 +348,13 @@
           for="cardholderName"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          Cardholder Name
+          Tên chủ thẻ
         </label>
         <input
           id="cardholderName"
           type="text"
           bind:value={cardholderName}
-          placeholder="John Doe"
+          placeholder="Nguyễn Văn A"
           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-colors"
           required
         />
@@ -364,7 +366,7 @@
           for="cardType"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          Card Type
+          Loại thẻ
         </label>
         <select
           id="cardType"
@@ -384,7 +386,7 @@
           for="cardNumber"
           class="block text-sm font-medium text-gray-700 mb-2"
         >
-          Card Number (13-19 digits)
+          Số thẻ (13-19 chữ số)
         </label>
         <input
           id="cardNumber"
@@ -397,8 +399,8 @@
           required
         />
         <p class="text-xs text-gray-500 mt-1">
-          Enter a valid credit card number (13-19 digits). Card type will be
-          auto-detected.
+          Nhập số thẻ tín dụng hợp lệ (13-19 chữ số). Loại thẻ sẽ được tự động
+          phát hiện.
         </p>
       </div>
 
@@ -409,7 +411,7 @@
             for="expiryDate"
             class="block text-sm font-medium text-gray-700 mb-2"
           >
-            Expiry Date
+            Ngày hết hạn
           </label>
           <input
             id="expiryDate"
@@ -447,7 +449,7 @@
           class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded"
         />
         <label for="isDefault" class="ml-2 text-sm text-gray-700">
-          Set as default payment method
+          Đặt làm phương thức thanh toán mặc định
         </label>
       </div>
 
@@ -459,7 +461,7 @@
           class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors duration-200"
           disabled={isLoading}
         >
-          Cancel
+          Hủy
         </button>
         <button
           type="submit"
@@ -488,10 +490,10 @@
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
               </svg>
-              Adding...
+              Đang thêm...
             </div>
           {:else}
-            Add Payment Method
+            Thêm phương thức thanh toán
           {/if}
         </button>
       </div>
