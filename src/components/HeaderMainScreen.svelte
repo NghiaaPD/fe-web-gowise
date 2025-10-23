@@ -39,6 +39,12 @@
     // Add your user profile logic here
   }
 
+  function handleUpgrade() {
+    // Navigate to premium options page
+    // using location.href to remain framework-agnostic in this component
+    location.href = "/premium";
+  }
+
   function handleKeyPress(event: KeyboardEvent) {
     if (event.key === "Enter") {
       handleSearch();
@@ -105,6 +111,17 @@
 
     <!-- Right Side Icons -->
     <div class="flex items-center space-x-4 ml-6">
+      <!-- Upgrade button (shown for non-premium users) -->
+      {#if !userData?.isPremium}
+        <button
+          onclick={handleUpgrade}
+          class="hidden sm:inline-flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-md hover:from-teal-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-300 transition-all duration-200 cursor-pointer mr-2"
+          title="Nâng cấp lên Premium"
+        >
+          Nâng cấp Premium
+        </button>
+      {/if}
+
       <!-- Notifications Icon -->
       <button
         onclick={handleNotifications}
