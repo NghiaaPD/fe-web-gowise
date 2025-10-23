@@ -7,7 +7,7 @@
   import IoMdEyeOff from "svelte-icons/io/IoMdEyeOff.svelte";
   import FaRegUserCircle from "svelte-icons/fa/FaRegUserCircle.svelte";
   import LoadingScreen from "./loadingScreen.svelte";
-  import { notificationStore } from "$lib/index";
+  import { notificationStore, showNotification } from "$lib/index";
 
   // import { goto } from "$app/navigation";
 
@@ -236,7 +236,21 @@
         loading = false;
         isSignUp = false;
         showSuccess = true;
-        successMessage = "Đăng ký thành công! Vui lòng đăng nhập.";
+        successMessage =
+          "Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.";
+        // Show global notification and set a flag so mainScreen can also show if needed
+        try {
+          showNotification(
+            {
+              title: "Đăng ký thành công",
+              message: "Vui lòng kiểm tra email để kích hoạt tài khoản.",
+            },
+            "success"
+          );
+          localStorage.setItem("justRegistered", "1");
+        } catch (e) {
+          // ignore
+        }
         setTimeout(() => {
           showSuccess = false;
         }, 2000);
