@@ -177,15 +177,18 @@
         const result = await response.json();
         console.log("✅ Plan saved successfully:", result);
         showNotification(
-          { title: "Plan Saved", message: "Travel plan saved successfully!" },
+          {
+            title: "Lưu kế hoạch thành công",
+            message: "Kế hoạch du lịch đã được lưu thành công!",
+          },
           "success"
         );
       } else {
         console.error("❌ Failed to save plan:", response.statusText);
         showNotification(
           {
-            title: "Save Failed",
-            message: "Failed to save travel plan. Please try again.",
+            title: "Lưu thất bại",
+            message: "Lưu kế hoạch thất bại. Vui lòng thử lại.",
           },
           "error"
         );
@@ -194,8 +197,8 @@
       console.error("❌ Error saving plan:", error);
       showNotification(
         {
-          title: "Save Failed",
-          message: "An error occurred while saving the plan.",
+          title: "Lưu thất bại",
+          message: "Đã xảy ra lỗi khi lưu kế hoạch.",
         },
         "error"
       );

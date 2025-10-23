@@ -127,15 +127,59 @@
   // TODO: Replace with actual API endpoint when available
   async function checkFirstPhoto(): Promise<boolean> {
     try {
-      // Placeholder - endpoint not yet available
-      // When API is ready, replace with:
-      // const response = await fetch(`${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/photos/${userId}`);
-      // const photos = await response.json();
-      // return Array.isArray(photos) && photos.length > 0;
+      if (!userId) {
+        console.log("[Achievement] No userId found for photo check");
+        return false;
+      }
 
-      return false; // Default to locked until API is available
+      const url = `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/api/gallery/user/${userId}/galleries`;
+      console.log("[Achievement] Checking first photo with URL:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      console.log(
+        "[Achievement] Gallery API Response status:",
+        response.status
+      );
+
+      // If backend returns 500 (or other 5xx), treat as temporary unavailable and keep locked
+      if (!response.ok) {
+        // Log body if possible for debugging
+        try {
+          const err = await response.json();
+          console.warn("[Achievement] Gallery API error body:", err);
+        } catch (e) {
+          console.warn(
+            "[Achievement] Gallery API returned non-JSON error or empty body"
+          );
+        }
+        return false;
+      }
+
+      const data = await response.json();
+      console.log("[Achievement] Gallery API Response data:", data);
+
+      // The API might return { data: [...] } or { galleries: [...] } or an array directly
+      let galleries: any = data;
+      if (data.data) galleries = data.data;
+      else if (data.galleries) galleries = data.galleries;
+
+      const hasPhoto = Array.isArray(galleries) && galleries.length > 0;
+      console.log(
+        "[Achievement] Has first photo?",
+        hasPhoto,
+        "Galleries count:",
+        galleries?.length
+      );
+      return hasPhoto;
     } catch (error) {
-      console.error("Error checking first photo:", error);
+      console.error("[Achievement] Error checking first photo:", error);
       return false;
     }
   }

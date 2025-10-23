@@ -66,8 +66,8 @@
 
       userId = getUserIdFromToken();
       if (!userId) {
-        error = "Unable to get user ID from token.";
-        showNotification({ title: "Load Failed", message: error }, "error");
+        error = "Không thể lấy ID người dùng từ token.";
+        showNotification({ title: "Tải thất bại", message: error }, "error");
         isLoading = false;
         return;
       }
@@ -86,12 +86,12 @@
         const data = await response.json();
         plans = data.plans || [];
       } else {
-        error = "Failed to load plans. Please try again.";
-        showNotification({ title: "Load Failed", message: error }, "error");
+        error = "Tải kế hoạch thất bại. Vui lòng thử lại.";
+        showNotification({ title: "Tải thất bại", message: error }, "error");
       }
     } catch (err) {
-      error = "An error occurred while loading plans.";
-      showNotification({ title: "Load Failed", message: error }, "error");
+      error = "Đã xảy ra lỗi khi tải kế hoạch.";
+      showNotification({ title: "Tải thất bại", message: error }, "error");
     } finally {
       isLoading = false;
     }

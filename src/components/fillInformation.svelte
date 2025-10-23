@@ -122,10 +122,10 @@
         dispatch("close");
         dispatch("updated", { userId });
         setTimeout(() => {
-          showNotification({ message: "Update successful" }, "success");
+          showNotification({ message: "Cập nhật thành công" }, "success");
         }, 200);
       } else {
-        showNotification({ message: "Update failed" }, "error");
+        showNotification({ message: "Cập nhật thất bại" }, "error");
         alert("Update failed");
       }
     } catch (err: any) {

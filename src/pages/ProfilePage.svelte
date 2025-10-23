@@ -81,8 +81,8 @@
       // Show success notification
       showNotification(
         {
-          title: "Profile Updated",
-          message: "Your profile information has been successfully updated.",
+          title: "Cập nhật hồ sơ",
+          message: "Thông tin hồ sơ đã được cập nhật thành công.",
         },
         "success"
       );
@@ -97,8 +97,8 @@
       // Show error notification
       showNotification(
         {
-          title: "Update Failed",
-          message: "Failed to update your profile. Please try again.",
+          title: "Cập nhật thất bại",
+          message: "Cập nhật hồ sơ thất bại. Vui lòng thử lại.",
         },
         "error"
       );

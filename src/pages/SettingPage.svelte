@@ -19,8 +19,8 @@
     dispatch("profileUpdated");
     showNotification(
       {
-        title: "Profile Updated",
-        message: "Your profile has been updated successfully.",
+        title: "Cập nhật hồ sơ",
+        message: "Hồ sơ của bạn đã được cập nhật thành công.",
       },
       "success"
     );

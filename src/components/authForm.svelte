@@ -176,8 +176,8 @@
           show: true,
           type: "success",
           content: {
-            title: "Login successful!",
-            message: "Loading user data...",
+            title: "Đăng nhập thành công!",
+            message: "Đang tải dữ liệu người dùng...",
           },
         }));
 

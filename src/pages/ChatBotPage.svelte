@@ -412,7 +412,7 @@
         <input
           type="text"
           placeholder="Tìm kiếm..."
-          class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          class="w-full pl-4 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-500 transition-shadow duration-150"
         />
       </div>
     </div>
@@ -539,7 +539,7 @@
               bind:value={newMessage}
               on:keydown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Xin chào! Tôi là trợ lý du lịch AI của bạn. Tôi có thể giúp gì cho kế hoạch chuyến đi tiếp theo của bạn?"
-              class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+              class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-500 transition-shadow duration-150"
               disabled={selectedPlan &&
                 selectedPlan.id !== "general" &&
                 !planChatReady}

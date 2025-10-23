@@ -188,15 +188,15 @@
       if (res.ok) {
         preferences.language = newLanguage;
         showNotification(
-          { message: "Language updated successfully!" },
+          { message: "Cập nhật ngôn ngữ thành công!" },
           "success"
         );
       } else {
-        showNotification({ message: "Failed to update language" }, "error");
+        showNotification({ message: "Cập nhật ngôn ngữ thất bại" }, "error");
       }
     } catch (error) {
       console.error("Error updating language:", error);
-      showNotification({ message: "Error updating language" }, "error");
+      showNotification({ message: "Lỗi khi cập nhật ngôn ngữ" }, "error");
     } finally {
       isLoading = false;
     }
@@ -226,15 +226,15 @@
       if (res.ok) {
         preferences.region = newRegion;
         showNotification(
-          { message: "Region updated successfully!" },
+          { message: "Cập nhật khu vực thành công!" },
           "success"
         );
       } else {
-        showNotification({ message: "Failed to update region" }, "error");
+        showNotification({ message: "Cập nhật khu vực thất bại" }, "error");
       }
     } catch (error) {
       console.error("Error updating region:", error);
-      showNotification({ message: "Error updating region" }, "error");
+      showNotification({ message: "Lỗi khi cập nhật khu vực" }, "error");
     } finally {
       isLoading = false;
     }
@@ -263,13 +263,16 @@
       if (res.ok) {
         preferences.city = newCity;
         originalPreferences.city = newCity;
-        showNotification({ message: "City updated successfully!" }, "success");
+        showNotification(
+          { message: "Cập nhật thành phố thành công!" },
+          "success"
+        );
       } else {
-        showNotification({ message: "Failed to update city" }, "error");
+        showNotification({ message: "Cập nhật thành phố thất bại" }, "error");
       }
     } catch (error) {
       console.error("Error updating city:", error);
-      showNotification({ message: "Error updating city" }, "error");
+      showNotification({ message: "Lỗi khi cập nhật thành phố" }, "error");
     }
   }
 
@@ -325,12 +328,12 @@
 
       hasChanges = false;
       showNotification(
-        { message: "All preferences updated successfully!" },
+        { message: "Cập nhật tất cả cài đặt thành công!" },
         "success"
       );
     } catch (error) {
       console.error("Error saving changes:", error);
-      showNotification({ message: "Error saving preferences" }, "error");
+      showNotification({ message: "Lỗi khi lưu cài đặt" }, "error");
     } finally {
       isLoading = false;
     }
