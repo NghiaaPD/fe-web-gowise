@@ -64,10 +64,10 @@
         "/logo.png",
     ];
     const FALLBACK_CATEGORIES = [
-        "Travel Stories",
-        "City Guide",
-        "Food & Culture",
-        "Eco Travel",
+        "Du lịch",
+        "Địa điểm ăn chơi",
+        "Đô ăn & nước uống",
+        "Du lịch tiết kiệm",
     ];
     const LIKED_STORAGE_KEY = "gowise_blog_liked_posts";
     const createTitleId = "blog-title-input";
