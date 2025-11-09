@@ -89,9 +89,9 @@
           <button
             onclick={handleSearch}
             class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1.5 text-sm
-                               bg-teal-600 text-white rounded-md
-                               hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-300
-                               transition-all duration-200 cursor-pointer"
+                              bg-teal-600 text-white rounded-md
+                              hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-300
+                              transition-all duration-200 cursor-pointer"
           >
             Search
           </button>
