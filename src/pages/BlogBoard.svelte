@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import BlogCard from "../components/BlogCard.svelte";
+    import { onMount, onDestroy } from "svelte";
     import FaSearch from "svelte-icons/fa/FaSearch.svelte";
-    import FaPlus from "svelte-icons/fa/FaPlus.svelte";
-    import FaFilter from "svelte-icons/fa/FaFilter.svelte";
     import FaPencilAlt from "svelte-icons/fa/FaPencilAlt.svelte";
     import { showNotification } from "$lib";
+    import IoIosPin from "svelte-icons/io/IoIosPin.svelte";
+    import IoMdTime from "svelte-icons/io/IoMdTime.svelte";
+    import IoMdHeart from "svelte-icons/io/IoMdHeart.svelte";
+    import IoMdEye from "svelte-icons/io/IoMdEye.svelte";
 
     type PostStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -55,13 +56,16 @@
         featured: boolean;
     }
 
+    interface UserPostStats {
+        totalPosts: number;
+        totalLikes: number;
+        totalViews: number;
+    }
+
     const FEATURED_LIKE_THRESHOLD = 30;
     const FEATURED_VIEW_THRESHOLD = 800;
     const PLACEHOLDER_IMAGES = [
-        "/beach.jpg",
-        "/forest.jpg",
-        "/mountain.jpg",
-        "/logo.png",
+        "/beach.jpg"
     ];
     const FALLBACK_CATEGORIES = [
         "Du lịch",
@@ -86,7 +90,6 @@
     let filteredPosts: BlogPostView[] = [];
     let stats = {
         total: 0,
-        featured: 0,
         totalViews: 0,
         totalLikes: 0,
     };
@@ -99,6 +102,10 @@
     let selectedPost: BlogPostView | null = null;
     let createModalOpen = false;
     let isSubmittingPost = false;
+    let hasMounted = false;
+    let appliedSearchQuery = "";
+    let appliedCategory = "";
+    let filterDebounceHandle: ReturnType<typeof setTimeout> | null = null;
     function getDefaultCategory() {
         return categories.length ? categories[0] : FALLBACK_CATEGORIES[0];
     }
@@ -113,17 +120,20 @@
         content: "",
         category: "",
     };
-    let userStats: {
-        totalPosts: number;
-        totalLikes: number;
-        totalViews: number;
-    } | null = null;
+    let userStats: UserPostStats | null = null;
 
     onMount(() => {
         resolveSession();
         loadLikedFromStorage();
         fetchFeed();
         fetchMyPostStats();
+        hasMounted = true;
+    });
+
+    onDestroy(() => {
+        if (filterDebounceHandle) {
+            clearTimeout(filterDebounceHandle);
+        }
     });
 
     $: filteredPosts = applyFilters(blogPosts);
@@ -349,24 +359,41 @@
         return null;
     }
 
-    async function fetchFeed() {
+    async function fetchFeed({
+        search,
+        category,
+    }: { search?: string; category?: string } = {}) {
         if (blogServiceBaseCandidates.length === 0) {
             loadError = "Blog service URL chưa được cấu hình.";
             return;
         }
+        const searchParam =
+            search !== undefined ? search : searchQuery.trim();
+        const categoryParam =
+            category !== undefined ? category : selectedCategory.trim();
         isLoading = true;
         loadError = "";
         try {
+            const params = new URLSearchParams({
+                page: "0",
+                size: "100",
+            });
+            if (searchParam) params.set("search", searchParam);
+            if (categoryParam) params.set("category", categoryParam);
             const timelinePayload = await fetchFromBlog<
                 ApiResponse<PageResponse<PostResponse>>
-            >(`/api/posts/timeline?page=0&size=100`, { allow404: true });
+            >(`/api/posts/timeline?${params.toString()}`, { allow404: true });
             if (timelinePayload) {
                 applyServerPayload(timelinePayload);
+                appliedSearchQuery = searchParam;
+                appliedCategory = categoryParam;
             } else {
                 const feedPayload = await fetchFromBlog<
                     ApiResponse<PageResponse<PostResponse>>
                 >(`/api/posts/feed?page=0&size=100`, { allow404: true });
                 applyServerPayload(feedPayload);
+                appliedSearchQuery = searchParam;
+                appliedCategory = categoryParam;
             }
         } catch (error) {
             console.error("Failed to load blog feed", error);
@@ -548,8 +575,9 @@
     function applyFilters(collection: BlogPostView[]) {
         return collection
             .filter((post) => {
-                const query = searchQuery.toLowerCase();
+                const query = searchQuery.trim().toLowerCase();
                 const matchesSearch =
+                    !query ||
                     post.title.toLowerCase().includes(query) ||
                     post.description.toLowerCase().includes(query) ||
                     post.author.toLowerCase().includes(query);
@@ -581,7 +609,6 @@
     ) {
         const base = {
             total: posts.length,
-            featured: posts.filter((p) => p.featured).length,
             totalViews: posts.reduce((sum, post) => sum + post.views, 0),
             totalLikes: posts.reduce((sum, post) => sum + post.likes, 0),
         };
@@ -590,7 +617,6 @@
         }
         return {
             total: personalStats.totalPosts,
-            featured: base.featured,
             totalViews: personalStats.totalViews,
             totalLikes: personalStats.totalLikes,
         };
@@ -692,6 +718,109 @@
             showNotification(
                 {
                     title: "Thao tác thất bại",
+                    message: extractErrorMessage(error),
+                },
+                "error",
+            );
+        }
+    }
+
+    function scheduleRealtimeFilters() {
+        if (!hasMounted) return;
+        const trimmedSearch = searchQuery.trim();
+        const trimmedCategory = selectedCategory.trim();
+        const searchChanged = trimmedSearch !== appliedSearchQuery;
+        const categoryChanged = trimmedCategory !== appliedCategory;
+        if (!searchChanged && !categoryChanged) {
+            return;
+        }
+        if (filterDebounceHandle) {
+            clearTimeout(filterDebounceHandle);
+        }
+        const delay = searchChanged ? 350 : 0;
+        filterDebounceHandle = setTimeout(() => {
+            fetchFeed({
+                search: trimmedSearch,
+                category: trimmedCategory,
+            });
+        }, delay);
+    }
+
+    function handleSearchInput(value: string) {
+        searchQuery = value;
+        scheduleRealtimeFilters();
+    }
+
+    function handleCategoryFilter(category: string) {
+        selectedCategory = category;
+        scheduleRealtimeFilters();
+    }
+
+    async function handleDelete(post: BlogPostView) {
+        if (blogServiceBaseCandidates.length === 0) {
+            showNotification(
+                {
+                    title: "Thiếu cấu hình",
+                    message: "Không xác định được địa chỉ Blog Service.",
+                },
+                "error",
+            );
+            return;
+        }
+        if (!userId) {
+            showNotification(
+                {
+                    title: "Cần đăng nhập",
+                    message: "Hãy đăng nhập để xoá bài viết của bạn.",
+                },
+                "error",
+            );
+            return;
+        }
+        if (typeof window !== "undefined") {
+            const confirmed = window.confirm(
+                `Bạn có chắc chắn muốn xoá "${post.title}"?`,
+            );
+            if (!confirmed) {
+                return;
+            }
+        }
+        try {
+            const payload = await fetchFromBlog<
+                ApiResponse<UserPostStats>
+            >(`/api/posts/${post.id}`, {
+                method: "DELETE",
+                withAuth: true,
+            });
+            blogPosts = blogPosts.filter((item) => item.id !== post.id);
+            likedPostIds.delete(post.id);
+            likedPostIds = new Set(likedPostIds);
+            persistLikedToStorage();
+            updateCategories(null, blogPosts);
+            if (selectedPost?.id === post.id) {
+                closeDetailModal();
+            }
+            if (payload?.data) {
+                userStats = {
+                    totalPosts: Number(payload.data.totalPosts ?? 0),
+                    totalLikes: Number(payload.data.totalLikes ?? 0),
+                    totalViews: Number(payload.data.totalViews ?? 0),
+                };
+            } else {
+                await fetchMyPostStats();
+            }
+            showNotification(
+                {
+                    title: "Đã xoá bài viết",
+                    message: "Bài viết đã được xoá khỏi bảng tin.",
+                },
+                "success",
+            );
+        } catch (error) {
+            console.error("Failed to delete post", error);
+            showNotification(
+                {
+                    title: "Không thể xoá bài viết",
                     message: extractErrorMessage(error),
                 },
                 "error",
@@ -850,21 +979,12 @@
                     </div>
                     <span class="font-medium">Write Post</span>
                 </button>
-
-                <button
-                    class="flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-xl transition-all duration-300 hover:shadow-md"
-                >
-                    <div class="w-4 h-4">
-                        <FaFilter />
-                    </div>
-                    <span class="font-medium">Filter</span>
-                </button>
             </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div class="flex items-center justify-between">
                 <div>
@@ -877,24 +997,6 @@
                     class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
                 >
                     <div class="w-5 h-5 text-blue-600">
-                        <FaPencilAlt />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Featured</p>
-                    <p class="text-2xl font-bold text-yellow-600">
-                        {stats.featured}
-                    </p>
-                </div>
-                <div
-                    class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center"
-                >
-                    <div class="w-4 h-4 text-yellow-600">
                         <FaPencilAlt />
                     </div>
                 </div>
@@ -953,7 +1055,10 @@
                 <input
                     type="text"
                     bind:value={searchQuery}
-                    placeholder="Search posts by title, content, or author..."
+                    placeholder="Tìm bài viết theo tiêu đề, nội dung hoặc tác giả..."
+                    aria-label="Tìm bài viết"
+                    on:input={(event) =>
+                        handleSearchInput((event.currentTarget as HTMLInputElement).value)}
                     class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
                 />
             </div>
@@ -963,6 +1068,10 @@
                 <select
                     bind:value={selectedCategory}
                     class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
+                    on:change={(event) =>
+                        handleCategoryFilter(
+                            (event.currentTarget as HTMLSelectElement).value,
+                        )}
                 >
                     <option value=""> Categories </option>
                     {#each categories as category}
@@ -973,7 +1082,7 @@
                     <button
                         type="button"
                         class="text-sm text-gray-500 hover:text-gray-700"
-                        on:click={() => (selectedCategory = "")}
+                        on:click={() => handleCategoryFilter("")}
                     >
                         Bỏ lọc
                     </button>
@@ -1069,19 +1178,34 @@
                         <FaSearch />
                     </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">
-                    Chưa có bài viết
-                </h3>
-                <p class="text-gray-600 mb-6">
-                    Hãy chia sẻ hành trình đầu tiên của bạn hoặc thử điều chỉnh
-                    bộ lọc.
-                </p>
-                <button
-                    on:click={handleWritePost}
-                    class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
-                >
-                    Viết bài đầu tiên
-                </button>
+                {#if selectedCategory}
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                        Không có bài viết về chủ đề này
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Hãy thử chọn một chuyên mục khác hoặc bỏ lọc để xem tất cả bài viết.
+                    </p>
+                    <button
+                        on:click={() => handleCategoryFilter("")}
+                        class="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-300"
+                    >
+                        Bỏ lọc
+                    </button>
+                {:else}
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                        Chưa có bài viết
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Hãy chia sẻ hành trình đầu tiên của bạn hoặc thử điều chỉnh
+                        bộ lọc.
+                    </p>
+                    <button
+                        on:click={handleWritePost}
+                        class="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-300"
+                    >
+                        Viết bài đầu tiên
+                    </button>
+                {/if}
             </div>
         {:else}
             <!-- Posts Grid -->
@@ -1097,20 +1221,112 @@
                             ? 'max-w-none'
                             : ''}"
                     >
-                        <BlogCard
-                            title={post.title}
-                            description={post.description}
-                            author={post.author}
-                            readTime={post.readTime}
-                            publishDate={post.publishDateLabel}
-                            likes={post.likes}
-                            views={post.views}
-                            imageUrl={post.imageUrl}
-                            category={post.category}
-                            featured={post.featured}
-                            on:readMore={() => handleReadMore(post)}
-                            on:like={() => handleLike(post)}
-                        />
+                        <div class="relative group">
+                            <div
+                                class="relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-gray-100"
+                            >
+                                {#if post.featured}
+                                    <div class="absolute top-4 left-4 z-20">
+                                        <span
+                                            class="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold rounded-full shadow-lg"
+                                        >
+                                            Nổi bật
+                                        </span>
+                                    </div>
+                                {/if}
+                                <div class="absolute top-4 right-4 z-20">
+                                    <span
+                                        class="px-3 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full shadow-lg border border-gray-200"
+                                    >
+                                        {post.category}
+                                    </span>
+                                </div>
+                                <div class="relative h-48 overflow-hidden">
+                                    <img
+                                        src={post.imageUrl}
+                                        alt={`Ảnh bìa ${post.title}`}
+                                        class="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
+                                    ></div>
+                                    <div class="absolute bottom-4 left-4 right-4">
+                                        <div
+                                            class="flex items-center justify-between text-white"
+                                        >
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-4 h-4">
+                                                    <IoIosPin />
+                                                </div>
+                                                <span class="text-sm font-medium">
+                                                    {post.author}
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <div class="w-4 h-4">
+                                                    <IoMdTime />
+                                                </div>
+                                                <span class="text-sm">{post.readTime}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-6 relative z-20">
+                                    <h3
+                                        class="text-xl font-bold text-gray-800 mb-3 group-hover:text-teal-600 transition-colors duration-300 line-clamp-1"
+                                    >
+                                        {post.title}
+                                    </h3>
+                                    <p
+                                        class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed"
+                                    >
+                                        {post.description}
+                                    </p>
+                                    <div
+                                        class="flex items-center justify-between mb-4 text-sm text-gray-500"
+                                    >
+                                        <div class="flex items-center space-x-4">
+                                            <span>{post.publishDateLabel}</span>
+                                            <div class="flex items-center space-x-1">
+                                                <div class="w-3 h-3">
+                                                    <IoMdEye />
+                                                </div>
+                                                <span>{formatNumber(post.views)}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            on:click={() => handleLike(post)}
+                                            class="relative z-10 flex items-center space-x-1 text-red-500 hover:text-red-600 transition-colors duration-200"
+                                        >
+                                            <div class="w-4 h-4">
+                                                <IoMdHeart />
+                                            </div>
+                                            <span class="font-medium">
+                                                {formatNumber(post.likes)}
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <div class="flex flex-col gap-3 sm:flex-row">
+                                        <button
+                                            type="button"
+                                            on:click={() => handleReadMore(post)}
+                                            class="relative z-10 flex-1 flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl transition-all duration-300 hover:shadow-lg"
+                                        >
+                                            <span class="font-medium">Đọc thêm</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            on:click={() => handleDelete(post)}
+                                            class="relative z-10 flex-1 flex items-center justify-center px-6 py-3 bg-white border border-red-200 text-red-500 rounded-xl hover:bg-red-50 hover:border-red-300 transition-colors duration-300"
+                                        >
+                                            Xóa
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 {/each}
             </div>
@@ -1181,7 +1397,6 @@
                     class="ml-auto flex items-center gap-2 text-teal-600 hover:text-teal-700 hover:cursor-pointer"
                     on:click={() => selectedPost && handleLike(selectedPost)}
                 >
-                    <!-- <FaPlus size={1} /> -->
                     <span>Yêu thích</span>
                 </button>
             </div>
@@ -1318,5 +1533,29 @@
     /* Custom styles for better animations */
     .hover\:scale-102:hover {
         transform: scale(1.02);
+    }
+
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 </style>
