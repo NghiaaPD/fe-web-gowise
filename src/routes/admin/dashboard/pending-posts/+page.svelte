@@ -1,12 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { goto, replaceState } from "$app/navigation";
-  import AdminBoard from "../../../pages/AdminBoard.svelte";
-
-  const TAB_KEYS = ["overview", "users", "plans", "settings"] as const;
-  type TabKey = (typeof TAB_KEYS)[number];
-
-  let activeTab: TabKey = "overview";
+  import { goto } from "$app/navigation";
+  import AdminPendingPosts from "../../../../components/AdminPendingPosts.svelte";
 
   onMount(() => {
     const cookies = document.cookie.split(";");
@@ -43,34 +38,35 @@
     } catch (error) {
       console.error("Error verifying admin token:", error);
       window.location.href = "/";
-      return;
-    }
-
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab && TAB_KEYS.includes(tab as TabKey)) {
-        activeTab = tab as TabKey;
-      }
     }
   });
 
-  function handleTabChange(tab: TabKey) {
-    activeTab = tab;
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("tab", tab);
-      replaceState(`${url.pathname}${url.search}`);
-    }
-  }
-
-  function openPendingPostsPage() {
-    goto("/admin/dashboard/pending-posts");
+  function goBack() {
+    goto("/admin/dashboard?tab=users");
   }
 </script>
 
-<AdminBoard
-  initialTab={activeTab}
-  onTabChange={handleTabChange}
-  onNavigateToPending={openPendingPostsPage}
-/>
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="mx-auto max-w-6xl space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold text-teal-600">Quản lý bài viết</p>
+        <h1 class="text-3xl font-bold text-gray-900">
+          Bài viết Pending cần duyệt
+        </h1>
+        <p class="text-sm text-gray-500">
+          Kiểm tra nội dung người dùng gửi lên và quyết định Approve hoặc Reject.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="rounded-full border border-gray-300 px-5 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-white"
+        onclick={goBack}
+      >
+        Quay lại bảng quản trị
+      </button>
+    </div>
+
+    <AdminPendingPosts />
+  </div>
+</div>
