@@ -3,7 +3,7 @@
   import { showNotification } from "$lib";
 
   type ModerateAction = "APPROVE" | "REJECT";
-  type AuthSource = "cookie" | "service";
+  type AuthSource = "cookie";
 
   interface AuthContext {
     token: string;
@@ -41,15 +41,6 @@
   }
 
   const BLOG_SERVICE_BASE_URL = getBlogServiceBase();
-  const SERVICE_ACCOUNT_TOKEN =
-    import.meta.env?.VITE_BLOG_SERVICE_ADMIN_TOKEN || "";
-  const SERVICE_ACCOUNT_USER_ID =
-    import.meta.env?.VITE_BLOG_SERVICE_ADMIN_ID || "";
-  const SERVICE_ACCOUNT_ROLES = parseConfiguredRoles(
-    import.meta.env?.VITE_BLOG_SERVICE_ADMIN_ROLES,
-  );
-  const FORCE_SERVICE_ACCOUNT =
-    import.meta.env?.VITE_BLOG_SERVICE_USE_SERVICE_ACCOUNT === "true";
   const pendingPageSize = 5;
 
   let pendingPosts: PendingPost[] = [];
@@ -61,15 +52,6 @@
   let moderationNotes: Record<string, string> = {};
   let moderationBusy: Record<string, boolean> = {};
   let authSource: AuthSource | null = null;
-  let preferServiceAccount = FORCE_SERVICE_ACCOUNT;
-  let serviceAuthCache: AuthContext | null = SERVICE_ACCOUNT_TOKEN
-    ? {
-        token: SERVICE_ACCOUNT_TOKEN,
-        userId: SERVICE_ACCOUNT_USER_ID || undefined,
-        roles: SERVICE_ACCOUNT_ROLES,
-        source: "service",
-      }
-    : null;
 
   function getBlogServiceBase() {
     const local = import.meta.env?.VITE_BLOG_SERVICE_LOCAL;
@@ -177,11 +159,6 @@
     return [];
   }
 
-  function parseConfiguredRoles(value?: string): string[] {
-    const normalized = normalizeRoles(value ?? "");
-    return normalized.length ? normalized : ["ADMIN"];
-  }
-
   function getCookieContext(): AuthContext | null {
     const token = getAccessToken();
     if (!token) return null;
@@ -193,63 +170,7 @@
     };
   }
 
-  async function getServiceAccountContext(
-    forceRefresh = false,
-  ): Promise<AuthContext | null> {
-    if (SERVICE_ACCOUNT_TOKEN && !forceRefresh) {
-      return {
-        token: SERVICE_ACCOUNT_TOKEN,
-        userId: SERVICE_ACCOUNT_USER_ID || undefined,
-        roles: SERVICE_ACCOUNT_ROLES,
-        source: "service",
-      };
-    }
-
-    if (!SERVICE_ACCOUNT_USER_ID) return null;
-    if (!forceRefresh && serviceAuthCache) return serviceAuthCache;
-
-    try {
-      const response = await fetch(
-        blogUrl("/api/auth/token", {
-          userId: SERVICE_ACCOUNT_USER_ID,
-          roles: SERVICE_ACCOUNT_ROLES.join(","),
-        }),
-        { credentials: "include" },
-      );
-      if (!response.ok) {
-        console.error("Không thể lấy token service account:", await response.text());
-        return null;
-      }
-      const payload = (await response.json()) as { token?: string };
-      if (!payload.token) {
-        console.error("Không nhận được token service account hợp lệ");
-        return null;
-      }
-      serviceAuthCache = {
-        token: payload.token,
-        userId: SERVICE_ACCOUNT_USER_ID,
-        roles: SERVICE_ACCOUNT_ROLES,
-        source: "service",
-      };
-      return serviceAuthCache;
-    } catch (error) {
-      console.error("Lỗi khi lấy token service account:", error);
-      return null;
-    }
-  }
-
-  async function getAuthContext(forceService = false): Promise<AuthContext | null> {
-    if (!preferServiceAccount && !forceService) {
-      const cookieCtx = getCookieContext();
-      if (cookieCtx) return cookieCtx;
-    }
-
-    const serviceCtx = await getServiceAccountContext(forceService);
-    if (serviceCtx) {
-      preferServiceAccount = true;
-      return serviceCtx;
-    }
-
+  function getAuthContext(): AuthContext | null {
     return getCookieContext();
   }
 
@@ -267,13 +188,11 @@
     return headers;
   }
 
-  async function ensureAuthContext(
-    forceService = false,
-  ): Promise<AuthContext | null> {
-    const context = await getAuthContext(forceService);
+  async function ensureAuthContext(): Promise<AuthContext | null> {
+    const context = getAuthContext();
     if (!context) {
       pendingError =
-        "Không tìm thấy token hợp lệ. Vui lòng đăng nhập lại hoặc cấu hình VITE_BLOG_SERVICE_ADMIN_TOKEN / VITE_BLOG_SERVICE_ADMIN_ID.";
+        "Không tìm thấy token hợp lệ. Vui lòng đăng nhập lại để tiếp tục duyệt bài.";
       showNotification(
         {
           title: "Thiếu thông tin đăng nhập",
@@ -339,25 +258,6 @@
 
       if (!response.ok) {
         const raw = await response.text();
-        if (
-          response.status === 401 &&
-          auth.source === "cookie" &&
-          (SERVICE_ACCOUNT_TOKEN || SERVICE_ACCOUNT_USER_ID) &&
-          !preferServiceAccount
-        ) {
-          preferServiceAccount = true;
-          pendingLoading = false;
-          await fetchPendingPosts(reset);
-          return;
-        }
-        if (response.status === 401 && auth.source === "service") {
-          const refreshed = await getServiceAccountContext(true);
-          if (refreshed) {
-            pendingLoading = false;
-            await fetchPendingPosts(reset);
-            return;
-          }
-        }
         const fallbackMessage =
           response.status === 401
             ? "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
@@ -422,25 +322,6 @@
 
       if (!response.ok) {
         const raw = await response.text();
-        if (
-          response.status === 401 &&
-          auth.source === "cookie" &&
-          (SERVICE_ACCOUNT_TOKEN || SERVICE_ACCOUNT_USER_ID) &&
-          !preferServiceAccount
-        ) {
-          preferServiceAccount = true;
-          moderationBusy = { ...moderationBusy, [postId]: false };
-          await moderatePost(postId, action);
-          return;
-        }
-        if (response.status === 401 && auth.source === "service") {
-          const refreshed = await getServiceAccountContext(true);
-          if (refreshed) {
-            moderationBusy = { ...moderationBusy, [postId]: false };
-            await moderatePost(postId, action);
-            return;
-          }
-        }
         const fallbackMessage =
           response.status === 401
             ? "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
@@ -506,9 +387,7 @@
       </p>
       {#if authSource}
         <p class="text-xs text-gray-400">
-          {authSource === "service"
-            ? "Đang dùng service account cho Blog Service."
-            : "Đang dùng token của phiên đăng nhập hiện tại."}
+          Đang dùng token của phiên đăng nhập hiện tại.
         </p>
       {/if}
     </div>

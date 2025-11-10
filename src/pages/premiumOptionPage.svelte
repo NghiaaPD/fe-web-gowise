@@ -16,7 +16,7 @@
   const USER_CACHE_KEY = "gowise:user-data";
 
   const backendBaseUrl = buildBackendBaseUrl();
-  const paymentEndpoint = resolvePaymentEndpoint();
+  const paymentEndpoint = `${backendBaseUrl}/api/payos/payment-link`;
 
   let showAuthForm = $state(false);
   let isCreatingPayment = $state(false);
@@ -94,18 +94,6 @@
       rawDomain.startsWith("http://") || rawDomain.startsWith("https://");
     const base = hasProtocol ? rawDomain : `http://${rawDomain}`;
     return port ? `${base}:${port}` : base;
-  }
-
-  function resolvePaymentEndpoint(): string {
-    const override = trimSlash(import.meta.env.VITE_PAYOS_PAYMENT_ENDPOINT);
-    if (override) {
-      return override;
-    }
-    const paymentBase = trimSlash(import.meta.env.VITE_PAYMENT_SERVICE_BASE);
-    if (paymentBase) {
-      return `${paymentBase}/api/payos/payment-link`;
-    }
-    return `${backendBaseUrl}/api/payos/payment-link`;
   }
 
   function sanitizeDescription(value: string | null | undefined): string {

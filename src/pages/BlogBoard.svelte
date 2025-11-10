@@ -147,21 +147,21 @@
     }
 
     function collectBlogServiceCandidates(): string[] {
-        const domains = [
-            import.meta.env.VITE_BLOG_SERVICE_DOMAIN,
-            import.meta.env.VITE_BE_DOMAIN,
-            import.meta.env.VITE_BLOG_SERVICE_FALLBACK,
-            import.meta.env.VITE_BLOG_SERVICE_LOCAL,
-        ];
-        const ports = [
-            import.meta.env.VITE_BLOG_SERVICE_PORT,
-            import.meta.env.VITE_BE_BLOG_PORT,
-            import.meta.env.VITE_BE_PORT,
-            import.meta.env.VITE_BLOG_SERVICE_FALLBACK_PORT,
-        ];
-
         const seen = new Set<string>();
         const candidates: string[] = [];
+        const domains: Array<string | undefined> = [
+            import.meta.env.VITE_BLOG_SERVICE_LOCAL,
+            import.meta.env.VITE_BE_DOMAIN,
+        ];
+
+        if (typeof window !== "undefined") {
+            domains.push(window.location.origin);
+        }
+
+        const ports: Array<string | undefined> = [
+            import.meta.env.VITE_BE_PORT,
+            "8080",
+        ];
 
         const pushCandidate = (value?: string | null) => {
             if (!value) return;
