@@ -11,6 +11,54 @@
   import FillInformation from "../../../components/fillInformation.svelte";
   import { onMount } from "svelte";
 
+  const USER_CACHE_KEY = "gowise:user-data";
+  const BACKEND_BASE = (() => {
+    const domain = import.meta.env.VITE_BE_DOMAIN?.replace(/\/$/, "") ?? "http://localhost";
+    const port = import.meta.env.VITE_BE_PORT ? `:${import.meta.env.VITE_BE_PORT}` : "";
+    return `${domain}${port}`;
+  })();
+
+  function readCachedUserData() {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem(USER_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      console.warn("Unable to read cached user data", error);
+      return null;
+    }
+  }
+
+  function cacheUserData(data: any | null) {
+    if (typeof window === "undefined") return;
+    try {
+      if (data) {
+        sessionStorage.setItem(USER_CACHE_KEY, JSON.stringify(data));
+      } else {
+        sessionStorage.removeItem(USER_CACHE_KEY);
+      }
+    } catch (error) {
+      console.warn("Unable to cache user data", error);
+    }
+  }
+
+  function getAccessTokenFromCookie(): string | null {
+    if (typeof document === "undefined") return null;
+    const tokenCookie = document.cookie
+      .split(";")
+      .find((cookie) => cookie.trim().startsWith("accessToken="));
+    return tokenCookie ? tokenCookie.split("=")[1] : null;
+  }
+
+  function clearPaymentQueryParam() {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("payment");
+    const query = url.searchParams.toString();
+    const next = query ? `${url.pathname}?${query}` : url.pathname;
+    window.history.replaceState({}, "", next);
+  }
+
   // Get userId from URL path (alternative approach without $app/stores)
   let userId = $state("");
 
@@ -24,7 +72,9 @@
   let showFillDialog = $state(false);
 
   // User data state
-  let userData = $state(null);
+  let userData = $state(readCachedUserData());
+  let showUpgradeBanner = $state(false);
+  let upgradeBannerMessage = $state("");
 
   // Handle navigation from sidebar
   function handleNavigation(event: CustomEvent<{ page: string }>) {
@@ -42,27 +92,21 @@
     if (!userId) return;
 
     try {
-      const cookies = document.cookie.split(";");
-      const tokenCookie = cookies.find((cookie) =>
-        cookie.trim().startsWith("accessToken=")
-      );
+      const token = getAccessTokenFromCookie();
+      if (!token) return;
 
-      if (!tokenCookie) return;
-
-      const token = tokenCookie.split("=")[1];
-
-      const res = await fetch(
-        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`${BACKEND_BASE}/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (res.ok) {
         const response = await res.json();
         userData = response.data;
+        cacheUserData(userData);
+      } else if (res.status === 404) {
+        cacheUserData(null);
       }
     } catch (error) {
       console.error("Error refreshing user data:", error);
@@ -81,18 +125,13 @@
     userId = pathSegments[1]; // Assuming URL format: /{userId}/mainScreen
 
     // Kiểm tra accessToken từ cookie
-    const cookies = document.cookie.split(";");
-    const tokenCookie = cookies.find((cookie) =>
-      cookie.trim().startsWith("accessToken=")
-    );
+    const token = getAccessTokenFromCookie();
 
-    if (!tokenCookie) {
+    if (!token) {
       // Không có token, redirect về trang đăng nhập
       window.location.href = "/";
       return;
     }
-
-    const token = tokenCookie.split("=")[1];
 
     // Decode token để kiểm tra user_id và role
     try {
@@ -127,22 +166,28 @@
 
       // Gọi API để lấy thông tin user
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetch(`${BACKEND_BASE}/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.status === 404) {
           showFillDialog = true;
+          cacheUserData(null);
         } else if (res.ok) {
           const response = await res.json();
           userData = response.data; // Lấy data từ response
+          cacheUserData(userData);
         }
       } catch (err) {
         console.error("Error fetching user info:", err);
+      }
+      const params = new URLSearchParams(window.location.search);
+      const paymentStatus = params.get("payment");
+      if (paymentStatus === "success") {
+        await handlePostPaymentUpgrade(token);
+      } else if (paymentStatus === "failed" || paymentStatus === "cancel") {
+        clearPaymentQueryParam();
       }
     } catch (error) {
       console.error("Error verifying token:", error);
@@ -150,7 +195,54 @@
       return;
     }
   });
+
+  async function handlePostPaymentUpgrade(token: string) {
+    if (!userId) return;
+    try {
+      const response = await fetch(`${BACKEND_BASE}/users/${userId}/is_premium`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isPremium: true }),
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.success === false) {
+        const message =
+          payload?.message || `Không thể cập nhật tài khoản (HTTP ${response.status})`;
+        throw new Error(message);
+      }
+      await refreshUserData();
+      showUpgradeBanner = true;
+      upgradeBannerMessage = "Chúc mừng! Bạn đã trở thành thành viên Premium.";
+      setTimeout(() => {
+        showUpgradeBanner = false;
+        upgradeBannerMessage = "";
+      }, 5000);
+    } catch (error) {
+      showUpgradeBanner = true;
+      upgradeBannerMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể cập nhật trạng thái Premium sau thanh toán.";
+      setTimeout(() => {
+        showUpgradeBanner = false;
+        upgradeBannerMessage = "";
+      }, 6000);
+    } finally {
+      clearPaymentQueryParam();
+    }
+  }
 </script>
+
+{#if showUpgradeBanner}
+  <div class="fixed top-4 inset-x-0 z-50 flex justify-center px-4">
+    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg shadow">
+      {upgradeBannerMessage}
+    </div>
+  </div>
+{/if}
 
 <div class="flex h-screen w-full">
   <div class="w-1/5 min-w-[128px] max-w-[256px] h-full">

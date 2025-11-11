@@ -28,6 +28,8 @@
     onclose,
     onforgotpassword,
     onsociallogin,
+    onloginSuccess,
+    redirectOnSuccess = true,
   }: {
     onsubmit?: (event: CustomEvent<AuthFormEvents["submit"]>) => void;
     onclose?: (event: CustomEvent<AuthFormEvents["close"]>) => void;
@@ -35,6 +37,8 @@
       event: CustomEvent<AuthFormEvents["forgotPassword"]>
     ) => void;
     onsociallogin?: (event: CustomEvent<AuthFormEvents["socialLogin"]>) => void;
+    onloginSuccess?: (event: CustomEvent<{ accessToken: string; userId: string; userRole: string }>) => void;
+    redirectOnSuccess?: boolean;
   } = $props();
 
   let email = $state("");
@@ -181,11 +185,21 @@
           },
         }));
 
-        // Hiển thị loading screen và fetch user data
-        setTimeout(() => {
-          showLoadingScreen = true;
-          fetchUserDataAndRedirect(userId, userRole, data.accessToken);
-        }, 1500);
+        const successDetail = {
+          accessToken: data.accessToken,
+          userId,
+          userRole,
+        };
+
+        if (redirectOnSuccess) {
+          // Hiển thị loading screen và fetch user data
+          setTimeout(() => {
+            showLoadingScreen = true;
+            fetchUserDataAndRedirect(userId, userRole, data.accessToken);
+          }, 1500);
+        } else {
+          onloginSuccess?.(new CustomEvent("loginSuccess", { detail: successDetail }));
+        }
         onsubmit?.(
           new CustomEvent("submit", {
             detail: { email, password, rememberMe, isSignUp },

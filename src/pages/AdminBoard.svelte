@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  // Import icons from svelte-icons
   import FaUserShield from "svelte-icons/fa/FaUserShield.svelte";
   import FaEnvelope from "svelte-icons/fa/FaEnvelope.svelte";
   import FaBell from "svelte-icons/fa/FaBell.svelte";
@@ -21,8 +19,18 @@
   import FaArrowUp from "svelte-icons/fa/FaArrowUp.svelte";
   import FaChartLine from "svelte-icons/fa/FaChartLine.svelte";
   import FaMapMarker from "svelte-icons/fa/FaMapMarker.svelte";
+  import FaRegNewspaper from "svelte-icons/fa/FaRegNewspaper.svelte";
 
-  let activeTab = $state("overview");
+  const TAB_KEYS = ["overview", "users", "plans", "settings"] as const;
+  type TabKey = (typeof TAB_KEYS)[number];
+
+  const props = $props<{
+    initialTab?: TabKey;
+    onTabChange?: (tab: TabKey) => void;
+    onNavigateToPending?: () => void;
+  }>();
+
+  let activeTab = $state<TabKey>(props.initialTab ?? "overview");
 
   // Logout function
   function handleLogout() {
@@ -32,6 +40,10 @@
     // Redirect to login
     window.location.href = "/";
   }
+
+  $effect(() => {
+    activeTab = props.initialTab ?? "overview";
+  });
 
   // Mock data
   let stats = {
@@ -55,8 +67,9 @@
     diskUsage: { value: "38%", color: "text-cyan-500" },
   };
 
-  function setActiveTab(tab: string) {
+  function setActiveTab(tab: TabKey) {
     activeTab = tab;
+    props?.onTabChange?.(tab);
   }
 
   function formatCurrency(value: number) {
@@ -444,6 +457,35 @@
           </div>
         </div>
       </div>
+    {:else if activeTab === "users"}
+      <div class="space-y-6">
+        <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p class="text-sm font-semibold text-teal-600">Quản lý người dùng</p>
+              <h3 class="text-2xl font-semibold text-gray-900">
+                Kiểm duyệt bài viết cộng đồng
+              </h3>
+              <p class="text-sm text-gray-500">
+                Chuyển tới trang duyệt bài để xem các bài Pending và thực hiện Approve/Reject.
+              </p>
+            </div>
+            <button
+              type="button"
+              onclick={props?.onNavigateToPending}
+              class="inline-flex items-center gap-2 rounded-full border border-teal-500 px-5 py-2 text-sm font-semibold text-teal-600 transition-colors hover:bg-teal-50"
+            >
+              <div class="h-4 w-4">
+                <FaRegNewspaper />
+              </div>
+              <span>Mở trang bài viết</span>
+            </button>
+          </div>
+        </div>
+        <div class="rounded-lg border border-dashed border-gray-300 bg-white/60 p-6 text-center text-gray-500">
+          Các tính năng quản lý người dùng khác sẽ được cập nhật trong thời gian tới.
+        </div>
+      </div>
     {:else}
       <!-- Other tabs content placeholder -->
       <div
@@ -453,9 +495,7 @@
           class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4"
         >
           <div class="w-8 h-8 text-gray-400">
-            {#if activeTab === "users"}
-              <FaUsers />
-            {:else if activeTab === "plans"}
+            {#if activeTab === "plans"}
               <FaCalendar />
             {:else if activeTab === "settings"}
               <FaCog />
@@ -463,22 +503,18 @@
           </div>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2 capitalize">
-          Quản lý {activeTab === "users"
-            ? "Người dùng"
-            : activeTab === "plans"
-              ? "Kế hoạch"
-              : activeTab === "settings"
-                ? "Cài đặt"
-                : activeTab}
+          Quản lý {activeTab === "plans"
+            ? "Kế hoạch"
+            : activeTab === "settings"
+              ? "Cài đặt"
+              : activeTab}
         </h3>
         <p class="text-gray-600">
-          Phần này đang được phát triển. Nội dung quản lý {activeTab === "users"
-            ? "người dùng"
-            : activeTab === "plans"
-              ? "kế hoạch"
-              : activeTab === "settings"
-                ? "cài đặt"
-                : activeTab}
+          Phần này đang được phát triển. Nội dung quản lý {activeTab === "plans"
+            ? "kế hoạch"
+            : activeTab === "settings"
+              ? "cài đặt"
+              : activeTab}
           sẽ sớm có mặt.
         </p>
       </div>
