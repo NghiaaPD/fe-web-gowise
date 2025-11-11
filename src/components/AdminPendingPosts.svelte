@@ -61,13 +61,17 @@
     const port = import.meta.env?.VITE_BE_PORT;
 
     if (domain && port) {
-      return `${stripTrailingSlash(domain)}:${port}`;
+      const baseUrl = `${stripTrailingSlash(domain)}:${port}`;
+      console.log("[BlogService] Base URL:", baseUrl);
+      return baseUrl;
     }
 
     if (domain) {
+      console.log("[BlogService] Using domain only:", domain);
       return stripTrailingSlash(domain);
     }
 
+    console.log("[BlogService] Using default: http://localhost:8080");
     return "http://localhost:8080";
   }
 
@@ -114,47 +118,81 @@
     const payload = decodeJWT(token);
     if (!payload) return null;
     return (
-      payload?.user_id ||
-      payload?.id ||
-      payload?.sub ||
-      payload?.userId ||
-      null
+      payload?.user_id || payload?.id || payload?.sub || payload?.userId || null
     );
   }
 
   function resolveRoles(token: string): string[] {
     const payload = decodeJWT(token);
     if (!payload) return [];
-    return extractRolesFromPayload(payload);
+    const roles = extractRolesFromPayload(payload);
+    console.log("[ResolveRoles] Roles from JWT:", roles);
+    return roles;
   }
 
   function extractRolesFromPayload(payload: Record<string, unknown>): string[] {
+    console.log("[ExtractRoles] JWT Payload:", payload);
+
     const candidates = [
       payload?.roles,
       payload?.role,
       payload?.user_role,
       payload?.userRole,
+      payload?.authorities, // Thêm authorities
     ];
 
     for (const candidate of candidates) {
       const normalized = normalizeRoles(candidate);
-      if (normalized.length) return normalized;
+      if (normalized.length) {
+        console.log(
+          "[ExtractRoles] Found roles:",
+          normalized,
+          "from:",
+          candidate
+        );
+        return normalized;
+      }
     }
+
+    console.warn("[ExtractRoles] No roles found in JWT payload");
     return [];
   }
 
   function normalizeRoles(value: unknown): string[] {
     if (!value) return [];
     if (Array.isArray(value)) {
-      return value
-        .map((role) => String(role).trim().toUpperCase())
+      const roles = value
+        .map((role) => {
+          // Handle Spring Security authority format: {authority: "ROLE_ADMIN"}
+          if (
+            typeof role === "object" &&
+            role !== null &&
+            "authority" in role
+          ) {
+            const authority = (role as any).authority;
+            // Remove "ROLE_" prefix if exists, GIỮ NGUYÊN CHỮ THƯỜNG
+            return String(authority)
+              .replace(/^ROLE_/i, "")
+              .trim();
+          }
+          // Handle string format, GIỮ NGUYÊN CHỮ THƯỜNG
+          return String(role)
+            .replace(/^ROLE_/i, "")
+            .trim();
+        })
         .filter((role) => role.length > 0);
+
+      console.log("[NormalizeRoles] Array input:", value, "→ output:", roles);
+      return roles;
     }
     if (typeof value === "string") {
-      return value
+      const roles = value
         .split(",")
-        .map((role) => role.trim().toUpperCase())
+        .map((role) => role.replace(/^ROLE_/i, "").trim())
         .filter((role) => role.length > 0);
+
+      console.log("[NormalizeRoles] String input:", value, "→ output:", roles);
+      return roles;
     }
     return [];
   }
@@ -177,14 +215,19 @@
   function buildAuthHeaders(context: AuthContext) {
     const headers: Record<string, string> = {
       Accept: "application/json",
-      Authorization: `Bearer ${context.token}`,
+      // CHỈ GỬI X-User-Id và X-User-Roles, không gửi Authorization
     };
     if (context.userId) {
       headers["X-User-Id"] = context.userId;
     }
     if (context.roles?.length) {
-      headers["X-User-Roles"] = context.roles.join(",");
+      // Backend yêu cầu: X-User-Roles: admin (chữ thường, không có dấu ngoặc đơn)
+      // Chỉ gửi 1 role, lấy role đầu tiên
+      const primaryRole = context.roles[0];
+      headers["X-User-Roles"] = primaryRole;
+      console.log("[BuildAuthHeaders] Role sent:", headers["X-User-Roles"]);
     }
+    console.log("[BuildAuthHeaders] Headers:", headers);
     return headers;
   }
 
@@ -198,7 +241,7 @@
           title: "Thiếu thông tin đăng nhập",
           message: pendingError,
         },
-        "error",
+        "error"
       );
       return null;
     }
@@ -245,28 +288,52 @@
     }
 
     try {
-      const response = await fetch(
-        blogUrl("/api/admin/posts/pending", {
-          page: pageToLoad,
-          size: pendingPageSize,
-        }),
-        {
-          headers: buildAuthHeaders(auth),
-          credentials: "include",
-        },
-      );
+      const url = blogUrl("/api/admin/posts/pending", {
+        page: pageToLoad,
+        size: pendingPageSize,
+      });
+      console.log("[FetchPendingPosts] Requesting URL:", url);
+      console.log("[FetchPendingPosts] Auth headers:", buildAuthHeaders(auth));
+
+      const response = await fetch(url, {
+        headers: buildAuthHeaders(auth),
+        credentials: "include",
+      });
+
+      console.log("[FetchPendingPosts] Response status:", response.status);
 
       if (!response.ok) {
         const raw = await response.text();
-        const fallbackMessage =
-          response.status === 401
-            ? "Phiên đăng nhập đã hết hạn hoặc không hợp lệ."
-            : "Không thể tải danh sách bài viết đang chờ duyệt.";
-        throw new Error(raw || fallbackMessage);
+        console.error("[FetchPendingPosts] Error response:", raw);
+
+        // Try to parse error message from backend
+        let errorMessage = `Không thể tải danh sách bài viết đang chờ duyệt. (Status: ${response.status})`;
+        try {
+          const errorData = JSON.parse(raw);
+          if (errorData.message) {
+            errorMessage =
+              errorData.message === "Blog service temporarily unavailable"
+                ? "🔧 Dịch vụ Blog đang tạm thời không khả dụng. Vui lòng liên hệ quản trị viên hệ thống hoặc thử lại sau."
+                : errorData.message;
+          }
+        } catch {
+          // If not JSON, use raw text
+          if (raw && raw.length < 200) {
+            errorMessage = raw;
+          }
+        }
+
+        if (response.status === 401) {
+          errorMessage = "Phiên đăng nhập đã hết hạn hoặc không hợp lệ.";
+        }
+
+        throw new Error(errorMessage);
       }
 
       const payload: ApiResponse<PageResponse<PendingPost>> =
         await response.json();
+      console.log("[FetchPendingPosts] Payload received:", payload);
+
       const newItems = payload?.data?.items ?? [];
       const nextPosts = reset ? newItems : [...pendingPosts, ...newItems];
       pendingPosts = nextPosts;
@@ -276,7 +343,15 @@
         typeof totalFromApi === "number" ? totalFromApi : nextPosts.length;
       pendingHasMore = pendingPosts.length < pendingTotal;
       pendingPage = pageToLoad + 1;
+
+      console.log(
+        "[FetchPendingPosts] Loaded",
+        newItems.length,
+        "posts. Total:",
+        pendingTotal
+      );
     } catch (error) {
+      console.error("[FetchPendingPosts] Error:", error);
       pendingError =
         error instanceof Error
           ? error.message
@@ -286,7 +361,7 @@
           title: "Không thể tải bài viết",
           message: pendingError,
         },
-        "error",
+        "error"
       );
     } finally {
       pendingLoading = false;
@@ -317,7 +392,7 @@
             action,
             ...(note ? { note } : {}),
           }),
-        },
+        }
       );
 
       if (!response.ok) {
@@ -342,7 +417,7 @@
               ? "Bài viết được xuất bản thành công."
               : "Bài viết đã bị từ chối.",
         },
-        "success",
+        "success"
       );
 
       if (pendingPosts.length === 0 && pendingHasMore) {
@@ -360,7 +435,7 @@
           message,
           icon: "⚠️",
         },
-        "error",
+        "error"
       );
     } finally {
       moderationBusy = { ...moderationBusy, [postId]: false };
@@ -415,22 +490,49 @@
 
   {#if pendingLoading && pendingPosts.length === 0}
     <div class="px-6 py-8 text-center text-gray-500">
-      Đang tải danh sách bài viết…
+      <div
+        class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-500 border-r-transparent"
+      ></div>
+      <p class="mt-3">Đang tải danh sách bài viết…</p>
     </div>
   {:else if pendingError && pendingPosts.length === 0}
-    <div class="px-6 py-8 text-center text-red-600">
-      {pendingError}
+    <div class="px-6 py-8">
+      <div
+        class="mx-auto max-w-md rounded-lg border border-red-200 bg-red-50 p-6"
+      >
+        <div class="flex items-start gap-3">
+          <div class="text-2xl">⚠️</div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-red-900 mb-1">
+              Không thể tải dữ liệu
+            </h3>
+            <p class="text-sm text-red-700">{pendingError}</p>
+            <button
+              type="button"
+              onclick={() => fetchPendingPosts(true)}
+              class="mt-3 rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            >
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   {:else if pendingPosts.length === 0}
     <div class="px-6 py-8 text-center text-gray-500">
-      Hiện chưa có bài viết nào cần duyệt.
+      <div class="text-4xl mb-2">✓</div>
+      <p>Hiện chưa có bài viết nào cần duyệt.</p>
     </div>
   {:else}
     <div class="divide-y divide-gray-100">
       {#each pendingPosts as post (post.id)}
-        <div class="flex flex-col gap-4 px-6 py-6 lg:flex-row lg:items-stretch lg:gap-6">
+        <div
+          class="flex flex-col gap-4 px-6 py-6 lg:flex-row lg:items-stretch lg:gap-6"
+        >
           {#if post.coverImageUrl}
-            <div class="max-w-xs overflow-hidden rounded-xl border border-gray-100">
+            <div
+              class="max-w-xs overflow-hidden rounded-xl border border-gray-100"
+            >
               <img
                 src={post.coverImageUrl}
                 alt={`Ảnh bìa bài viết ${post.title}`}
@@ -443,7 +545,9 @@
           <div class="flex flex-1 flex-col gap-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <p
+                  class="text-xs font-semibold uppercase tracking-wide text-gray-500"
+                >
                   Tác giả
                 </p>
                 <p class="text-sm font-semibold text-gray-900">
@@ -489,7 +593,7 @@
                 oninput={(event) =>
                   handleNoteInput(
                     post.id,
-                    (event.currentTarget as HTMLTextAreaElement).value,
+                    (event.currentTarget as HTMLTextAreaElement).value
                   )}
                 placeholder="Nhập lý do duyệt / từ chối để ghi lại lịch sử."
               />
