@@ -15,6 +15,8 @@
 
   let showDeleteDialog = false;
   let planToDelete: any = null;
+  let showPremiumDialog = false;
+  let isPremium = false;
 
   function handleDeleteDialogCancel() {
     showDeleteDialog = false;
@@ -113,6 +115,15 @@
 
   let userId: string | null = null;
 
+  // Helper to get access token from cookies
+  function getAccessTokenFromCookie(): string | null {
+    if (typeof document === "undefined") return null;
+    const tokenCookie = document.cookie
+      .split(";")
+      .find((cookie) => cookie.trim().startsWith("accessToken="));
+    return tokenCookie ? tokenCookie.split("=")[1] : null;
+  }
+
   // Helper to get userId from JWT token in cookies
   function getUserIdFromToken(): string | null {
     const cookies = document.cookie.split(";");
@@ -129,6 +140,34 @@
       return tokenData?.user_id || tokenData?.id || tokenData?.sub || null;
     } catch (error) {
       return null;
+    }
+  }
+
+  // Fetch user details to check premium status
+  async function fetchUserDetails() {
+    try {
+      const currentUserId = getUserIdFromToken();
+      if (!currentUserId) return;
+
+      const token = getAccessTokenFromCookie();
+      const response = await fetch(
+        `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/${currentUserId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          isPremium = result.data.is_premium || result.data.isPremium || false;
+          console.log("[ManagePlan] User premium status:", isPremium);
+        }
+      }
+    } catch (error) {
+      console.error("[ManagePlan] Error fetching user details:", error);
     }
   }
 
@@ -169,6 +208,7 @@
   }
 
   onMount(() => {
+    fetchUserDetails();
     fetchPlans();
   });
   // Get transformed selected plan for ViewDetail
@@ -253,7 +293,21 @@
   };
 
   function handleCreatePlan() {
+    // Check if user has reached plan limit (2 plans for non-premium users)
+    if (!isPremium && plans.length >= 2) {
+      showPremiumDialog = true;
+      return;
+    }
     window.location.href = "/instruct";
+  }
+
+  function handleClosePremiumDialog() {
+    showPremiumDialog = false;
+  }
+
+  function handleUpgradePremium() {
+    showPremiumDialog = false;
+    window.location.href = "/premium";
   }
 
   function handleImportPlan() {
@@ -734,6 +788,131 @@
     </div>
   {/if}
 </div>
+
+<!-- Premium Upgrade Dialog -->
+{#if showPremiumDialog}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    in:fade={{ duration: 200 }}
+    out:fade={{ duration: 200 }}
+  >
+    <div
+      class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all"
+      in:slide={{ duration: 300, easing: quintOut }}
+      out:slide={{ duration: 200, easing: quintOut }}
+    >
+      <!-- Icon -->
+      <div class="flex justify-center mb-6">
+        <div
+          class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="text-white"
+          >
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h3 class="text-2xl font-bold text-center text-gray-800 mb-3">
+        Nâng cấp lên Premium
+      </h3>
+
+      <!-- Description -->
+      <p class="text-gray-600 text-center mb-6">
+        Bạn đã đạt giới hạn <span class="font-bold text-teal-600"
+          >2 kế hoạch</span
+        >
+        cho tài khoản miễn phí. Nâng cấp lên Premium để tạo
+        <span class="font-bold text-teal-600">không giới hạn</span> kế hoạch du lịch!
+      </p>
+
+      <!-- Features -->
+      <div
+        class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-4 mb-6"
+      >
+        <p class="text-sm font-semibold text-gray-700 mb-3">Lợi ích Premium:</p>
+        <ul class="space-y-2">
+          <li class="flex items-start gap-2 text-sm text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-teal-600 flex-shrink-0 mt-0.5"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Tạo không giới hạn kế hoạch du lịch</span>
+          </li>
+          <li class="flex items-start gap-2 text-sm text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-teal-600 flex-shrink-0 mt-0.5"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Truy cập các tính năng cao cấp</span>
+          </li>
+          <li class="flex items-start gap-2 text-sm text-gray-600">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="text-teal-600 flex-shrink-0 mt-0.5"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Hỗ trợ ưu tiên 24/7</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button
+          on:click={handleClosePremiumDialog}
+          class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors duration-200 font-medium"
+        >
+          Để sau
+        </button>
+        <button
+          on:click={handleUpgradePremium}
+          class="flex-1 px-4 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+        >
+          Nâng cấp ngay
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   /* Custom styles for better animations */

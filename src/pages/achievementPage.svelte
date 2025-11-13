@@ -49,6 +49,17 @@
       points: 75,
       icon: "👥",
     },
+    {
+      id: 4,
+      title: "Blog Đầu Tiên",
+      description: "Viết và đăng bài blog đầu tiên của bạn",
+      category: "social",
+      isUnlocked: false,
+      progress: 0,
+      maxProgress: 1,
+      points: 80,
+      icon: "📝",
+    },
   ];
 
   let isLoading = true;
@@ -185,18 +196,129 @@
   }
 
   // Check if user has added their first friend
-  // TODO: Replace with actual API endpoint when available
   async function checkFirstFriend(): Promise<boolean> {
     try {
-      // Placeholder - endpoint not yet available
-      // When API is ready, replace with:
-      // const response = await fetch(`${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/friends/${userId}`);
-      // const friends = await response.json();
-      // return Array.isArray(friends) && friends.length > 0;
+      if (!userId) {
+        console.log("[Achievement] No userId found for friend check");
+        return false;
+      }
 
-      return false; // Default to locked until API is available
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("accessToken="))
+        ?.split("=")[1];
+
+      if (!token) {
+        console.log("[Achievement] No token found");
+        return false;
+      }
+
+      const url = `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/users/friends/accepted`;
+      console.log("[Achievement] Checking first friend with URL:", url);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+        }),
+      });
+
+      console.log(
+        "[Achievement] Friends API Response status:",
+        response.status
+      );
+
+      if (!response.ok) {
+        console.warn(
+          "[Achievement] Friends API returned error:",
+          response.status
+        );
+        return false;
+      }
+
+      const result = await response.json();
+      console.log("[Achievement] Friends API Response data:", result);
+
+      if (result.success && result.data) {
+        const friendCount = Array.isArray(result.data) ? result.data.length : 0;
+        const hasFriend = friendCount > 0;
+        console.log(
+          "[Achievement] Has first friend?",
+          hasFriend,
+          "Friends count:",
+          friendCount
+        );
+        return hasFriend;
+      }
+
+      return false;
     } catch (error) {
-      console.error("Error checking first friend:", error);
+      console.error("[Achievement] Error checking first friend:", error);
+      return false;
+    }
+  }
+
+  // Check if user has written their first blog post
+  async function checkFirstBlog(): Promise<boolean> {
+    try {
+      if (!userId) {
+        console.log("[Achievement] No userId found for blog check");
+        return false;
+      }
+
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("accessToken="))
+        ?.split("=")[1];
+
+      if (!token) {
+        console.log("[Achievement] No token found");
+        return false;
+      }
+
+      const url = `http://gowise.ddns.net:8081/api/posts/me?page=0&size=1`;
+      console.log("[Achievement] Checking first blog with URL:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "X-User-Id": userId,
+        },
+      });
+
+      console.log("[Achievement] Blog API Response status:", response.status);
+
+      if (!response.ok) {
+        console.warn("[Achievement] Blog API returned error:", response.status);
+        return false;
+      }
+
+      const result = await response.json();
+      console.log("[Achievement] Blog API Response data:", result);
+
+      if (result.data && result.data.items) {
+        const approvedPosts = result.data.items.filter(
+          (item: any) => item.status === "APPROVED"
+        );
+        const hasBlog = approvedPosts.length > 0;
+        console.log(
+          "[Achievement] Has first blog?",
+          hasBlog,
+          "Approved posts count:",
+          approvedPosts.length
+        );
+        return hasBlog;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("[Achievement] Error checking first blog:", error);
       return false;
     }
   }
@@ -217,16 +339,19 @@
     try {
       // Check each achievement
       console.log("[Achievement] Checking all achievements...");
-      const [hasFirstPlan, hasFirstPhoto, hasFirstFriend] = await Promise.all([
-        checkFirstPlan(),
-        checkFirstPhoto(),
-        checkFirstFriend(),
-      ]);
+      const [hasFirstPlan, hasFirstPhoto, hasFirstFriend, hasFirstBlog] =
+        await Promise.all([
+          checkFirstPlan(),
+          checkFirstPhoto(),
+          checkFirstFriend(),
+          checkFirstBlog(),
+        ]);
 
       console.log("[Achievement] Results:", {
         hasFirstPlan,
         hasFirstPhoto,
         hasFirstFriend,
+        hasFirstBlog,
       });
 
       // Update achievement 1 - First Plan
@@ -255,6 +380,14 @@
         achievements[2].unlockedDate = new Date().toISOString();
       }
 
+      // Update achievement 4 - First Blog
+      if (hasFirstBlog) {
+        console.log("[Achievement] ✅ Unlocking First Blog achievement!");
+        achievements[3].isUnlocked = true;
+        achievements[3].progress = 1;
+        achievements[3].unlockedDate = new Date().toISOString();
+      }
+
       // Trigger reactivity
       achievements = [...achievements];
       console.log("[Achievement] Final achievements state:", achievements);
@@ -273,6 +406,44 @@
   $: totalPoints = achievements
     .filter((a) => a.isUnlocked)
     .reduce((sum, a) => sum + a.points, 0);
+
+  $: unlockedCount = achievements.filter((a) => a.isUnlocked).length;
+
+  $: rank =
+    unlockedCount === 0
+      ? "Sắt"
+      : unlockedCount === 1
+        ? "Đồng"
+        : unlockedCount <= 3
+          ? "Bạc"
+          : "Vàng";
+
+  $: rankColor =
+    unlockedCount === 0
+      ? "text-gray-600"
+      : unlockedCount === 1
+        ? "text-orange-600"
+        : unlockedCount <= 3
+          ? "text-slate-400"
+          : "text-yellow-600";
+
+  $: rankBgColor =
+    unlockedCount === 0
+      ? "bg-gray-100"
+      : unlockedCount === 1
+        ? "bg-orange-100"
+        : unlockedCount <= 3
+          ? "bg-slate-100"
+          : "bg-yellow-100";
+
+  $: rankIconColor =
+    unlockedCount === 0
+      ? "text-gray-600"
+      : unlockedCount === 1
+        ? "text-orange-600"
+        : unlockedCount <= 3
+          ? "text-slate-400"
+          : "text-yellow-600";
 
   // Filter state
   let selectedCategory: string = "all";
@@ -334,12 +505,15 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm text-gray-600 mb-1">Hạng</p>
-          <p class="text-2xl font-bold text-blue-600">
-            {totalPoints >= 1000 ? "Vàng" : totalPoints >= 500 ? "Bạc" : "Đồng"}
+          <p class="text-2xl font-bold {rankColor}">
+            {rank}
+          </p>
+          <p class="text-xs text-gray-500 mt-1">
+            {unlockedCount}/4 thành tựu
           </p>
         </div>
         <div
-          class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+          class="w-10 h-10 {rankBgColor} rounded-lg flex items-center justify-center"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -351,7 +525,7 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="text-blue-600"
+            class={rankIconColor}
           >
             <path
               d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"
