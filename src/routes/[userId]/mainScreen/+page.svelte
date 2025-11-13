@@ -6,15 +6,20 @@
   import BlogBoard from "../../../pages/BlogBoard.svelte";
   import FundBoard from "../../../pages/GalleryBoard.svelte";
   import AchievementPage from "../../../pages/achievementPage.svelte";
+  import FriendBoard from "../../../pages/friendBoard.svelte";
   import ChatBotPage from "../../../pages/ChatBotPage.svelte";
   import SettingPage from "../../../pages/SettingPage.svelte";
   import FillInformation from "../../../components/fillInformation.svelte";
+  import SearchFriends from "../../../components/searchFriends.svelte";
   import { onMount } from "svelte";
 
   const USER_CACHE_KEY = "gowise:user-data";
   const BACKEND_BASE = (() => {
-    const domain = import.meta.env.VITE_BE_DOMAIN?.replace(/\/$/, "") ?? "http://localhost";
-    const port = import.meta.env.VITE_BE_PORT ? `:${import.meta.env.VITE_BE_PORT}` : "";
+    const domain =
+      import.meta.env.VITE_BE_DOMAIN?.replace(/\/$/, "") ?? "http://localhost";
+    const port = import.meta.env.VITE_BE_PORT
+      ? `:${import.meta.env.VITE_BE_PORT}`
+      : "";
     return `${domain}${port}`;
   })();
 
@@ -70,6 +75,9 @@
 
   // Show fill information dialog
   let showFillDialog = $state(false);
+
+  // Show search friends dialog
+  let showSearchFriends = $state(false);
 
   // User data state
   let userData = $state(readCachedUserData());
@@ -199,18 +207,22 @@
   async function handlePostPaymentUpgrade(token: string) {
     if (!userId) return;
     try {
-      const response = await fetch(`${BACKEND_BASE}/users/${userId}/is_premium`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isPremium: true }),
-      });
+      const response = await fetch(
+        `${BACKEND_BASE}/users/${userId}/is_premium`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ isPremium: true }),
+        }
+      );
       const payload = await response.json().catch(() => null);
       if (!response.ok || payload?.success === false) {
         const message =
-          payload?.message || `Không thể cập nhật tài khoản (HTTP ${response.status})`;
+          payload?.message ||
+          `Không thể cập nhật tài khoản (HTTP ${response.status})`;
         throw new Error(message);
       }
       await refreshUserData();
@@ -238,7 +250,9 @@
 
 {#if showUpgradeBanner}
   <div class="fixed top-4 inset-x-0 z-50 flex justify-center px-4">
-    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg shadow">
+    <div
+      class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg shadow"
+    >
       {upgradeBannerMessage}
     </div>
   </div>
@@ -265,6 +279,8 @@
         {#key achievementKey}
           <AchievementPage />
         {/key}
+      {:else if currentPage === "friends"}
+        <FriendBoard />
       {:else if currentPage === "chat"}
         <ChatBotPage />
       {:else if currentPage === "settings"}
@@ -280,3 +296,32 @@
 {#if showFillDialog}
   <FillInformation on:close={() => (showFillDialog = false)} />
 {/if}
+
+{#if showSearchFriends}
+  <SearchFriends on:close={() => (showSearchFriends = false)} />
+{/if}
+
+<!-- Floating Action Button -->
+<button
+  class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 shadow-lg hover:shadow-xl hover:from-teal-600 hover:to-teal-700 active:scale-95 flex items-center justify-center transition-all duration-200 z-[1000]"
+  aria-label="Add user"
+  onclick={() => (showSearchFriends = true)}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="text-white"
+  >
+    <path d="M2 21a8 8 0 0 1 13.292-6" />
+    <circle cx="10" cy="8" r="5" />
+    <path d="M19 16v6" />
+    <path d="M22 19h-6" />
+  </svg>
+</button>

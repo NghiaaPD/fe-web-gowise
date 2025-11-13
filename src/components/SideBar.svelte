@@ -6,6 +6,7 @@
   import FaImages from "svelte-icons/fa/FaImages.svelte";
   import FaTrophy from "svelte-icons/fa/FaTrophy.svelte";
   import FaRobot from "svelte-icons/fa/FaRobot.svelte";
+  import FaUserFriends from "svelte-icons/fa/FaUserFriends.svelte";
   import FaSignOutAlt from "svelte-icons/fa/FaSignOutAlt.svelte";
   import IoIosSettings from "svelte-icons/io/IoIosSettings.svelte";
 
@@ -60,9 +61,11 @@
                 ? '168px'
                 : activeItem === 'achievement'
                   ? '224px'
-                  : activeItem === 'chat'
+                  : activeItem === 'friends'
                     ? '280px'
-                    : '0'}); box-shadow: 0 2px 8px rgba(13, 148, 136, 0.15);"
+                    : activeItem === 'chat'
+                      ? '336px'
+                      : '0'}); box-shadow: 0 2px 8px rgba(13, 148, 136, 0.15);"
       ></div>
 
       <!-- Dashboard -->
@@ -184,6 +187,30 @@
           'achievement'
             ? 'text-[#0D9488] font-semibold'
             : 'text-[#374151] group-hover:text-[#0D9488]'}">Thành tựu</span
+        >
+      </button>
+
+      <!-- Friends -->
+      <button
+        class="relative flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 ease-in-out group hover:bg-[#F0FDFA] cursor-pointer {activeItem ===
+        'friends'
+          ? 'bg-[#F0FDFA]'
+          : ''} w-full text-left"
+        on:click={() => setActive("friends")}
+      >
+        <div
+          class="w-5 h-5 transition-all duration-300 ease-in-out {activeItem ===
+          'friends'
+            ? 'text-[#0D9488] transform scale-110'
+            : 'text-[#374151] group-hover:text-[#0D9488] group-hover:scale-105'}"
+        >
+          <FaUserFriends />
+        </div>
+        <span
+          class="font-medium transition-all duration-300 ease-in-out {activeItem ===
+          'friends'
+            ? 'text-[#0D9488] font-semibold'
+            : 'text-[#374151] group-hover:text-[#0D9488]'}">Bạn bè</span
         >
       </button>
 

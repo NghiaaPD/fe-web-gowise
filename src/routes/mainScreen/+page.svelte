@@ -63,3 +63,27 @@
 </script>
 
 <LoadingScreen manualControl={false} />
+
+<!-- Floating Action Button -->
+<button
+  class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 flex items-center hover:scale-110 justify-center transition-all duration-300 z-[1000] group"
+  aria-label="Add user"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="text-white transition-transform duration-300 group-hover:rotate-90"
+  >
+    <path d="M2 21a8 8 0 0 1 13.292-6" />
+    <circle cx="10" cy="8" r="5" />
+    <path d="M19 16v6" />
+    <path d="M22 19h-6" />
+  </svg>
+</button>
