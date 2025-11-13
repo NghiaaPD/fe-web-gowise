@@ -193,7 +193,9 @@
       });
 
       if (response.ok) {
-        console.log(`[Gallery API] Successfully deleted gallery ${galleryToDelete.id}`);
+        console.log(
+          `[Gallery API] Successfully deleted gallery ${galleryToDelete.id}`
+        );
         // Remove gallery from list
         galleries = galleries.filter((g) => g.id !== galleryToDelete?.id);
         // Show success notification (optional)

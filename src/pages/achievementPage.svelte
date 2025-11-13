@@ -410,38 +410,38 @@
   $: unlockedCount = achievements.filter((a) => a.isUnlocked).length;
 
   $: rank =
-    unlockedCount === 0
+    unlockedCount <= 1
       ? "Sắt"
-      : unlockedCount === 1
+      : unlockedCount === 2
         ? "Đồng"
-        : unlockedCount <= 3
+        : unlockedCount === 3
           ? "Bạc"
           : "Vàng";
 
   $: rankColor =
-    unlockedCount === 0
+    unlockedCount <= 1
       ? "text-gray-600"
-      : unlockedCount === 1
-        ? "text-orange-600"
-        : unlockedCount <= 3
+      : unlockedCount === 2
+        ? "text-[#D08D4C]"
+        : unlockedCount === 3
           ? "text-slate-400"
           : "text-yellow-600";
 
   $: rankBgColor =
-    unlockedCount === 0
+    unlockedCount <= 1
       ? "bg-gray-100"
-      : unlockedCount === 1
-        ? "bg-orange-100"
-        : unlockedCount <= 3
+      : unlockedCount === 2
+        ? "bg-[#D08D4C]/10"
+        : unlockedCount === 3
           ? "bg-slate-100"
           : "bg-yellow-100";
 
   $: rankIconColor =
-    unlockedCount === 0
+    unlockedCount <= 1
       ? "text-gray-600"
-      : unlockedCount === 1
-        ? "text-orange-600"
-        : unlockedCount <= 3
+      : unlockedCount === 2
+        ? "text-[#D08D4C]"
+        : unlockedCount === 3
           ? "text-slate-400"
           : "text-yellow-600";
 
