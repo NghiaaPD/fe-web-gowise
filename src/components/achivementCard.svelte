@@ -3,7 +3,7 @@
   import FaLock from "svelte-icons/fa/FaLock.svelte";
   import FaStar from "svelte-icons/fa/FaStar.svelte";
 
-  export let id: number;
+  export const id: number = 0;
   export let title: string;
   export let description: string;
   export let category: "travel" | "social" | "planning" | "milestone";

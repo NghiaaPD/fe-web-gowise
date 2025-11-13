@@ -18,6 +18,8 @@
   let showDetailGallery = false;
   let selectedGalleryId = "";
   let isLoading = true;
+  let showDeleteDialog = false;
+  let galleryToDelete: { id: string; caption: string } | null = null;
 
   // Gallery data
   let galleries: Array<{
@@ -158,6 +160,55 @@
     selectedGalleryId = gallery.id;
     showDetailGallery = true;
   }
+
+  function handleDeleteClick(gallery: any, event: Event) {
+    event.stopPropagation();
+    galleryToDelete = { id: gallery.id, caption: gallery.caption };
+    showDeleteDialog = true;
+  }
+
+  function handleCancelDelete() {
+    showDeleteDialog = false;
+    galleryToDelete = null;
+  }
+
+  async function handleConfirmDelete() {
+    if (!galleryToDelete) return;
+
+    const token = getAccessToken();
+    if (!token) {
+      console.error("No authentication token found");
+      return;
+    }
+
+    try {
+      const apiUrl = `${import.meta.env.VITE_BE_DOMAIN}:${import.meta.env.VITE_BE_PORT}/api/gallery/trip/${galleryToDelete.id}`;
+      console.log(`[Gallery API] Deleting gallery: ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        console.log(`[Gallery API] Successfully deleted gallery ${galleryToDelete.id}`);
+        // Remove gallery from list
+        galleries = galleries.filter((g) => g.id !== galleryToDelete?.id);
+        // Show success notification (optional)
+        console.log("✅ Gallery deleted successfully");
+      } else {
+        const error = await response.text();
+        console.error(`[Gallery API] Failed to delete gallery:`, error);
+      }
+    } catch (error) {
+      console.error("[Gallery API] Error deleting gallery:", error);
+    } finally {
+      showDeleteDialog = false;
+      galleryToDelete = null;
+    }
+  }
 </script>
 
 <div class="p-6 bg-gray-50 min-h-screen {showUploadScreen ? 'blur-sm' : ''}">
@@ -279,6 +330,7 @@
               location={gallery.location}
               photoCount={gallery.photoCount}
               totalLikes={gallery.totalLikes}
+              onDelete={(e) => handleDeleteClick(gallery, e)}
             />
           </div>
         {/each}
@@ -309,4 +361,70 @@
 <!-- Upload Screen Modal -->
 {#if showUploadScreen}
   <UploadScreen on:close={handleCloseUpload} on:upload={handleUpload} />
+{/if}
+
+<!-- Delete Confirmation Dialog -->
+{#if showDeleteDialog && galleryToDelete}
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all"
+    >
+      <!-- Icon -->
+      <div class="flex justify-center mb-4">
+        <div
+          class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-red-600"
+          >
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            ></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h3 class="text-xl font-bold text-center text-gray-800 mb-2">
+        Xóa bộ sưu tập?
+      </h3>
+
+      <!-- Description -->
+      <p class="text-gray-600 text-center mb-6">
+        Bạn có chắc chắn muốn xóa <span class="font-semibold"
+          >"{galleryToDelete.caption}"</span
+        >? Hành động này không thể hoàn tác.
+      </p>
+
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button
+          on:click={handleCancelDelete}
+          class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors duration-200 font-medium"
+        >
+          Hủy
+        </button>
+        <button
+          on:click={handleConfirmDelete}
+          class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors duration-200 font-medium"
+        >
+          Xóa
+        </button>
+      </div>
+    </div>
+  </div>
 {/if}
