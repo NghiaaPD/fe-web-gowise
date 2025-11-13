@@ -238,8 +238,8 @@
           const body =
             jsonBody !== undefined ? JSON.stringify(jsonBody) : undefined;
           const finalUrl = buildBlogUrl(path, candidate);
-          console.log('🚀 [fetchFromBlog] Final URL to fetch:', finalUrl);
-          console.log('🚀 [fetchFromBlog] Headers:', headers);
+          console.log("🚀 [fetchFromBlog] Final URL to fetch:", finalUrl);
+          console.log("🚀 [fetchFromBlog] Headers:", headers);
           return fetch(finalUrl, {
             method,
             headers,
