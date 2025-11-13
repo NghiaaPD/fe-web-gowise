@@ -293,12 +293,12 @@
 <!-- Profile Modal -->
 {#if showProfileModal}
   <!-- Backdrop -->
-  <div
-    class="fixed inset-0 z-[1040] bg-black/20 backdrop-blur-sm"
+  <button
+    type="button"
+    class="fixed inset-0 z-[1040] bg-black/20 backdrop-blur-sm cursor-default"
     onclick={closeProfileModal}
-    role="button"
-    tabindex="0"
-  ></div>
+    aria-label="Đóng hồ sơ"
+  ></button>
 
   <!-- Modal Content -->
   <div
@@ -306,9 +306,9 @@
   >
     <div
       class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
-      onclick={(e) => e.stopPropagation()}
-      role="button"
-      tabindex="0"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profile-title"
     >
       {#if isLoadingProfile}
         <div class="p-8 flex items-center justify-center">
@@ -328,7 +328,10 @@
             </span>
           </div>
           <div>
-            <h3 class="text-2xl font-semibold text-gray-900 mb-1">
+            <h3
+              id="profile-title"
+              class="text-2xl font-semibold text-gray-900 mb-1"
+            >
               {profileData.firstName}
               {profileData.lastName}
             </h3>
@@ -342,9 +345,9 @@
         <div class="p-8">
           <div class="grid grid-cols-2 gap-8 mb-6">
             <div class="flex flex-col">
-              <label class="mb-2 font-medium text-gray-700 text-sm"
-                >First Name</label
-              >
+              <div class="mb-2 font-medium text-gray-700 text-sm">
+                First Name
+              </div>
               <div
                 class="p-3 border border-gray-300 rounded-md text-sm bg-gray-50"
               >
@@ -352,9 +355,9 @@
               </div>
             </div>
             <div class="flex flex-col">
-              <label class="mb-2 font-medium text-gray-700 text-sm"
-                >Last Name</label
-              >
+              <div class="mb-2 font-medium text-gray-700 text-sm">
+                Last Name
+              </div>
               <div
                 class="p-3 border border-gray-300 rounded-md text-sm bg-gray-50"
               >
@@ -365,7 +368,7 @@
 
           {#if profileData.city}
             <div class="flex flex-col mb-6">
-              <label class="mb-2 font-medium text-gray-700 text-sm">City</label>
+              <div class="mb-2 font-medium text-gray-700 text-sm">City</div>
               <div
                 class="p-3 border border-gray-300 rounded-md text-sm bg-gray-50"
               >
@@ -376,7 +379,7 @@
 
           {#if profileData.bio}
             <div class="flex flex-col mb-6">
-              <label class="mb-2 font-medium text-gray-700 text-sm">Bio</label>
+              <div class="mb-2 font-medium text-gray-700 text-sm">Bio</div>
               <div
                 class="p-3 border border-gray-300 rounded-md text-sm bg-gray-50 min-h-[100px]"
               >
