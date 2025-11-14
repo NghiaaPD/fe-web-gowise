@@ -76,7 +76,7 @@
 
       <div class="space-y-4">
         <div>
-          <label class="text-sm font-semibold text-gray-700">Base URL</label>
+          <div class="text-sm font-semibold text-gray-700">Base URL</div>
           <div class="mt-1 flex gap-2">
             <code class="flex-1 rounded bg-gray-100 p-2 text-sm">{baseUrl}</code
             >
@@ -90,9 +90,9 @@
         </div>
 
         <div>
-          <label class="text-sm font-semibold text-gray-700"
-            >Pending Posts URL</label
-          >
+          <div class="text-sm font-semibold text-gray-700">
+            Pending Posts URL
+          </div>
           <div class="mt-1 flex gap-2">
             <code class="flex-1 rounded bg-gray-100 p-2 text-sm break-all"
               >{pendingUrl}</code
@@ -107,7 +107,7 @@
         </div>
 
         <div>
-          <label class="text-sm font-semibold text-gray-700">Status</label>
+          <div class="text-sm font-semibold text-gray-700">Status</div>
           <div class="mt-1 flex items-center gap-2">
             {#if healthStatus === "checking"}
               <span
@@ -134,9 +134,7 @@
 
         {#if apiResponse}
           <div>
-            <label class="text-sm font-semibold text-gray-700"
-              >API Response</label
-            >
+            <div class="text-sm font-semibold text-gray-700">API Response</div>
             <pre
               class="mt-1 overflow-auto rounded bg-gray-900 p-4 text-xs text-green-400 max-h-96">{apiResponse}</pre>
           </div>
