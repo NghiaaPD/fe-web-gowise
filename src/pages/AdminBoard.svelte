@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import FaUserShield from "svelte-icons/fa/FaUserShield.svelte";
   import FaEnvelope from "svelte-icons/fa/FaEnvelope.svelte";
   import FaBell from "svelte-icons/fa/FaBell.svelte";
@@ -21,6 +22,15 @@
   import FaMapMarker from "svelte-icons/fa/FaMapMarker.svelte";
   import FaRegNewspaper from "svelte-icons/fa/FaRegNewspaper.svelte";
 
+  const BACKEND_BASE = (() => {
+    const domain =
+      import.meta.env.VITE_BE_DOMAIN?.replace(/\/$/, "") ?? "http://localhost";
+    const port = import.meta.env.VITE_BE_PORT
+      ? `:${import.meta.env.VITE_BE_PORT}`
+      : "";
+    return `${domain}${port}`;
+  })();
+
   const TAB_KEYS = ["overview", "users", "plans", "settings"] as const;
   type TabKey = (typeof TAB_KEYS)[number];
 
@@ -31,6 +41,17 @@
   }>();
 
   let activeTab = $state<TabKey>(props.initialTab ?? "overview");
+  let isLoading = $state(true);
+
+  // Helper to get JWT token from cookies
+  function getAccessToken(): string | null {
+    const cookies = document.cookie.split(";");
+    const tokenCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith("accessToken=")
+    );
+    if (!tokenCookie) return null;
+    return tokenCookie.split("=")[1];
+  }
 
   // Logout function
   function handleLogout() {
@@ -45,13 +66,103 @@
     activeTab = props.initialTab ?? "overview";
   });
 
-  // Mock data
-  let stats = {
-    totalUsers: { value: 12847, change: 2.3, trend: "up" },
-    activeUsers: { value: 8934, change: 2.1, trend: "up" },
-    totalPlans: { value: 3421, change: 19.3, trend: "up" },
+  // Statistics data
+  let stats = $state({
+    totalUsers: { value: 0, change: 0, trend: "up" },
+    totalPlans: { value: 0, change: 0, trend: "up" },
     revenue: { value: 284750, change: 3.2, trend: "up" },
-  };
+  });
+
+  // Fetch user statistics
+  async function fetchUserStatistics() {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
+      const apiUrl = `${BACKEND_BASE}/users/statistics`;
+      console.log("[Admin API] Fetching user statistics from:", apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("[Admin API] User statistics:", result);
+
+        if (result.success) {
+          stats.totalUsers.value = result.total_users || 0;
+          // Calculate change if provided by API, otherwise use 0
+          stats.totalUsers.change = result.change || 0;
+        }
+      } else {
+        console.error(
+          "[Admin API] Failed to fetch user statistics:",
+          response.status
+        );
+      }
+    } catch (error) {
+      console.error("[Admin API] Error fetching user statistics:", error);
+    }
+  }
+
+  // Fetch plan statistics
+  async function fetchPlanStatistics() {
+    try {
+      const token = getAccessToken();
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
+      const apiUrl = `${BACKEND_BASE}/plans/statistics`;
+      console.log("[Admin API] Fetching plan statistics from:", apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("[Admin API] Plan statistics:", result);
+
+        if (result.success) {
+          stats.totalPlans.value = result.total_plans || 0;
+          // Calculate change if provided by API, otherwise use 0
+          stats.totalPlans.change = result.change || 0;
+        }
+      } else {
+        console.error(
+          "[Admin API] Failed to fetch plan statistics:",
+          response.status
+        );
+      }
+    } catch (error) {
+      console.error("[Admin API] Error fetching plan statistics:", error);
+    }
+  }
+
+  // Fetch all statistics
+  async function fetchStatistics() {
+    isLoading = true;
+    await Promise.all([fetchUserStatistics(), fetchPlanStatistics()]);
+    isLoading = false;
+  }
+
+  onMount(() => {
+    fetchStatistics();
+  });
 
   let systemHealth = {
     serverStatus: {
@@ -194,280 +305,275 @@
   <!-- Main Content -->
   <div class="p-6">
     {#if activeTab === "overview"}
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Users -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Tổng người dùng</p>
-              <p class="text-3xl font-bold text-gray-900">
-                {formatNumber(stats.totalUsers.value)}
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
-            >
-              <div class="w-6 h-6 text-blue-600">
-                <FaUsers />
+      {#if isLoading}
+        <!-- Loading State -->
+        <div class="flex items-center justify-center py-16">
+          <div
+            class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-teal-500 border-t-transparent mb-4"
+          ></div>
+        </div>
+      {:else}
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <!-- Total Users -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-sm font-medium text-gray-600">Tổng người dùng</p>
+                <p class="text-3xl font-bold text-gray-900">
+                  {formatNumber(stats.totalUsers.value)}
+                </p>
+              </div>
+              <div
+                class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+              >
+                <div class="w-6 h-6 text-blue-600">
+                  <FaUsers />
+                </div>
               </div>
             </div>
+            {#if stats.totalUsers.change > 0}
+              <div class="flex items-center space-x-1">
+                <div class="w-3 h-3 text-green-500">
+                  <FaArrowUp />
+                </div>
+                <span class="text-sm text-green-600 font-medium"
+                  >+{stats.totalUsers.change}% so với tháng trước</span
+                >
+              </div>
+            {:else}
+              <div class="text-sm text-gray-500">Dữ liệu cập nhật</div>
+            {/if}
           </div>
-          <div class="flex items-center space-x-1">
-            <div class="w-3 h-3 text-green-500">
-              <FaArrowUp />
+
+          <!-- Total Plans -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-sm font-medium text-gray-600">Tổng kế hoạch</p>
+                <p class="text-3xl font-bold text-gray-900">
+                  {formatNumber(stats.totalPlans.value)}
+                </p>
+              </div>
+              <div
+                class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+              >
+                <div class="w-6 h-6 text-purple-600">
+                  <FaMapMarker />
+                </div>
+              </div>
             </div>
-            <span class="text-sm text-green-600 font-medium"
-              >+{stats.totalUsers.change}% so với tháng trước</span
-            >
+            {#if stats.totalPlans.change > 0}
+              <div class="flex items-center space-x-1">
+                <div class="w-3 h-3 text-green-500">
+                  <FaArrowUp />
+                </div>
+                <span class="text-sm text-green-600 font-medium"
+                  >+{stats.totalPlans.change}% so với tháng trước</span
+                >
+              </div>
+            {:else}
+              <div class="text-sm text-gray-500">Dữ liệu cập nhật</div>
+            {/if}
+          </div>
+
+          <!-- Revenue -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-sm font-medium text-gray-600">Doanh thu</p>
+                <p class="text-3xl font-bold text-gray-900">
+                  {formatCurrency(stats.revenue.value)}
+                </p>
+              </div>
+              <div
+                class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center"
+              >
+                <div class="w-6 h-6 text-teal-600">
+                  <FaDollarSign />
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-1">
+              <div class="w-3 h-3 text-green-500">
+                <FaArrowUp />
+              </div>
+              <span class="text-sm text-green-600 font-medium"
+                >+{stats.revenue.change}% chuyển đổi</span
+              >
+            </div>
           </div>
         </div>
 
-        <!-- Active Users -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-sm font-medium text-gray-600">
-                Người dùng hoạt động
-              </p>
-              <p class="text-3xl font-bold text-gray-900">
-                {formatNumber(stats.activeUsers.value)}
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
-            >
-              <div class="w-6 h-6 text-green-600">
-                <FaChartLine />
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- User Growth Chart -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">
+                Tăng trưởng người dùng
+              </h3>
+              <div class="w-5 h-5 text-gray-400">
+                <FaChartBar />
               </div>
             </div>
-          </div>
-          <div class="flex items-center space-x-1">
-            <div class="w-3 h-3 text-green-500">
-              <FaArrowUp />
+            <div class="h-64 flex items-center justify-center text-gray-500">
+              Biểu đồ trực quan sẽ hiển thị ở đây
             </div>
-            <span class="text-sm text-green-600 font-medium"
-              >+{stats.activeUsers.change}% so với tuần trước</span
-            >
-          </div>
-        </div>
-
-        <!-- Total Plans -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Tổng kế hoạch</p>
-              <p class="text-3xl font-bold text-gray-900">
-                {formatNumber(stats.totalPlans.value)}
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
-            >
-              <div class="w-6 h-6 text-purple-600">
-                <FaMapMarker />
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center space-x-1">
-            <div class="w-3 h-3 text-green-500">
-              <FaArrowUp />
-            </div>
-            <span class="text-sm text-green-600 font-medium"
-              >+{stats.totalPlans.change}% so với tháng trước</span
-            >
-          </div>
-        </div>
-
-        <!-- Revenue -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <p class="text-sm font-medium text-gray-600">Doanh thu</p>
-              <p class="text-3xl font-bold text-gray-900">
-                {formatCurrency(stats.revenue.value)}
-              </p>
-            </div>
-            <div
-              class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center"
-            >
-              <div class="w-6 h-6 text-teal-600">
-                <FaDollarSign />
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center space-x-1">
-            <div class="w-3 h-3 text-green-500">
-              <FaArrowUp />
-            </div>
-            <span class="text-sm text-green-600 font-medium"
-              >+{stats.revenue.change}% chuyển đổi</span
-            >
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Section -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- User Growth Chart -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">
-              Tăng trưởng người dùng
-            </h3>
-            <div class="w-5 h-5 text-gray-400">
-              <FaChartBar />
-            </div>
-          </div>
-          <div class="h-64 flex items-center justify-center text-gray-500">
-            Biểu đồ trực quan sẽ hiển thị ở đây
-          </div>
-        </div>
-
-        <!-- Revenue Analytics Chart -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">
-              Phân tích doanh thu
-            </h3>
-            <div class="w-5 h-5 text-gray-400">
-              <FaTachometerAlt />
-            </div>
-          </div>
-          <div class="h-64 flex items-center justify-center text-gray-500">
-            Biểu đồ trực quan sẽ hiển thị ở đây
-          </div>
-        </div>
-      </div>
-
-      <!-- System Health -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-6">
-          Tình trạng hệ thống
-        </h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
-          <!-- Server Status -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-green-600">
-                <FaServer />
-              </div>
-            </div>
-            <p class="text-xs text-gray-600 mb-1">Trạng thái máy chủ</p>
-            <p class="text-sm font-semibold {systemHealth.serverStatus.color}">
-              {systemHealth.serverStatus.value === "Healthy"
-                ? "Tốt"
-                : systemHealth.serverStatus.value}
-            </p>
           </div>
 
-          <!-- Uptime -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-blue-600">
-                <FaClock />
-              </div>
-            </div>
-            <p class="text-xs text-gray-600 mb-1">Thời gian hoạt động</p>
-            <p class="text-sm font-semibold {systemHealth.uptime.color}">
-              {systemHealth.uptime.value}
-            </p>
-          </div>
-
-          <!-- Response Time -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-purple-600">
-                <FaWifi />
-              </div>
-            </div>
-            <p class="text-xs text-gray-600 mb-1">Thời gian phản hồi</p>
-            <p class="text-sm font-semibold {systemHealth.responseTime.color}">
-              {systemHealth.responseTime.value}
-            </p>
-          </div>
-
-          <!-- Active Connections -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-orange-600">
-                <FaUserFriends />
-              </div>
-            </div>
-            <p class="text-xs text-gray-600 mb-1">Kết nối hoạt động</p>
-            <p
-              class="text-sm font-semibold {systemHealth.activeConnections
-                .color}"
-            >
-              {systemHealth.activeConnections.value}
-            </p>
-          </div>
-
-          <!-- CPU Usage -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-red-600">
+          <!-- Revenue Analytics Chart -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-gray-900">
+                Phân tích doanh thu
+              </h3>
+              <div class="w-5 h-5 text-gray-400">
                 <FaTachometerAlt />
               </div>
             </div>
-            <p class="text-xs text-gray-600 mb-1">Sử dụng CPU</p>
-            <p class="text-sm font-semibold {systemHealth.cpuUsage.color}">
-              {systemHealth.cpuUsage.value}
-            </p>
-          </div>
-
-          <!-- Memory -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-indigo-600">
-                <FaMicrochip />
-              </div>
+            <div class="h-64 flex items-center justify-center text-gray-500">
+              Biểu đồ trực quan sẽ hiển thị ở đây
             </div>
-            <p class="text-xs text-gray-600 mb-1">Bộ nhớ</p>
-            <p class="text-sm font-semibold {systemHealth.memory.color}">
-              {systemHealth.memory.value}
-            </p>
-          </div>
-
-          <!-- Disk Usage -->
-          <div class="text-center">
-            <div
-              class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-3"
-            >
-              <div class="w-6 h-6 text-cyan-600">
-                <FaHdd />
-              </div>
-            </div>
-            <p class="text-xs text-gray-600 mb-1">Sử dụng ổ đĩa</p>
-            <p class="text-sm font-semibold {systemHealth.diskUsage.color}">
-              {systemHealth.diskUsage.value}
-            </p>
           </div>
         </div>
-      </div>
+
+        <!-- System Health -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-6">
+            Tình trạng hệ thống
+          </h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
+            <!-- Server Status -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-green-600">
+                  <FaServer />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Trạng thái máy chủ</p>
+              <p
+                class="text-sm font-semibold {systemHealth.serverStatus.color}"
+              >
+                {systemHealth.serverStatus.value === "Healthy"
+                  ? "Tốt"
+                  : systemHealth.serverStatus.value}
+              </p>
+            </div>
+
+            <!-- Uptime -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-blue-600">
+                  <FaClock />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Thời gian hoạt động</p>
+              <p class="text-sm font-semibold {systemHealth.uptime.color}">
+                {systemHealth.uptime.value}
+              </p>
+            </div>
+
+            <!-- Response Time -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-purple-600">
+                  <FaWifi />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Thời gian phản hồi</p>
+              <p
+                class="text-sm font-semibold {systemHealth.responseTime.color}"
+              >
+                {systemHealth.responseTime.value}
+              </p>
+            </div>
+
+            <!-- Active Connections -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-orange-600">
+                  <FaUserFriends />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Kết nối hoạt động</p>
+              <p
+                class="text-sm font-semibold {systemHealth.activeConnections
+                  .color}"
+              >
+                {systemHealth.activeConnections.value}
+              </p>
+            </div>
+
+            <!-- CPU Usage -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-red-600">
+                  <FaTachometerAlt />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Sử dụng CPU</p>
+              <p class="text-sm font-semibold {systemHealth.cpuUsage.color}">
+                {systemHealth.cpuUsage.value}
+              </p>
+            </div>
+
+            <!-- Memory -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-indigo-600">
+                  <FaMicrochip />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Bộ nhớ</p>
+              <p class="text-sm font-semibold {systemHealth.memory.color}">
+                {systemHealth.memory.value}
+              </p>
+            </div>
+
+            <!-- Disk Usage -->
+            <div class="text-center">
+              <div
+                class="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-3"
+              >
+                <div class="w-6 h-6 text-cyan-600">
+                  <FaHdd />
+                </div>
+              </div>
+              <p class="text-xs text-gray-600 mb-1">Sử dụng ổ đĩa</p>
+              <p class="text-sm font-semibold {systemHealth.diskUsage.color}">
+                {systemHealth.diskUsage.value}
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
     {:else if activeTab === "users"}
       <div class="space-y-6">
         <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p class="text-sm font-semibold text-teal-600">Quản lý người dùng</p>
+              <p class="text-sm font-semibold text-teal-600">
+                Quản lý người dùng
+              </p>
               <h3 class="text-2xl font-semibold text-gray-900">
                 Kiểm duyệt bài viết cộng đồng
               </h3>
               <p class="text-sm text-gray-500">
-                Chuyển tới trang duyệt bài để xem các bài Pending và thực hiện Approve/Reject.
+                Chuyển tới trang duyệt bài để xem các bài Pending và thực hiện
+                Approve/Reject.
               </p>
             </div>
             <button
@@ -482,8 +588,11 @@
             </button>
           </div>
         </div>
-        <div class="rounded-lg border border-dashed border-gray-300 bg-white/60 p-6 text-center text-gray-500">
-          Các tính năng quản lý người dùng khác sẽ được cập nhật trong thời gian tới.
+        <div
+          class="rounded-lg border border-dashed border-gray-300 bg-white/60 p-6 text-center text-gray-500"
+        >
+          Các tính năng quản lý người dùng khác sẽ được cập nhật trong thời gian
+          tới.
         </div>
       </div>
     {:else}

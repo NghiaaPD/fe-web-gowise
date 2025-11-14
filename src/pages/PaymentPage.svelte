@@ -28,7 +28,7 @@
 
   const props = $props<{ userData?: Record<string, any> | null }>();
 
-  const PLAN_PRICE_VND = 5_000;
+  const PLAN_PRICE_VND = 52_397;
   const PLAN_NAME = "Gói Premium Gowise";
   const PLAN_DESCRIPTION =
     "Quyền truy cập đầy đủ vào trợ lý du lịch AI, lịch trình theo thời gian thực và hỗ trợ ưu tiên trong 30 ngày.";
@@ -44,7 +44,10 @@
 
   let localUser = $state<Record<string, any> | null>(props.userData ?? null);
   let resolvedUserId = $state<string | null>(
-    props.userData?.id ?? props.userData?.userId ?? props.userData?.user_id ?? null
+    props.userData?.id ??
+      props.userData?.userId ??
+      props.userData?.user_id ??
+      null
   );
   let accessToken = $state<string | null>(null);
 
@@ -68,7 +71,9 @@
   const orderCode = $derived(paymentResult?.orderCode ?? null);
   const qrCodeValue = $derived(paymentResult?.qrCode ?? "");
   const expiresAtText = $derived(
-    formatTimestamp(paymentResult?.expiredAt ?? paymentResult?.expiresAt ?? null)
+    formatTimestamp(
+      paymentResult?.expiredAt ?? paymentResult?.expiresAt ?? null
+    )
   );
   const disableSubmit = $derived(!accessToken || !resolvedUserId || isLoading);
 
@@ -231,7 +236,9 @@
     return value.toLocaleString("vi-VN");
   }
 
-  function formatTimestamp(value: string | number | null | undefined): string | null {
+  function formatTimestamp(
+    value: string | number | null | undefined
+  ): string | null {
     if (value === null || value === undefined) return null;
     let millis: number | null = null;
 
@@ -352,13 +359,20 @@
         normalizedPaymentData?.checkout_url ??
         normalizedPaymentData?.redirectUrl ??
         normalizedPaymentData?.redirect_url ??
-        (normalizedPaymentData?.data as PayOSPaymentResponse | undefined)?.checkoutUrl ??
-        (normalizedPaymentData?.data as PayOSPaymentResponse | undefined)?.checkout_url ??
-        (normalizedPaymentData?.payload as PayOSPaymentResponse | undefined)?.checkoutUrl ??
-        (normalizedPaymentData?.payload as PayOSPaymentResponse | undefined)?.checkout_url;
+        (normalizedPaymentData?.data as PayOSPaymentResponse | undefined)
+          ?.checkoutUrl ??
+        (normalizedPaymentData?.data as PayOSPaymentResponse | undefined)
+          ?.checkout_url ??
+        (normalizedPaymentData?.payload as PayOSPaymentResponse | undefined)
+          ?.checkoutUrl ??
+        (normalizedPaymentData?.payload as PayOSPaymentResponse | undefined)
+          ?.checkout_url;
 
       if (!checkoutCandidate || typeof checkoutCandidate !== "string") {
-        console.error("Unexpected PayOS payload", normalizedPaymentData ?? data);
+        console.error(
+          "Unexpected PayOS payload",
+          normalizedPaymentData ?? data
+        );
         throw new Error("Không nhận được đường dẫn thanh toán từ PayOS.");
       }
 
@@ -424,8 +438,8 @@
       <p class="eyebrow">Nâng cấp Premium</p>
       <h1>Thanh toán Gowise Premium qua PayOS</h1>
       <p class="subtitle">
-        Chỉ {formatCurrency(PLAN_PRICE_VND)} VND / tháng (~1.99 USD) để mở khóa toàn bộ tính năng của trợ lý du lịch
-        AI.
+        Chỉ {formatCurrency(PLAN_PRICE_VND)} VND / tháng (~1.99 USD) để mở khóa toàn
+        bộ tính năng của trợ lý du lịch AI.
       </p>
     </div>
     <div class="hero-pill">
@@ -448,7 +462,8 @@
         {/each}
       </ul>
       <div class="plan-hint">
-        Thanh toán xử lý qua PayOS, hỗ trợ hầu hết ngân hàng Việt Nam với mã QR hoặc chuyển khoản tự động.
+        Thanh toán xử lý qua PayOS, hỗ trợ hầu hết ngân hàng Việt Nam với mã QR
+        hoặc chuyển khoản tự động.
       </div>
     </article>
 
@@ -487,7 +502,11 @@
         <div class="form-grid">
           <label>
             <span>Công ty</span>
-            <input type="text" bind:value={buyerCompany} placeholder="VD: Gowise Travel" />
+            <input
+              type="text"
+              bind:value={buyerCompany}
+              placeholder="VD: Gowise Travel"
+            />
           </label>
 
           <label>
@@ -537,7 +556,8 @@
         {isLoading ? "Đang tạo liên kết..." : "Tạo liên kết PayOS"}
       </button>
       <p class="small-print">
-        Bạn sẽ nhận được đường dẫn thanh toán và mã QR PayOS. Liên kết tự động hết hạn sau 2 phút để đảm bảo an toàn.
+        Bạn sẽ nhận được đường dẫn thanh toán và mã QR PayOS. Liên kết tự động
+        hết hạn sau 2 phút để đảm bảo an toàn.
       </p>
     </form>
   </div>
@@ -573,8 +593,12 @@
           <div class="detail">
             <span>Ngân hàng</span>
             <div>
-              {#if paymentResult.accountName}<p>Chủ tài khoản: {paymentResult.accountName}</p>{/if}
-              {#if paymentResult.accountNumber}<p>Số tài khoản: {paymentResult.accountNumber}</p>{/if}
+              {#if paymentResult.accountName}<p>
+                  Chủ tài khoản: {paymentResult.accountName}
+                </p>{/if}
+              {#if paymentResult.accountNumber}<p>
+                  Số tài khoản: {paymentResult.accountNumber}
+                </p>{/if}
               {#if paymentResult.bin}<p>BIN: {paymentResult.bin}</p>{/if}
             </div>
           </div>
@@ -584,7 +608,11 @@
       {#if checkoutUrl}
         <div class="checkout-row">
           <input type="text" readonly value={checkoutUrl} />
-          <button type="button" class="icon-button" onclick={() => copyToClipboard(checkoutUrl)}>
+          <button
+            type="button"
+            class="icon-button"
+            onclick={() => copyToClipboard(checkoutUrl)}
+          >
             <FaCopy />
           </button>
           <button type="button" class="icon-button" onclick={openCheckout}>
@@ -599,7 +627,10 @@
             alt="PayOS QR code"
             src={`https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=${encodeURIComponent(qrCodeValue)}`}
           />
-          <p>Quét QR để thanh toán tức thì qua ứng dụng ngân hàng hoặc ví điện tử.</p>
+          <p>
+            Quét QR để thanh toán tức thì qua ứng dụng ngân hàng hoặc ví điện
+            tử.
+          </p>
         </div>
       {/if}
     </section>

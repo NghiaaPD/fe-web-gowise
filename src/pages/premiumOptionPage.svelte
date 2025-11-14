@@ -7,16 +7,47 @@
   import AuthForm from "../components/authForm.svelte";
   import { showNotification } from "$lib";
 
-  const PLAN_PRICE_VND = 5_000;
-  const PLAN_NAME = "Gói Premium Gowise";
-  const PLAN_DESCRIPTION =
-    "Truy cập đầy đủ trợ lý du lịch AI, cảnh báo thời tiết và hỗ trợ ưu tiên trong 30 ngày.";
+  const PLANS = [
+    {
+      id: "monthly",
+      name: "Gói 1 Tháng",
+      price: 52_397,
+      priceUSD: "1.99",
+      duration: "1 tháng",
+      popular: false,
+      description:
+        "Truy cập đầy đủ trợ lý du lịch AI và hỗ trợ ưu tiên trong 30 ngày.",
+      endpoint: "/api/payos/payment-link",
+    },
+    {
+      id: "premium",
+      name: "Gói 6 Tháng",
+      price: 314_380,
+      priceUSD: "11.99",
+      duration: "6 tháng",
+      popular: true,
+      description:
+        "Tiết kiệm 10%! Trải nghiệm Premium dài hạn với giá tốt nhất.",
+      endpoint: "/api/payos/payment-link/premium",
+    },
+    {
+      id: "enterprise",
+      name: "Gói 1 Năm",
+      price: 628_760,
+      priceUSD: "23.99",
+      duration: "12 tháng",
+      popular: false,
+      description:
+        "Tiết kiệm 20%! Giải pháp tốt nhất cho người dùng thường xuyên.",
+      endpoint: "/api/payos/payment-link/enterprise",
+    },
+  ];
+
   const MAX_DESCRIPTION_LENGTH = 25;
   const PAYOS_DESCRIPTION = "Gowise Premium";
   const USER_CACHE_KEY = "gowise:user-data";
 
   const backendBaseUrl = buildBackendBaseUrl();
-  const paymentEndpoint = `${backendBaseUrl}/api/payos/payment-link`;
 
   let showAuthForm = $state(false);
   let isCreatingPayment = $state(false);
@@ -123,7 +154,8 @@
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
       const message =
-        payload?.message || `Không thể lấy thông tin người dùng (HTTP ${response.status})`;
+        payload?.message ||
+        `Không thể lấy thông tin người dùng (HTTP ${response.status})`;
       throw new Error(message);
     }
     const data = payload?.data ?? payload;
@@ -140,7 +172,7 @@
     return window.location.origin;
   }
 
-  function handleStartPremium() {
+  function handleStartPremium(plan: (typeof PLANS)[number]) {
     paymentError = "";
     if (isProcessingReturn) return;
     const token = getAccessToken();
@@ -155,10 +187,13 @@
       );
       return;
     }
-    createPaymentLink(token);
+    createPaymentLink(token, plan);
   }
 
-  async function createPaymentLink(token: string) {
+  async function createPaymentLink(
+    token: string,
+    plan: (typeof PLANS)[number]
+  ) {
     if (isCreatingPayment) return;
     const userId = getUserIdFromToken(token);
     if (!userId) {
@@ -177,13 +212,15 @@
     const cancelUrl = `${origin}/premium?status=cancel`;
     const payload = {
       userId,
-      description: sanitizeDescription(PAYOS_DESCRIPTION) || PLAN_NAME,
+      description: sanitizeDescription(plan.name) || plan.name,
       cancelUrl,
       returnUrl: successUrl,
-      items: [{ name: PLAN_NAME }],
+      items: [{ name: plan.name }],
+      amount: plan.price,
     };
 
     try {
+      const paymentEndpoint = `${backendBaseUrl}${plan.endpoint}`;
       const response = await fetch(paymentEndpoint, {
         method: "POST",
         headers: {
@@ -249,17 +286,22 @@
   }
 
   async function markUserAsPremium(token: string, userId: string) {
-    const response = await fetch(`${backendBaseUrl}/users/${userId}/is_premium`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ isPremium: true }),
-    });
+    const response = await fetch(
+      `${backendBaseUrl}/users/${userId}/is_premium`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isPremium: true }),
+      }
+    );
     const payload = await response.json().catch(() => null);
     if (!response.ok || payload?.success === false) {
-      const message = payload?.message || `Không thể cập nhật tài khoản (HTTP ${response.status})`;
+      const message =
+        payload?.message ||
+        `Không thể cập nhật tài khoản (HTTP ${response.status})`;
       throw new Error(message);
     }
   }
@@ -271,11 +313,16 @@
     url.searchParams.delete("orderCode");
     url.searchParams.delete("order_code");
     const paramsString = url.searchParams.toString();
-    const nextUrl = paramsString ? `${url.pathname}?${paramsString}` : url.pathname;
+    const nextUrl = paramsString
+      ? `${url.pathname}?${paramsString}`
+      : url.pathname;
     window.history.replaceState({}, "", nextUrl);
   }
 
-  async function finalizeSuccessfulPayment(orderCode?: string | null, existingToken?: string | null) {
+  async function finalizeSuccessfulPayment(
+    orderCode?: string | null,
+    existingToken?: string | null
+  ) {
     if (isProcessingReturn) return;
     const token = existingToken ?? getAccessToken();
     if (!token) {
@@ -286,7 +333,8 @@
     }
     const userId = getUserIdFromToken(token);
     if (!userId) {
-      returnStatusMessage = "Không xác định được tài khoản. Đăng nhập lại để tiếp tục.";
+      returnStatusMessage =
+        "Không xác định được tài khoản. Đăng nhập lại để tiếp tục.";
       showAuth();
       awaitingUpgradeAfterLogin = true;
       return;
@@ -342,7 +390,11 @@
   });
 
   function handleLoginSuccess(
-    event: CustomEvent<{ accessToken: string; userId?: string; userRole?: string }>
+    event: CustomEvent<{
+      accessToken: string;
+      userId?: string;
+      userRole?: string;
+    }>
   ) {
     hideAuth();
     const token = event.detail?.accessToken || getAccessToken();
@@ -354,7 +406,7 @@
       finalizeSuccessfulPayment(null, token);
       return;
     }
-    createPaymentLink(token);
+    createPaymentLink(token, PLANS[0]);
   }
 </script>
 
@@ -381,96 +433,106 @@
     </div>
 
     <!-- Pricing Cards -->
-    <div class="grid grid-cols-1 place-items-center gap-8 max-w-2xl mx-auto">
-      <!-- Premium Plan -->
-      <div
-        class="bg-white border-2 border-teal-500 rounded-2xl p-8 relative shadow-xl hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 hover:border-teal-400 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white"
-      >
-        <!-- Most Popular Badge -->
-        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-          <div
-            class="bg-teal-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg hover:bg-teal-600 transition-colors duration-300"
-          >
-            <div class="w-4 h-4 mr-2"><IoIosStar /></div>
-            Phổ biến nhất
-          </div>
-        </div>
-
-        <div class="text-center mb-8">
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">Gói Premium</h3>
-          <div class="flex items-baseline justify-center gap-2">
-            <span class="text-3xl font-bold text-gray-900">~1.99 USD</span>
-            <span class="text-gray-500 text-lg">/ tháng</span>
-          </div>
-          <p class="text-sm text-gray-500">
-            ({PLAN_PRICE_VND.toLocaleString()} VND quy đổi theo PayOS)
-          </p>
-          <p class="text-gray-600 mt-4">{PLAN_DESCRIPTION}</p>
-        </div>
-
-        <!-- What's Included -->
-        <div class="mb-8">
-          <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
-            <div class="w-4 h-4 text-teal-500 mr-2"><IoMdCheckmark /></div>
-            Bao gồm:
-          </h4>
-          <ul class="space-y-3">
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Lịch trình AI không giới hạn
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Cá nhân hóa nâng cao
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Cập nhật lịch trình thời gian thực
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Điểm đến & trải nghiệm cao cấp
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Hỗ trợ khách hàng ưu tiên
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Truy cập ngoại tuyến
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Lập kế hoạch du lịch nhóm
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Budget Optimization
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Khuyến nghị từ người trong cuộc địa phương
-            </li>
-            <li class="flex items-center text-gray-600">
-              <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
-              Tích hợp bảo hiểm du lịch
-            </li>
-          </ul>
-        </div>
-
-        <button
-          type="button"
-          onclick={handleStartPremium}
-          disabled={isCreatingPayment}
-          class="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 hover:scale-105 transition-all duration-300 flex items-center justify-center hover:shadow-lg transform hover:-translate-y-1 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      {#each PLANS as plan}
+        <!-- Premium Plan Card -->
+        <div
+          class="bg-white border-2 rounded-2xl p-8 relative shadow-xl hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-300 {plan.popular
+            ? 'border-teal-500 hover:border-teal-400 hover:bg-gradient-to-br hover:from-teal-50 hover:to-white scale-105'
+            : 'border-gray-200 hover:border-teal-300'}"
         >
-          {isCreatingPayment ? "Đang tạo liên kết..." : "Bắt đầu Premium"}
-          <div class="w-6 h-6 ml-2"><IoIosFlash /></div>
-        </button>
-        {#if paymentError}
-          <p class="text-sm text-red-600 mt-3 text-center">{paymentError}</p>
-        {/if}
-      </div>
+          <!-- Most Popular Badge -->
+          {#if plan.popular}
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <div
+                class="bg-teal-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center shadow-lg hover:bg-teal-600 transition-colors duration-300"
+              >
+                <div class="w-4 h-4 mr-2"><IoIosStar /></div>
+                Phổ biến nhất
+              </div>
+            </div>
+          {/if}
+
+          <div class="text-center mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+            <div class="flex items-baseline justify-center gap-2">
+              <span class="text-3xl font-bold text-gray-900"
+                >~{plan.priceUSD} USD</span
+              >
+              <span class="text-gray-500 text-lg">/ {plan.duration}</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">
+              ({plan.price.toLocaleString()} VND)
+            </p>
+            <p class="text-gray-600 mt-4">{plan.description}</p>
+          </div>
+
+          <!-- What's Included -->
+          <div class="mb-8">
+            <h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+              <div class="w-4 h-4 text-teal-500 mr-2"><IoMdCheckmark /></div>
+              Bao gồm:
+            </h4>
+            <ul class="space-y-3">
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Lịch trình AI không giới hạn
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Cá nhân hóa nâng cao
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Cập nhật lịch trình thời gian thực
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Điểm đến & trải nghiệm cao cấp
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Hỗ trợ khách hàng ưu tiên
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Truy cập ngoại tuyến
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Lập kế hoạch du lịch nhóm
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Budget Optimization
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Khuyến nghị từ người trong cuộc địa phương
+              </li>
+              <li class="flex items-center text-gray-600">
+                <div class="w-4 h-4 text-teal-500 mr-3"><IoMdCheckmark /></div>
+                Tích hợp bảo hiểm du lịch
+              </li>
+            </ul>
+          </div>
+
+          <button
+            type="button"
+            onclick={() => handleStartPremium(plan)}
+            disabled={isCreatingPayment}
+            class="w-full py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 flex items-center justify-center hover:shadow-lg transform hover:-translate-y-1 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed {plan.popular
+              ? 'bg-teal-500 text-white hover:bg-teal-600'
+              : 'bg-gray-100 text-gray-900 hover:bg-teal-50 border-2 border-teal-500'}"
+          >
+            {isCreatingPayment ? "Đang tạo liên kết..." : "Chọn gói này"}
+            <div class="w-6 h-6 ml-2"><IoIosFlash /></div>
+          </button>
+          {#if paymentError}
+            <p class="text-sm text-red-600 mt-3 text-center">{paymentError}</p>
+          {/if}
+        </div>
+      {/each}
     </div>
 
     <!-- Money Back Guarantee -->
