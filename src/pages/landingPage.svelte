@@ -33,6 +33,7 @@
   import IoIosMail from "svelte-icons/io/IoIosMail.svelte";
 
   import AuthForm from "../components/authForm.svelte";
+  import Phone3D from "../components/3Dphone.svelte";
 
   const cards = [
     { title: "NIGHT", img: "/hodangquang.jpg" },
@@ -41,10 +42,11 @@
   ];
 
   const socials = [
-    { icon: IoLogoFacebook, link: "#" },
-    { icon: IoLogoInstagram, link: "#" },
-    { icon: IoLogoYoutube, link: "#" },
-    { icon: IoLogoLinkedin, link: "#" },
+    {
+      icon: IoLogoFacebook,
+      link: "https://www.facebook.com/profile.php?id=61580929276868",
+    },
+    { icon: IoLogoInstagram, link: "https://www.instagram.com/gowise.2025/" },
   ];
 
   // Reviews data
@@ -173,6 +175,11 @@
             >GIÁ</a
           >
           <a
+            href="#mobile-app"
+            class="hover:underline hover:decoration-teal-500"
+            >ỨNG DỤNG DI ĐỘNG</a
+          >
+          <a
             href="#how-it-works"
             class="hover:underline hover:decoration-teal-500">CÁCH HOẠT ĐỘNG</a
           >
@@ -198,10 +205,6 @@
                     <IoLogoFacebook />
                   {:else if s.icon === IoLogoInstagram}
                     <IoLogoInstagram />
-                  {:else if s.icon === IoLogoYoutube}
-                    <IoLogoYoutube />
-                  {:else if s.icon === IoLogoLinkedin}
-                    <IoLogoLinkedin />
                   {/if}
                 </div>
               </a>
@@ -437,6 +440,129 @@
       </div>
     </div>
   </section>
+  <!-- Mobile App Section -->
+  <section
+    id="mobile-app"
+    class="bg-gradient-to-br from-slate-900 via-teal-950 to-emerald-950 py-20 px-10 relative overflow-hidden"
+  >
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 opacity-20">
+      <div
+        class="absolute top-10 left-10 w-72 h-72 bg-teal-400 rounded-full blur-3xl animate-pulse"
+      ></div>
+      <div
+        class="absolute bottom-10 right-10 w-96 h-96 bg-emerald-500 rounded-full blur-3xl animate-pulse"
+        style="animation-delay: 1s;"
+      ></div>
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-teal-500/20 rounded-full blur-3xl"
+      ></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <!-- Left: Content -->
+        <div class="text-white order-2 lg:order-1">
+          <p class="text-teal-400 font-bold text-sm tracking-widest mb-4">
+            ỨNG DỤNG DI ĐỘNG
+          </p>
+          <h2 class="text-4xl md:text-5xl font-bold mb-6">
+            Mang AI Du lịch<br />
+            trong túi của bạn
+          </h2>
+          <p class="text-gray-300 text-lg mb-8 leading-relaxed">
+            Truy cập trợ lý du lịch AI của bạn mọi lúc, mọi nơi. Ứng dụng di
+            động GoWise mang đến trải nghiệm lập kế hoạch liền mạch với điều
+            hướng ngoại tuyến, cập nhật thời gian thực và đồng bộ hóa đám mây.
+          </p>
+
+          <!-- Features List -->
+          <div class="space-y-4 mb-8">
+            <div class="flex items-start gap-3">
+              <div
+                class="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <div class="w-3 h-3 text-white">
+                  <IoMdCheckmark />
+                </div>
+              </div>
+              <div>
+                <h4 class="font-semibold text-white mb-1">
+                  Chế độ ngoại tuyến
+                </h4>
+                <p class="text-gray-400 text-sm">
+                  Truy cập lịch trình của bạn ngay cả khi không có internet
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div
+                class="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <div class="w-3 h-3 text-white">
+                  <IoMdCheckmark />
+                </div>
+              </div>
+              <div>
+                <h4 class="font-semibold text-white mb-1">
+                  Thông báo thông minh
+                </h4>
+                <p class="text-gray-400 text-sm">
+                  Nhận nhắc nhở về chuyến bay, đặt chỗ và hoạt động
+                </p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div
+                class="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+              >
+                <div class="w-3 h-3 text-white">
+                  <IoMdCheckmark />
+                </div>
+              </div>
+              <div>
+                <h4 class="font-semibold text-white mb-1">Đồng bộ đám mây</h4>
+                <p class="text-gray-400 text-sm">
+                  Kế hoạch của bạn luôn cập nhật trên mọi thiết bị
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Download Button -->
+          <div class="flex flex-wrap gap-4">
+            <a
+              href="/resources/gowise.apk"
+              download="gowise.apk"
+              class="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all duration-300 hover:scale-105 cursor-pointer shadow-lg hover:shadow-xl"
+            >
+              <svg
+                class="w-8 h-8"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <div class="text-left">
+                <div class="text-sm">Download</div>
+                <div class="text-lg font-bold">GoWise APK</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: 3D Phone -->
+        <div class="order-1 lg:order-2">
+          <Phone3D screenImage="/mobile-bg.jpg" />
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="pricing" class="bg-white py-20 px-10">
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
@@ -1081,6 +1207,8 @@
           <div class="flex space-x-4">
             <a
               href="https://www.facebook.com/profile.php?id=61580929276868"
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-teal-500 transition-all duration-300 cursor-pointer"
             >
               <div class="w-5 h-5">
@@ -1088,27 +1216,13 @@
               </div>
             </a>
             <a
-              href="#"
+              href="https://www.instagram.com/gowise.2025/"
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-teal-500 transition-all duration-300 cursor-pointer"
             >
               <div class="w-5 h-5">
                 <IoLogoInstagram />
-              </div>
-            </a>
-            <a
-              href="#"
-              class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-teal-500 transition-all duration-300 cursor-pointer"
-            >
-              <div class="w-5 h-5">
-                <IoLogoYoutube />
-              </div>
-            </a>
-            <a
-              href="#"
-              class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-teal-500 transition-all duration-300 cursor-pointer"
-            >
-              <div class="w-5 h-5">
-                <IoLogoLinkedin />
               </div>
             </a>
           </div>
@@ -1185,13 +1299,6 @@
               <a
                 href="#"
                 class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
-                >Đào tạo AI</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="text-gray-400 hover:text-teal-400 transition cursor-pointer"
                 >Cộng đồng</a
               >
             </li>
@@ -1226,7 +1333,7 @@
               <div class="w-5 h-5 mr-3 text-teal-400">
                 <IoIosCall />
               </div>
-              +84 696969696969
+              +84 912531774
             </div>
             <div class="flex items-center text-gray-400">
               <div class="w-5 h-5 mr-3 text-teal-400">
@@ -1350,6 +1457,4 @@
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
   }
-
-  /* Alternative floating particles effect */
 </style>

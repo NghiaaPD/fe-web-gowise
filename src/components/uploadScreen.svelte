@@ -262,8 +262,6 @@
 
       // Show result
       if (failCount === 0) {
-        alert(`✅ Tải lên thành công ${successCount} ảnh!`);
-
         // Reset form and close
         caption = "";
         location = "";
@@ -277,13 +275,17 @@
           dispatch("close");
         }, 300);
       } else {
-        alert(
-          `⚠️ Tải lên hoàn tất!\n✅ Thành công: ${successCount} ảnh\n❌ Thất bại: ${failCount} ảnh`
-        );
+        dispatch("upload", {
+          success: false,
+          error: `Tải lên hoàn tất! Thành công: ${successCount} ảnh, Thất bại: ${failCount} ảnh`,
+        });
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("❌ Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại!");
+      dispatch("upload", {
+        success: false,
+        error: "Có lỗi xảy ra khi tải ảnh lên. Vui lòng thử lại!",
+      });
     } finally {
       isUploading = false;
       uploadProgress = 0;

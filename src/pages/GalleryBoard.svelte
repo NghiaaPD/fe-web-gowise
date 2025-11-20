@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { showNotification } from "$lib";
   import FundCard from "../components/GalleryCard.svelte";
   import UploadScreen from "../components/uploadScreen.svelte";
   import ShowDetailGallery from "../components/showDetailGallery.svelte";
@@ -140,8 +141,24 @@
     console.log("Upload completed:", event.detail);
     if (event.detail.success) {
       console.log(`✅ Successfully uploaded ${event.detail.count} photos`);
+      showNotification(
+        {
+          title: "Tải ảnh thành công",
+          message: `Đã tải lên ${event.detail.count} ảnh vào kho kỉ niệm.`,
+        },
+        "success"
+      );
       // Refresh gallery list after successful upload
       fetchGalleries();
+    } else {
+      showNotification(
+        {
+          title: "Tải ảnh thất bại",
+          message:
+            event.detail.error || "Không thể tải ảnh lên. Vui lòng thử lại.",
+        },
+        "error"
+      );
     }
     // Modal will close itself after successful upload
   }

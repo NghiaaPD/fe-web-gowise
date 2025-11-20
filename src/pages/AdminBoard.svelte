@@ -31,7 +31,7 @@
     return `${domain}${port}`;
   })();
 
-  const TAB_KEYS = ["overview", "users", "plans", "settings"] as const;
+  const TAB_KEYS = ["overview", "users", "settings"] as const;
   type TabKey = (typeof TAB_KEYS)[number];
 
   const props = $props<{
@@ -69,8 +69,6 @@
   // Statistics data
   let stats = $state({
     totalUsers: { value: 0, change: 0, trend: "up" },
-    totalPlans: { value: 0, change: 0, trend: "up" },
-    revenue: { value: 284750, change: 3.2, trend: "up" },
   });
 
   // Fetch user statistics
@@ -113,50 +111,10 @@
     }
   }
 
-  // Fetch plan statistics
-  async function fetchPlanStatistics() {
-    try {
-      const token = getAccessToken();
-      if (!token) {
-        console.error("No authentication token found");
-        return;
-      }
-
-      const apiUrl = `${BACKEND_BASE}/plans/statistics`;
-      console.log("[Admin API] Fetching plan statistics from:", apiUrl);
-
-      const response = await fetch(apiUrl, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("[Admin API] Plan statistics:", result);
-
-        if (result.success) {
-          stats.totalPlans.value = result.total_plans || 0;
-          // Calculate change if provided by API, otherwise use 0
-          stats.totalPlans.change = result.change || 0;
-        }
-      } else {
-        console.error(
-          "[Admin API] Failed to fetch plan statistics:",
-          response.status
-        );
-      }
-    } catch (error) {
-      console.error("[Admin API] Error fetching plan statistics:", error);
-    }
-  }
-
   // Fetch all statistics
   async function fetchStatistics() {
     isLoading = true;
-    await Promise.all([fetchUserStatistics(), fetchPlanStatistics()]);
+    await fetchUserStatistics();
     isLoading = false;
   }
 
@@ -273,20 +231,6 @@
       </button>
       <button
         class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab ===
-        'plans'
-          ? 'border-teal-500 text-teal-600'
-          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
-        onclick={() => setActiveTab("plans")}
-      >
-        <div class="flex items-center space-x-2">
-          <div class="w-4 h-4">
-            <FaCalendar />
-          </div>
-          <span>Kế hoạch</span>
-        </div>
-      </button>
-      <button
-        class="py-4 px-1 border-b-2 font-medium text-sm transition-colors {activeTab ===
         'settings'
           ? 'border-teal-500 text-teal-600'
           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}"
@@ -314,7 +258,7 @@
         </div>
       {:else}
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 gap-6 mb-8">
           <!-- Total Users -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between mb-4">
@@ -344,97 +288,6 @@
             {:else}
               <div class="text-sm text-gray-500">Dữ liệu cập nhật</div>
             {/if}
-          </div>
-
-          <!-- Total Plans -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <p class="text-sm font-medium text-gray-600">Tổng kế hoạch</p>
-                <p class="text-3xl font-bold text-gray-900">
-                  {formatNumber(stats.totalPlans.value)}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
-              >
-                <div class="w-6 h-6 text-purple-600">
-                  <FaMapMarker />
-                </div>
-              </div>
-            </div>
-            {#if stats.totalPlans.change > 0}
-              <div class="flex items-center space-x-1">
-                <div class="w-3 h-3 text-green-500">
-                  <FaArrowUp />
-                </div>
-                <span class="text-sm text-green-600 font-medium"
-                  >+{stats.totalPlans.change}% so với tháng trước</span
-                >
-              </div>
-            {:else}
-              <div class="text-sm text-gray-500">Dữ liệu cập nhật</div>
-            {/if}
-          </div>
-
-          <!-- Revenue -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <p class="text-sm font-medium text-gray-600">Doanh thu</p>
-                <p class="text-3xl font-bold text-gray-900">
-                  {formatCurrency(stats.revenue.value)}
-                </p>
-              </div>
-              <div
-                class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center"
-              >
-                <div class="w-6 h-6 text-teal-600">
-                  <FaDollarSign />
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-1">
-              <div class="w-3 h-3 text-green-500">
-                <FaArrowUp />
-              </div>
-              <span class="text-sm text-green-600 font-medium"
-                >+{stats.revenue.change}% chuyển đổi</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <!-- User Growth Chart -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900">
-                Tăng trưởng người dùng
-              </h3>
-              <div class="w-5 h-5 text-gray-400">
-                <FaChartBar />
-              </div>
-            </div>
-            <div class="h-64 flex items-center justify-center text-gray-500">
-              Biểu đồ trực quan sẽ hiển thị ở đây
-            </div>
-          </div>
-
-          <!-- Revenue Analytics Chart -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900">
-                Phân tích doanh thu
-              </h3>
-              <div class="w-5 h-5 text-gray-400">
-                <FaTachometerAlt />
-              </div>
-            </div>
-            <div class="h-64 flex items-center justify-center text-gray-500">
-              Biểu đồ trực quan sẽ hiển thị ở đây
-            </div>
           </div>
         </div>
 
@@ -604,27 +457,14 @@
           class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4"
         >
           <div class="w-8 h-8 text-gray-400">
-            {#if activeTab === "plans"}
-              <FaCalendar />
-            {:else if activeTab === "settings"}
-              <FaCog />
-            {/if}
+            <FaCog />
           </div>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2 capitalize">
-          Quản lý {activeTab === "plans"
-            ? "Kế hoạch"
-            : activeTab === "settings"
-              ? "Cài đặt"
-              : activeTab}
+          Quản lý Cài đặt
         </h3>
         <p class="text-gray-600">
-          Phần này đang được phát triển. Nội dung quản lý {activeTab === "plans"
-            ? "kế hoạch"
-            : activeTab === "settings"
-              ? "cài đặt"
-              : activeTab}
-          sẽ sớm có mặt.
+          Phần này đang được phát triển. Nội dung quản lý cài đặt sẽ sớm có mặt.
         </p>
       </div>
     {/if}
